@@ -1,8 +1,8 @@
 # SmartSpend - AI-Powered Personal Finance Assistant
 
-## Team Members
+## Developer
 
-- **Josh** - Developer, Designer, Tester, Project Manager (Individual Project)
+- **Josh** 
 
 ## Project Description
 
