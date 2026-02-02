@@ -84,17 +84,6 @@ ASE 485
 
 ---
 
-# Burndown Metrics
-
-| Metric       | Sprint 1 Target | Sprint 2 Target | Total |
-| ------------ | --------------- | --------------- | ----- |
-| Features     | 5 / 10          | 10 / 10         | 10    |
-| Requirements | 7 / 14          | 14 / 14         | 14    |
-| LoC          | ~1500           | ~4000           | ~4000 |
-| Unit Tests   | ~15             | ~40             | ~40   |
-
----
-
 # Sprint Plan
 
 **Sprint 1 (Weeks 4-8)**
@@ -126,7 +115,7 @@ ASE 485
 ## Topic 1: Sports Betting Analytics
 
 - **Why:** Understand the math and statistics behind odds, expected value, and data-driven decision making
-- **How:** Use Claude/ChatGPT as tutors, build Python scripts to simulate and analyze outcomes
+- **How:** Use AI as tutors, build Python scripts to simulate and analyze outcomes
 
 ## Topic 2: Stock Market Analysis
 
@@ -144,4 +133,4 @@ ASE 485
 - **Learning with AI:** Sports betting analytics & stock market analysis
 - **GitHub:** https://github.com/Jolteer/ase485-capstone-finance-ml
 
-**Ready for questions!**
+**Questions?**
