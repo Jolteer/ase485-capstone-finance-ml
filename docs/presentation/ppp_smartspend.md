@@ -11,7 +11,7 @@ paginate: true
 ### Project Plan Presentation (PPP)
 
 Josh
-ASE 485 - Week 4
+ASE 485
 
 ---
 
@@ -29,7 +29,7 @@ ASE 485 - Week 4
 
 # Proposed Solution
 
-**SmartSpend** — an application that:
+**SmartSpend** 
 
 - Analyzes spending data using ML to identify problem areas
 - Generates personalized budgets based on actual behavior
