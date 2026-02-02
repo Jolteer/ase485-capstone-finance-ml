@@ -133,11 +133,11 @@ The application follows a client-server architecture:
 
 ### Sprint 1 (Weeks 4-8)
 
-- Week 4: PPP, Project setup (Git, Docker, database)
-- Week 5: User authentication + React/FastAPI foundation
-- Week 6: Transaction input & import functionality
-- Week 7: ML categorization model & spending visualization
-- Week 8: Dashboard UI & Sprint 1 Presentation
+- Week 4: Project setup (Docker, database) + React/FastAPI foundation
+- Week 5: User authentication + Transaction input
+- Week 6: Import functionality + ML categorization model
+- Week 7: Spending visualization + Dashboard UI
+- Week 8: Testing, polish & Sprint 1 Presentation
 
 ### Sprint 2 (Weeks 9-15)
 
