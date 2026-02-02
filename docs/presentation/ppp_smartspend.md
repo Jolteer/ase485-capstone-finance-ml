@@ -70,7 +70,7 @@ ASE 485
 **Client Side:**
 
 - Web Application (React)
-- Mobile App (Flutter/Dart)
+- Mobile App (Flutter)
 
 **Server Side (via REST API):**
 
