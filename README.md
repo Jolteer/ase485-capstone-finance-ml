@@ -6,11 +6,11 @@
 
 ## Project Description
 
-  SmartSpend is a web application that uses artificial intelligence and machine learning to help individuals with poor spending habits build better financial behaviors. The app analyzes a user's spending data, identifies problem areas, generates personalized budgets, and provides actionable recommendations to help users save money over time.
+SmartSpend is a web application that uses artificial intelligence and machine learning to help individuals with poor spending habits build better financial behaviors. The app analyzes a user's spending data, identifies problem areas, generates personalized budgets, and provides actionable recommendations to help users save money over time.
 
 ## Problem Domain
 
-  Many people struggle with managing their finances effectively:
+Many people struggle with managing their finances effectively:
 
 - They overspend in certain categories without realizing it.
 - They fail to maintain a consistent budget over time.
@@ -19,33 +19,39 @@
 
   SmartSpend solves this by using machine learning to learn from a user's spending patterns and provide personalized, adaptive budgeting guidance.
 
+## Goals
+
+- Build a working ML-powered personal finance application
+- Help users improve spending habits through personalized recommendations
+- Demonstrate effective use of machine learning in a real-world application
+
 ## Features and Requirements
 
 ### Features & Requirements
 
-  1. Spending Analysis:
-     - RQ1: Users can input or import their spending data.
-     - RQ2: The system automatically categorizes transactions by type (food, entertainment, bills, etc.).
-     - RQ3: Users can view spending breakdowns by category and time period.
+1. Spending Analysis:
+   - RQ1: Users can input or import their spending data.
+   - RQ2: The system automatically categorizes transactions by type (food, entertainment, bills, etc.).
+   - RQ3: Users can view spending breakdowns by category and time period.
 
-  2. ML-Powered Budget Generation:
-     - RQ4: The ML model generates a personalized budget based on the user's income and spending history.
-     - RQ5: Budgets adapt over time as the model learns from new spending data.
+2. ML-Powered Budget Generation:
+   - RQ4: The ML model generates a personalized budget based on the user's income and spending history.
+   - RQ5: Budgets adapt over time as the model learns from new spending data.
 
-  3. Savings Recommendations:
-     - RQ6: The system provides at least 3 actionable savings recommendations per analysis.
-     - RQ7: Recommendations are personalized based on the user's specific spending patterns.
+3. Savings Recommendations:
+   - RQ6: The system provides at least 3 actionable savings recommendations per analysis.
+   - RQ7: Recommendations are personalized based on the user's specific spending patterns.
 
-  4. Progress Tracking:
-     - RQ8: Users can set financial goals and track progress toward them.
-     - RQ9: The app visualizes spending trends over time with charts and graphs.
+4. Progress Tracking:
+   - RQ8: Users can set financial goals and track progress toward them.
+   - RQ9: The app visualizes spending trends over time with charts and graphs.
 
-  5. Alerts and Notifications:
-     - RQ10: Users receive alerts when approaching or exceeding budget limits in specific categories.
+5. Alerts and Notifications:
+   - RQ10: Users receive alerts when approaching or exceeding budget limits in specific categories.
 
-  We have 5 features and 10 requirements.
+We have 5 features and 10 requirements.
 
-  Link: [docs/features/overall.md](docs/features/overall.md)
+Link: [docs/features/overall.md](docs/features/overall.md)
 
 ### Non-Functional Requirements
 
@@ -56,7 +62,7 @@
 
 ## Data Model
 
-  The data model consists of four core entities:
+The data model consists of four core entities:
 
 - **User:** id, email, password_hash, name, created_at
 - **Transaction:** id, user_id, amount, category, description, date
@@ -67,7 +73,7 @@
 
 ## Architecture
 
-  The application follows a client-server architecture:
+The application follows a client-server architecture:
 
 - **Frontend:** React-based web interface for user interaction and data visualization.
 - **Backend:** FastAPI (Python) server handling API requests, business logic, and ML model inference.
@@ -123,4 +129,4 @@
 - Implement alerts and notifications.
 - Comprehensive testing and bug fixes.
 
-  Link: [Canvas Progress Page]
+  Link: [docs/plan/milestones.md](docs/plan/milestones.md)
