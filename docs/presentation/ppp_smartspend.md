@@ -29,7 +29,7 @@ ASE 485 - Week 4
 
 # Proposed Solution
 
-**SmartSpend** — a web application that:
+**SmartSpend** — an application that:
 
 - Analyzes spending data using ML to identify problem areas
 - Generates personalized budgets based on actual behavior
@@ -41,24 +41,42 @@ ASE 485 - Week 4
 
 # Features and Requirements
 
-| Feature                    | Requirements                                            |
-| -------------------------- | ------------------------------------------------------- |
-| 1. Spending Analysis       | RQ1: Import data, RQ2: Auto-categorize, RQ3: Breakdowns |
-| 2. ML Budget Generation    | RQ4: Personalized budgets, RQ5: Adaptive over time      |
-| 3. Savings Recommendations | RQ6: 3+ suggestions, RQ7: Personalized                  |
-| 4. Progress Tracking       | RQ8: Goal setting, RQ9: Trend visualizations            |
-| 5. Alerts & Notifications  | RQ10: Budget limit warnings                             |
+| Feature                       | Requirements                          |
+| ----------------------------- | ------------------------------------- |
+| 1. User Authentication        | Secure sign up/login                  |
+| 2. Transaction Input          | Manual entry, Import/upload data      |
+| 3. Transaction Categorization | Auto-categorize using ML              |
+| 4. Spending Visualization     | Category breakdowns, Time period view |
+| 5. Budget Generation          | ML-generated personalized budgets     |
 
-**Total: 5 features, 10 requirements**
+---
+
+# Features and Requirements (cont.)
+
+| Feature                    | Requirements                            |
+| -------------------------- | --------------------------------------- |
+| 6. Budget Adaptation       | Budgets adapt based on new data         |
+| 7. Savings Recommendations | 3+ actionable suggestions, Personalized |
+| 8. Goal Setting            | Create and manage financial goals       |
+| 9. Progress Tracking       | Track goals, Visualize trends           |
+| 10. Alerts & Notifications | Budget limit warnings                   |
+
+**Total: 10 features, 14 requirements**
 
 ---
 
 # Architecture
 
-- **Frontend:** React web interface
-- **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL
-- **ML Pipeline:** Scikit-learn, pandas
+**Client Side:**
+
+- Web Application (React)
+- Mobile App (Flutter/Dart)
+
+**Server Side (via REST API):**
+
+- Server: FastAPI (Python) + ML Pipeline (Scikit-learn, pandas)
+- Database: PostgreSQL
+- Deployment: Docker containers
 
 **Data Model:**
 
@@ -70,8 +88,8 @@ ASE 485 - Week 4
 
 | Metric       | Sprint 1 Target | Sprint 2 Target | Total |
 | ------------ | --------------- | --------------- | ----- |
-| Features     | 2 / 5           | 5 / 5           | 5     |
-| Requirements | 4 / 10          | 10 / 10         | 10    |
+| Features     | 5 / 10          | 10 / 10         | 10    |
+| Requirements | 7 / 14          | 14 / 14         | 14    |
 | LoC          | ~1500           | ~4000           | ~4000 |
 | Unit Tests   | ~15             | ~40             | ~40   |
 
@@ -79,19 +97,27 @@ ASE 485 - Week 4
 
 # Sprint Plan
 
-**Stage 2: Prototype/MVP (Weeks 4-8)**
+**Sprint 1 (Weeks 4-8)**
 
-- Week 4: PPP. Sprint 1 - 1
-- Week 5: Sprint 1 - 2. React + FastAPI setup
-- Week 6: Sprint 1 - 3. Transaction input & ML categorization
-- Week 7: Sprint 1 - 4. Dashboard & visualizations
-- Week 8: Sprint 1 Presentation. Budget generation model
+- Week 4: PPP, Project setup (Git, Docker, database)
+- Week 5: User authentication + React/FastAPI foundation
+- Week 6: Transaction input & import functionality
+- Week 7: ML categorization model & spending visualization
+- Week 8: Dashboard UI & Sprint 1 Presentation
 
-**Stage 3: Project (Weeks 10-16)**
+---
 
-- Weeks 10-15: Sprint 2 (6 sprints). Full implementation
-- Week 15: Project submissions deadline (4/26)
-- Week 16: Final Presentation (4/27, 4/29)
+# Sprint Plan (cont.)
+
+**Sprint 2 (Weeks 9-15)**
+
+- Week 9: Budget generation ML model
+- Week 10: Budget adaptation system
+- Week 11: Savings recommendations engine
+- Week 12: Goal setting & progress tracking
+- Week 13: Alerts & notifications system
+- Week 14: Flutter mobile app development & integration
+- Week 15: Testing, deployment, Final Presentation (4/27, 4/29)
 
 ---
 
@@ -112,8 +138,9 @@ ASE 485 - Week 4
 # Summary
 
 - **Project:** SmartSpend — ML-powered personal finance assistant
-- **Tech Stack:** React, FastAPI, PostgreSQL, Scikit-learn
-- **Scope:** 5 features, 10 requirements across 2 sprints
+- **Platforms:** Web + Mobile
+- **Tech Stack:** React, Flutter/Dart, FastAPI, PostgreSQL, Scikit-learn
+- **Scope:** 10 features, 14 requirements across 2 sprints
 - **Learning with AI:** Sports betting analytics & stock market analysis
 - **GitHub:** https://github.com/Jolteer/ase485-capstone-finance-ml
 

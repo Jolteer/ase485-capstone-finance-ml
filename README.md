@@ -6,7 +6,7 @@
 
 ## Project Description
 
-SmartSpend is a web application that uses artificial intelligence and machine learning to help individuals with poor spending habits build better financial behaviors. The app analyzes a user's spending data, identifies problem areas, generates personalized budgets, and provides actionable recommendations to help users save money over time.
+SmartSpend is a web and mobile application that uses artificial intelligence and machine learning to help individuals with poor spending habits build better financial behaviors. The app analyzes a user's spending data, identifies problem areas, generates personalized budgets, and provides actionable recommendations to help users save money over time.
 
 ## Problem Domain
 
@@ -19,43 +19,52 @@ Many people struggle with managing their finances effectively:
 
   SmartSpend solves this by using machine learning to learn from a user's spending patterns and provide personalized, adaptive budgeting guidance.
 
-## Goals
-
-- Build a working ML-powered personal finance application
-- Help users improve spending habits through personalized recommendations
-- Demonstrate effective use of machine learning in a real-world application
-
 ## Features and Requirements
 
 ### Features & Requirements
 
-1. Spending Analysis:
-   - RQ1: Users can input or import their spending data.
-   - RQ2: The system automatically categorizes transactions by type (food, entertainment, bills, etc.).
-   - RQ3: Users can view spending breakdowns by category and time period.
+1. User Authentication:
+   - Users can securely sign up and log in to their account.
 
-2. ML-Powered Budget Generation:
-   - RQ4: The ML model generates a personalized budget based on the user's income and spending history.
-   - RQ5: Budgets adapt over time as the model learns from new spending data.
+2. Transaction Input:
+   - Users can manually input spending transactions.
+   - Users can import or upload spending data from external sources.
 
-3. Savings Recommendations:
-   - RQ6: The system provides at least 3 actionable savings recommendations per analysis.
-   - RQ7: Recommendations are personalized based on the user's specific spending patterns.
+3. Transaction Categorization:
+   - The system automatically categorizes transactions using ML (food, entertainment, bills, etc.).
 
-4. Progress Tracking:
-   - RQ8: Users can set financial goals and track progress toward them.
-   - RQ9: The app visualizes spending trends over time with charts and graphs.
+4. Spending Visualization:
+   - Users can view spending breakdowns by category.
+   - Users can view spending breakdowns by time period (week, month, year).
 
-5. Alerts and Notifications:
-   - RQ10: Users receive alerts when approaching or exceeding budget limits in specific categories.
+5. Budget Generation:
+   - The ML model generates a personalized budget based on the user's income and spending history.
 
-We have 5 features and 10 requirements.
+6. Budget Adaptation:
+   - Budgets adapt over time as the model learns from new spending data.
+
+7. Savings Recommendations:
+   - The system provides at least 3 actionable savings recommendations per analysis.
+   - Recommendations are personalized based on the user's specific spending patterns.
+
+8. Goal Setting:
+   - Users can create and manage financial goals (e.g., save for vacation, pay off debt).
+
+9. Progress Tracking:
+   - Users can track progress toward their financial goals.
+   - The app visualizes spending trends over time with charts and graphs.
+
+10. Alerts and Notifications:
+
+- Users receive alerts when approaching or exceeding budget limits in specific categories.
+
+**Total: 10 features, 14 requirements**
 
 Link: [docs/features/overall.md](docs/features/overall.md)
 
 ### Non-Functional Requirements
 
-- Web application built with React frontend and FastAPI backend.
+- Web and mobile applications (React web + Flutter/Dart mobile).
 - User financial data is stored securely with encryption.
 - The application should respond to user actions within 2 seconds.
 - The ML model should process and categorize transactions with at least 80% accuracy.
@@ -75,10 +84,17 @@ The data model consists of four core entities:
 
 The application follows a client-server architecture:
 
-- **Frontend:** React-based web interface for user interaction and data visualization.
-- **Backend:** FastAPI (Python) server handling API requests, business logic, and ML model inference.
+**Client Side:**
+
+- **Web Application:** React-based interface for user interaction and data visualization.
+- **Mobile App:** Flutter/Dart native mobile application.
+
+**Server Side (via REST API):**
+
+- **Server:** FastAPI (Python) handling API requests, business logic, and ML model inference.
 - **Database:** PostgreSQL for storing user profiles, transactions, and budget history.
 - **ML Pipeline:** Scikit-learn and pandas for transaction categorization, spending pattern analysis, and budget generation.
+- **Deployment:** Docker containers for consistent development and production environments.
 
   [Architecture diagram will be added here]
 
@@ -111,22 +127,26 @@ The application follows a client-server architecture:
 ## Project Documentation
 
 - [Project Plan Presentation (PPP)](docs/presentation/ppp_smartspend.md)
+- [Individual Contributions - Josh](individual/josh/progress.md)
 
 ## Schedule & Milestones
 
-### Sprint 1 (Weeks 4-8): Prototype/MVP
+### Sprint 1 (Weeks 4-8)
 
-- Set up project infrastructure (React frontend, FastAPI backend, PostgreSQL database).
-- Implement user authentication and transaction data input.
-- Build basic transaction categorization with ML model.
-- Create initial dashboard with spending breakdown visualizations.
+- Week 4: PPP, Project setup (Git, Docker, database)
+- Week 5: User authentication + React/FastAPI foundation
+- Week 6: Transaction input & import functionality
+- Week 7: ML categorization model & spending visualization
+- Week 8: Dashboard UI & Sprint 1 Presentation
 
-### Sprint 2 (Weeks 9-15): Full Implementation
+### Sprint 2 (Weeks 9-15)
 
-- Implement ML-powered budget generation.
-- Build savings recommendation engine.
-- Add progress tracking and goal-setting features.
-- Implement alerts and notifications.
-- Comprehensive testing and bug fixes.
+- Week 9: Budget generation ML model
+- Week 10: Budget adaptation system
+- Week 11: Savings recommendations engine
+- Week 12: Goal setting & progress tracking
+- Week 13: Alerts & notifications system
+- Week 14: Flutter mobile app development & integration
+- Week 15: Testing, deployment, Final Presentation (4/27, 4/29)
 
   Link: [docs/plan/milestones.md](docs/plan/milestones.md)
