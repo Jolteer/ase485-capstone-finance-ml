@@ -14,4 +14,8 @@
     required this.description,
     required this.progress,
   });
+
+  double get progressPercent => targetAmount > 0 ? progress / targetAmount : 0;
+
+  bool get isCompleted => progress >= targetAmount;
 }
