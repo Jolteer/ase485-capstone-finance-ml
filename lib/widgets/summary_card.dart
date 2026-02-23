@@ -16,15 +16,24 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = color ?? theme.colorScheme.primary;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: color),
+            Icon(icon, size: 32, color: iconColor),
             const SizedBox(height: 8),
-            Text(title),
-            Text(value),
+            Text(title, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),

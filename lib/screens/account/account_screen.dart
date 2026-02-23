@@ -12,56 +12,16 @@ class AccountScreen extends StatelessWidget {
       body: ListView(
         children: [
           const SizedBox(height: 24),
-          CircleAvatar(
-            radius: 48,
-            backgroundColor: theme.colorScheme.primaryContainer,
-            child: Icon(
-              Icons.person,
-              size: 48,
-              color: theme.colorScheme.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Center(
-            child: Text(
-              'User Name',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Center(
-            child: Text(
-              'user@example.com',
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Center(
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.edit, size: 16),
-              label: const Text('Edit Profile'),
-            ),
-          ),
+          _ProfileHeader(theme: theme),
           const SizedBox(height: 16),
           const Divider(),
-          ListTile(
-            leading: const Icon(Icons.analytics_outlined),
-            title: const Text('Analytics'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.analytics),
-          ),
-          ListTile(
-            leading: const Icon(Icons.lightbulb_outline),
-            title: const Text('Recommendations'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () =>
-                Navigator.pushNamed(context, AppRoutes.recommendations),
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings_outlined),
-            title: const Text('Settings'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.settings),
+          ..._menuItems.map(
+            (item) => ListTile(
+              leading: Icon(item.icon),
+              title: Text(item.label),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.pushNamed(context, item.route),
+            ),
           ),
           const Divider(),
           ListTile(
@@ -77,3 +37,70 @@ class AccountScreen extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Profile header
+// ---------------------------------------------------------------------------
+
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 48,
+          backgroundColor: theme.colorScheme.primaryContainer,
+          child: Icon(
+            Icons.person,
+            size: 48,
+            color: theme.colorScheme.onPrimaryContainer,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'User Name',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          'user@example.com',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.edit, size: 16),
+          label: const Text('Edit Profile'),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Menu items
+// ---------------------------------------------------------------------------
+
+class _MenuItem {
+  final IconData icon;
+  final String label;
+  final String route;
+  const _MenuItem(this.icon, this.label, this.route);
+}
+
+const _menuItems = [
+  _MenuItem(Icons.analytics_outlined, 'Analytics', AppRoutes.analytics),
+  _MenuItem(
+    Icons.lightbulb_outline,
+    'Recommendations',
+    AppRoutes.recommendations,
+  ),
+  _MenuItem(Icons.settings_outlined, 'Settings', AppRoutes.settings),
+];

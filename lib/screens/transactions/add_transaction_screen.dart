@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
+import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -85,7 +86,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                 ),
                 leading: const Icon(Icons.calendar_today),
-                title: Text('${_date.month}/${_date.day}/${_date.year}'),
+                title: Text(Formatters.date(_date)),
                 trailing: const Icon(Icons.edit),
                 onTap: () async {
                   final picked = await showDatePicker(
