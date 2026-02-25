@@ -12,9 +12,18 @@ class AddTransactionScreen extends StatefulWidget {
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _amountController = TextEditingController();
+  final _descriptionController = TextEditingController();
   String _category = Categories.food;
   bool _isExpense = true;
   DateTime _date = DateTime.now();
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +49,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               // Amount
               TextFormField(
+                controller: _amountController,
                 decoration: const InputDecoration(
                   labelText: 'Amount',
                   prefixText: '\$ ',
@@ -54,7 +64,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               // Category dropdown
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 decoration: const InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),
@@ -68,6 +78,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               // Description
               TextFormField(
+                controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   border: OutlineInputBorder(),
@@ -92,8 +103,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: _date,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
+                    firstDate: DateTime.now().subtract(
+                      const Duration(days: 365 * 5),
+                    ),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
                   if (picked != null) setState(() => _date = picked);
                 },
@@ -103,7 +116,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               // Submit
               FilledButton.icon(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    // TODO: construct Transaction from controllers and save via TransactionProvider
                     Navigator.pop(context);
                   }
                 },

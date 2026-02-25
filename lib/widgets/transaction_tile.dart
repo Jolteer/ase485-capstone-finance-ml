@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/config/colors.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
@@ -29,7 +30,7 @@ class TransactionTile extends StatelessWidget {
       trailing: Text(
         Formatters.currency(transaction.amount),
         style: theme.textTheme.titleSmall?.copyWith(
-          color: _isExpense ? theme.colorScheme.error : Colors.green,
+          color: _isExpense ? theme.colorScheme.error : AppColors.income,
           fontWeight: FontWeight.w600,
         ),
       ),

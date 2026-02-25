@@ -12,7 +12,7 @@ class AccountScreen extends StatelessWidget {
       body: ListView(
         children: [
           const SizedBox(height: 24),
-          _ProfileHeader(theme: theme),
+          const _ProfileHeader(),
           const SizedBox(height: 16),
           const Divider(),
           ..._menuItems.map(
@@ -30,7 +30,7 @@ class AccountScreen extends StatelessWidget {
               'Logout',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            onTap: () {},
+            onTap: () {}, // TODO: implement logout via AuthProvider
           ),
         ],
       ),
@@ -43,12 +43,11 @@ class AccountScreen extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.theme});
-
-  final ThemeData theme;
+  const _ProfileHeader();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         CircleAvatar(
@@ -75,7 +74,7 @@ class _ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () {}, // TODO: implement edit profile
           icon: const Icon(Icons.edit, size: 16),
           label: const Text('Edit Profile'),
         ),

@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
-import 'package:ase485_capstone_finance_ml/models/transaction.dart';
+import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/screens/transactions/transactions_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/budget/budget_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/goals/goals_screen.dart';
@@ -58,27 +58,26 @@ class _HomeDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('SmartSpend'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            onPressed: () {}, // TODO: implement notifications
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _Greeting(theme: theme),
+          const _Greeting(),
           const SizedBox(height: 20),
           const _SummaryCards(),
           const SizedBox(height: 24),
-          _QuickActionsBar(theme: theme),
+          const _QuickActionsBar(),
           const SizedBox(height: 24),
-          _RecentTransactionsSection(theme: theme),
+          const _RecentTransactionsSection(),
         ],
       ),
     );
@@ -90,12 +89,11 @@ class _HomeDashboard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _Greeting extends StatelessWidget {
-  const _Greeting({required this.theme});
-
-  final ThemeData theme;
+  const _Greeting();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -177,12 +175,11 @@ class _SummaryCards extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _QuickActionsBar extends StatelessWidget {
-  const _QuickActionsBar({required this.theme});
-
-  final ThemeData theme;
+  const _QuickActionsBar();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -264,12 +261,11 @@ class _QuickAction extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _RecentTransactionsSection extends StatelessWidget {
-  const _RecentTransactionsSection({required this.theme});
-
-  final ThemeData theme;
+  const _RecentTransactionsSection();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -289,55 +285,8 @@ class _RecentTransactionsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        ..._recentTransactions.map((t) => TransactionTile(transaction: t)),
+        ...recentTransactions.map((t) => TransactionTile(transaction: t)),
       ],
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Sample data (uses the real Transaction model)
-// ---------------------------------------------------------------------------
-
-final _recentTransactions = [
-  Transaction(
-    id: '1',
-    userId: 'demo',
-    amount: -85.40,
-    category: 'Food',
-    description: 'Grocery Store',
-    date: DateTime(2026, 2, 22),
-  ),
-  Transaction(
-    id: '2',
-    userId: 'demo',
-    amount: -120.00,
-    category: 'Bills',
-    description: 'Electric Bill',
-    date: DateTime(2026, 2, 20),
-  ),
-  Transaction(
-    id: '3',
-    userId: 'demo',
-    amount: 3200.00,
-    category: 'Other',
-    description: 'Salary Deposit',
-    date: DateTime(2026, 2, 15),
-  ),
-  Transaction(
-    id: '4',
-    userId: 'demo',
-    amount: -15.99,
-    category: 'Entertainment',
-    description: 'Netflix',
-    date: DateTime(2026, 2, 14),
-  ),
-  Transaction(
-    id: '5',
-    userId: 'demo',
-    amount: -45.00,
-    category: 'Transportation',
-    description: 'Gas Station',
-    date: DateTime(2026, 2, 13),
-  ),
-];

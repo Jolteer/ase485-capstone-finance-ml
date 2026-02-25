@@ -1,4 +1,6 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/config/colors.dart';
+import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
@@ -15,7 +17,7 @@ class RecommendationsScreen extends StatelessWidget {
         children: [
           const _InsightsBanner(),
           const SizedBox(height: 16),
-          ..._sampleRecommendations.map(
+          ...sampleRecommendations.map(
             (r) => _RecommendationTile(recommendation: r),
           ),
         ],
@@ -102,7 +104,7 @@ class _RecommendationTile extends StatelessWidget {
         trailing: Text(
           'Save ${Formatters.currency(recommendation.potentialSavings)}',
           style: TextStyle(
-            color: Colors.green.shade700,
+            color: AppColors.success,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -111,49 +113,3 @@ class _RecommendationTile extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Sample data (uses the real Recommendation model)
-// ---------------------------------------------------------------------------
-
-const _sampleRecommendations = [
-  Recommendation(
-    id: '1',
-    category: 'Food',
-    title: 'Reduce dining out',
-    description:
-        'You spent 30% more on restaurants this month compared to your average.',
-    potentialSavings: 85,
-  ),
-  Recommendation(
-    id: '2',
-    category: 'Entertainment',
-    title: 'Review subscriptions',
-    description:
-        'You have 3 subscriptions totaling \$45/mo. Consider canceling unused ones.',
-    potentialSavings: 15,
-  ),
-  Recommendation(
-    id: '3',
-    category: 'Bills',
-    title: 'Lower utility costs',
-    description:
-        'Your electric bill is higher than similar households. Try off-peak usage.',
-    potentialSavings: 30,
-  ),
-  Recommendation(
-    id: '4',
-    category: 'Shopping',
-    title: 'Set a shopping limit',
-    description:
-        'Impulse purchases added up to \$120 this month. A weekly cap could help.',
-    potentialSavings: 60,
-  ),
-  Recommendation(
-    id: '5',
-    category: 'Transportation',
-    title: 'Optimize commute',
-    description: 'Carpooling or public transit 2 days/week could save on gas.',
-    potentialSavings: 40,
-  ),
-];

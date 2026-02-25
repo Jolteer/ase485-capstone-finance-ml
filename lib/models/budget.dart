@@ -1,4 +1,5 @@
-﻿class Budget {
+﻿/// A spending budget for a given [category] over a [period] (e.g. 'monthly').
+class Budget {
   final String id;
   final String userId;
   final String category;
@@ -36,4 +37,42 @@
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  Budget copyWith({
+    String? id,
+    String? userId,
+    String? category,
+    double? limitAmount,
+    String? period,
+    DateTime? createdAt,
+  }) {
+    return Budget(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      category: category ?? this.category,
+      limitAmount: limitAmount ?? this.limitAmount,
+      period: period ?? this.period,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Budget &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          userId == other.userId &&
+          category == other.category &&
+          limitAmount == other.limitAmount &&
+          period == other.period &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, userId, category, limitAmount, period, createdAt);
+
+  @override
+  String toString() =>
+      'Budget(id: $id, category: $category, limit: $limitAmount, period: $period)';
 }

@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 import 'package:ase485_capstone_finance_ml/widgets/category_card.dart';
@@ -13,13 +14,16 @@ class BudgetScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Budget'),
         actions: [
-          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () {},
+          ), // TODO: implement budget edit
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _MonthlyOverviewCard(theme: theme),
+          const _MonthlyOverviewCard(),
           const SizedBox(height: 16),
           Text(
             'Category Budgets',
@@ -28,7 +32,7 @@ class BudgetScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ..._budgetItems.map(
+          ...sampleBudgetItems.map(
             (b) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: CategoryCard(
@@ -42,7 +46,7 @@ class BudgetScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {}, // TODO: implement add budget category
         child: const Icon(Icons.add),
       ),
     );
@@ -54,12 +58,11 @@ class BudgetScreen extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _MonthlyOverviewCard extends StatelessWidget {
-  const _MonthlyOverviewCard({required this.theme});
-
-  final ThemeData theme;
+  const _MonthlyOverviewCard();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     const spent = 1820.0;
     const budget = 3000.0;
     const ratio = spent / budget;
@@ -99,24 +102,3 @@ class _MonthlyOverviewCard extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Sample data
-// ---------------------------------------------------------------------------
-
-class _BudgetItem {
-  final String category;
-  final double spent;
-  final double limit;
-  const _BudgetItem(this.category, this.spent, this.limit);
-}
-
-const _budgetItems = [
-  _BudgetItem('Food', 420, 500),
-  _BudgetItem('Entertainment', 180, 200),
-  _BudgetItem('Bills', 650, 600),
-  _BudgetItem('Shopping', 210, 300),
-  _BudgetItem('Transportation', 160, 200),
-  _BudgetItem('Healthcare', 80, 150),
-  _BudgetItem('Education', 50, 100),
-];

@@ -1,4 +1,5 @@
-﻿class User {
+﻿/// The authenticated user's profile information.
+class User {
   final String id;
   final String email;
   final String name;
@@ -28,4 +29,34 @@
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  User copyWith({
+    String? id,
+    String? email,
+    String? name,
+    DateTime? createdAt,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is User &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          email == other.email &&
+          name == other.name &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode => Object.hash(id, email, name, createdAt);
+
+  @override
+  String toString() => 'User(id: $id, name: $name, email: $email)';
 }

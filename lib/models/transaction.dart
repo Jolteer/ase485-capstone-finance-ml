@@ -1,4 +1,5 @@
-﻿class Transaction {
+﻿/// A single financial transaction (positive = income, negative = expense).
+class Transaction {
   final String id;
   final String userId;
   final double amount;
@@ -36,4 +37,42 @@
       'date': date.toIso8601String(),
     };
   }
+
+  Transaction copyWith({
+    String? id,
+    String? userId,
+    double? amount,
+    String? category,
+    String? description,
+    DateTime? date,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      amount: amount ?? this.amount,
+      category: category ?? this.category,
+      description: description ?? this.description,
+      date: date ?? this.date,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Transaction &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          userId == other.userId &&
+          amount == other.amount &&
+          category == other.category &&
+          description == other.description &&
+          date == other.date;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, userId, amount, category, description, date);
+
+  @override
+  String toString() =>
+      'Transaction(id: $id, amount: $amount, category: $category, description: $description)';
 }

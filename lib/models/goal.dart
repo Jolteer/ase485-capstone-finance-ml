@@ -1,4 +1,5 @@
-﻿class Goal {
+﻿/// A savings goal with a [targetAmount] and deadline ([targetDate]).
+class Goal {
   final String id;
   final String userId;
   final double targetAmount;
@@ -40,4 +41,42 @@
       'progress': progress,
     };
   }
+
+  Goal copyWith({
+    String? id,
+    String? userId,
+    double? targetAmount,
+    DateTime? targetDate,
+    String? description,
+    double? progress,
+  }) {
+    return Goal(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      targetAmount: targetAmount ?? this.targetAmount,
+      targetDate: targetDate ?? this.targetDate,
+      description: description ?? this.description,
+      progress: progress ?? this.progress,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Goal &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          userId == other.userId &&
+          targetAmount == other.targetAmount &&
+          targetDate == other.targetDate &&
+          description == other.description &&
+          progress == other.progress;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, userId, targetAmount, targetDate, description, progress);
+
+  @override
+  String toString() =>
+      'Goal(id: $id, description: $description, progress: $progress/$targetAmount)';
 }

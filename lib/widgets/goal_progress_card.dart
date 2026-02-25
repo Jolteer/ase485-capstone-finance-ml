@@ -28,9 +28,9 @@ class GoalProgressCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Header(goal: goal, icon: icon, theme: theme),
+              _Header(goal: goal, icon: icon),
               const SizedBox(height: 12),
-              _ProgressRow(goal: goal, percent: percent, theme: theme),
+              _ProgressRow(goal: goal, percent: percent),
               const SizedBox(height: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
@@ -56,14 +56,14 @@ class GoalProgressCard extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.goal, required this.icon, required this.theme});
+  const _Header({required this.goal, required this.icon});
 
   final Goal goal;
   final IconData icon;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Icon(icon, color: theme.colorScheme.primary),
@@ -79,8 +79,8 @@ class _Header extends StatelessWidget {
         if (goal.isCompleted)
           Chip(
             label: const Text('Done'),
-            backgroundColor: Colors.green.withAlpha(40),
-            labelStyle: const TextStyle(color: Colors.green),
+            backgroundColor: theme.colorScheme.primaryContainer,
+            labelStyle: TextStyle(color: theme.colorScheme.primary),
             padding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
           ),
@@ -90,18 +90,14 @@ class _Header extends StatelessWidget {
 }
 
 class _ProgressRow extends StatelessWidget {
-  const _ProgressRow({
-    required this.goal,
-    required this.percent,
-    required this.theme,
-  });
+  const _ProgressRow({required this.goal, required this.percent});
 
   final Goal goal;
   final double percent;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

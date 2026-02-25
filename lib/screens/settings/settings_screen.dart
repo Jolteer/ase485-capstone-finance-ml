@@ -20,7 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           const SizedBox(height: 8),
-          _SectionHeader('Appearance'),
+          const _SectionHeader('Appearance'),
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode),
             title: const Text('Dark Mode'),
@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) => setState(() => _darkMode = v),
           ),
           const Divider(),
-          _SectionHeader('Notifications'),
+          const _SectionHeader('Notifications'),
           SwitchListTile(
             secondary: const Icon(Icons.notifications_active),
             title: const Text('Push Notifications'),
@@ -38,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) => setState(() => _notifications = v),
           ),
           const Divider(),
-          _SectionHeader('Security'),
+          const _SectionHeader('Security'),
           SwitchListTile(
             secondary: const Icon(Icons.fingerprint),
             title: const Text('Biometric Login'),
@@ -47,21 +47,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) => setState(() => _biometric = v),
           ),
           const Divider(),
-          _SectionHeader('Data'),
+          const _SectionHeader('Data'),
           ListTile(
             leading: const Icon(Icons.download),
             title: const Text('Export Data'),
             subtitle: const Text('Download transactions as CSV'),
-            onTap: () {},
+            onTap: () {}, // TODO: implement CSV export
           ),
           ListTile(
             leading: const Icon(Icons.delete_outline),
             title: const Text('Clear Data'),
             subtitle: const Text('Remove all local data'),
-            onTap: () {},
+            onTap: () {}, // TODO: implement clear data with confirmation
           ),
           const Divider(),
-          _SectionHeader('About'),
+          const _SectionHeader('About'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('Version'),
@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Logout',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            onTap: () {},
+            onTap: () {}, // TODO: implement logout via AuthProvider
           ),
         ],
       ),

@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
-import 'package:ase485_capstone_finance_ml/models/transaction.dart';
+import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
 
@@ -9,27 +9,32 @@ class TransactionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
         actions: [
-          IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () {},
+          ), // TODO: implement filter
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {},
+          ), // TODO: implement search
         ],
       ),
       body: Column(
         children: [
-          _MonthSelector(theme: theme),
-          _CategoryChips(),
+          const _MonthSelector(),
+          const _CategoryChips(),
           const SizedBox(height: 8),
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _sampleTransactions.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemCount: sampleTransactions.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (_, index) =>
-                  TransactionTile(transaction: _sampleTransactions[index]),
+                  TransactionTile(transaction: sampleTransactions[index]),
             ),
           ),
         ],
@@ -48,12 +53,11 @@ class TransactionsScreen extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _MonthSelector extends StatelessWidget {
-  const _MonthSelector({required this.theme});
-
-  final ThemeData theme;
+  const _MonthSelector();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -74,6 +78,8 @@ class _MonthSelector extends StatelessWidget {
 }
 
 class _CategoryChips extends StatelessWidget {
+  const _CategoryChips();
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -105,74 +111,3 @@ class _CategoryChips extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Sample data (uses the real Transaction model)
-// ---------------------------------------------------------------------------
-
-final _sampleTransactions = [
-  Transaction(
-    id: '1',
-    userId: 'demo',
-    amount: -85.40,
-    category: 'Food',
-    description: 'Grocery Store',
-    date: DateTime(2026, 2, 22),
-  ),
-  Transaction(
-    id: '2',
-    userId: 'demo',
-    amount: -120.00,
-    category: 'Bills',
-    description: 'Electric Bill',
-    date: DateTime(2026, 2, 20),
-  ),
-  Transaction(
-    id: '3',
-    userId: 'demo',
-    amount: 3200.00,
-    category: 'Other',
-    description: 'Salary Deposit',
-    date: DateTime(2026, 2, 15),
-  ),
-  Transaction(
-    id: '4',
-    userId: 'demo',
-    amount: -15.99,
-    category: 'Entertainment',
-    description: 'Netflix',
-    date: DateTime(2026, 2, 14),
-  ),
-  Transaction(
-    id: '5',
-    userId: 'demo',
-    amount: -45.00,
-    category: 'Transportation',
-    description: 'Gas Station',
-    date: DateTime(2026, 2, 13),
-  ),
-  Transaction(
-    id: '6',
-    userId: 'demo',
-    amount: -67.30,
-    category: 'Shopping',
-    description: 'Amazon Order',
-    date: DateTime(2026, 2, 12),
-  ),
-  Transaction(
-    id: '7',
-    userId: 'demo',
-    amount: -24.50,
-    category: 'Healthcare',
-    description: 'Pharmacy',
-    date: DateTime(2026, 2, 10),
-  ),
-  Transaction(
-    id: '8',
-    userId: 'demo',
-    amount: -49.99,
-    category: 'Education',
-    description: 'Online Course',
-    date: DateTime(2026, 2, 8),
-  ),
-];

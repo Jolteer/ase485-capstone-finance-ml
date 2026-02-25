@@ -1,4 +1,6 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/config/colors.dart';
+import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 
@@ -13,9 +15,9 @@ class AnalyticsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _PeriodSelector(),
+          const _PeriodSelector(),
           const SizedBox(height: 20),
-          _SpendingSummaryCard(theme: theme),
+          const _SpendingSummaryCard(),
           const SizedBox(height: 16),
           Text(
             'Spending by Category',
@@ -24,9 +26,9 @@ class AnalyticsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ..._categoryBreakdown.map((c) => _CategoryBar(item: c, theme: theme)),
+          ...sampleCategoryBreakdown.map((c) => _CategoryBar(item: c)),
           const SizedBox(height: 16),
-          _MonthComparisonCard(theme: theme),
+          const _MonthComparisonCard(),
         ],
       ),
     );
@@ -38,6 +40,8 @@ class AnalyticsScreen extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _PeriodSelector extends StatelessWidget {
+  const _PeriodSelector();
+
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<int>(
@@ -57,12 +61,11 @@ class _PeriodSelector extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _SpendingSummaryCard extends StatelessWidget {
-  const _SpendingSummaryCard({required this.theme});
-
-  final ThemeData theme;
+  const _SpendingSummaryCard();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -80,7 +83,9 @@ class _SpendingSummaryCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               '12% less than last month',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.green),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.success,
+              ),
             ),
           ],
         ),
@@ -94,13 +99,13 @@ class _SpendingSummaryCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _CategoryBar extends StatelessWidget {
-  const _CategoryBar({required this.item, required this.theme});
+  const _CategoryBar({required this.item});
 
-  final _CatBreakdown item;
-  final ThemeData theme;
+  final CategoryBreakdown item;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -142,12 +147,11 @@ class _CategoryBar extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _MonthComparisonCard extends StatelessWidget {
-  const _MonthComparisonCard({required this.theme});
-
-  final ThemeData theme;
+  const _MonthComparisonCard();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -200,24 +204,3 @@ class _MonthStat extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Sample data
-// ---------------------------------------------------------------------------
-
-class _CatBreakdown {
-  final String category;
-  final double amount;
-  final double ratio;
-  const _CatBreakdown(this.category, this.amount, this.ratio);
-}
-
-const _categoryBreakdown = [
-  _CatBreakdown('Food', 420, 0.84),
-  _CatBreakdown('Bills', 650, 1.0),
-  _CatBreakdown('Shopping', 210, 0.42),
-  _CatBreakdown('Transportation', 160, 0.32),
-  _CatBreakdown('Entertainment', 180, 0.36),
-  _CatBreakdown('Healthcare', 80, 0.16),
-  _CatBreakdown('Education', 50, 0.10),
-];
