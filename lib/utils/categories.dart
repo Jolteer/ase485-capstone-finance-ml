@@ -1,4 +1,6 @@
-﻿class Categories {
+﻿import 'package:flutter/material.dart';
+
+class Categories {
   Categories._();
 
   static const String food = 'Food';
@@ -11,7 +13,39 @@
   static const String other = 'Other';
 
   static const List<String> all = [
-    food, entertainment, bills, shopping,
-    transportation, healthcare, education, other,
+    food,
+    entertainment,
+    bills,
+    shopping,
+    transportation,
+    healthcare,
+    education,
+    other,
   ];
+
+  static IconData icon(String category) {
+    return switch (category) {
+      food => Icons.restaurant,
+      entertainment => Icons.movie,
+      bills => Icons.receipt_long,
+      shopping => Icons.shopping_bag,
+      transportation => Icons.directions_car,
+      healthcare => Icons.local_hospital,
+      education => Icons.school,
+      _ => Icons.attach_money,
+    };
+  }
+
+  static Color color(String category) {
+    return switch (category) {
+      food => Colors.orange,
+      entertainment => Colors.teal,
+      bills => Colors.red,
+      shopping => Colors.purple,
+      transportation => Colors.blue,
+      healthcare => Colors.pink,
+      education => Colors.indigo,
+      _ => Colors.grey,
+    };
+  }
 }

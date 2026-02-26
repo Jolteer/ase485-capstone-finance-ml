@@ -1,9 +1,2 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:ase485_capstone_finance_ml/app.dart';
-
-void main() {
-  testWidgets('SmartSpendApp smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const SmartSpendApp());
-    expect(find.text('SmartSpend'), findsOneWidget);
-  });
-}
+// Smoke test moved to test/app_test.dart to avoid duplication.
+void main() {}
