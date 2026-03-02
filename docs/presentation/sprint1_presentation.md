@@ -2,179 +2,146 @@
 marp: true
 theme: default
 paginate: true
-header: "Sprint 1 Presentation — SmartSpend"
+header: "Sprint 1 Retrospective — SmartSpend"
 footer: "Joshua Day | ASE 485 | Spring 2026"
 ---
 
-# SmartSpend
+# Sprint 1 Retrospective
 
-## AI-Powered Personal Finance Assistant
+## SmartSpend
 
-**Sprint 1 Presentation**
-
-Joshua Day
-ASE 485 — Spring 2026
+**By:** Joshua Day
 
 ---
 
 ## The Problem
 
-- Financial stress is a leading cause of anxiety
-- People overspend without realizing it
-- Existing budgeting apps require too much manual input
-- Generic advice doesn't adapt to individual behavior
+**70% of Americans live paycheck-to-paycheck**
 
-**SmartSpend** uses machine learning to provide personalized, adaptive budgeting guidance.
+- Lack visibility into spending patterns
+- Struggle to create realistic budgets
 
----
+## My Solution: SmartSpend
 
-## My Approach
+**AI-powered personal finance assistant that:**
 
-Build a **full-stack application** that learns from spending patterns:
+- Automatically categorizes transactions using ML
+- Generates personalized budgets from spending patterns
+- Provides intelligent savings recommendations
 
-- **Frontend:** Flutter (iOS, Android, Web)
-- **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL
-- **ML:** Scikit-learn for transaction categorization & budget generation
-- **Deployment:** Docker containers
+**Built with:** Flutter + FastAPI + PostgreSQL + ML (scikit-learn)
 
 ---
 
-## Architecture Overview
+## What Went Wrong
 
-```
-┌──────────────────┐     REST API      ┌──────────────────┐
-│   Flutter App    │ ◄──────────────► │  FastAPI Backend  │
-│ (iOS/Android/Web)│                   │  (Python)         │
-└──────────────────┘                   └────────┬─────────┘
-                                                │
-                                       ┌────────▼─────────┐
-                                       │   PostgreSQL DB   │
-                                       │   (via Docker)    │
-                                       └──────────────────┘
-```
+- Underestimated Flutter-FastAPI integration time
+- Docker networking issues delayed DB connectivity
+- JWT token refresh logic was tricky to implement
+- Provider state management edge cases broke UI
 
 ---
 
-## Sprint 1 Progress — Week by Week
+## What Went Well
 
-| Week | What I Built |
-|------|-------------|
-| **4** | Project setup — GitHub repo, Docker (docker-compose + PostgreSQL), Flutter & FastAPI scaffolding |
-| **5** | User authentication — JWT auth endpoints, login/signup screens, DB schema (init.sql, seed.sql) |
-| **6** | Transaction management — CRUD API endpoints, Flutter UI for adding/viewing transactions |
-| **7** | Dashboard & visualization — spending breakdowns by category, API services for budgets, goals, recommendations |
-| **8** | Testing, bug fixes, UI polish (account, settings, analytics screens) |
+- Built full-stack architecture
+- All 5 features completed on time
+- Backend API is working and well-documented
+- Flutter UI is polished with reusable components
+- Good test coverage for core functionality
 
 ---
 
-## What's Working — Backend
+## Improvement Plan
 
-- **FastAPI** server with 5 routers:
-  - `/auth` — register & login with JWT tokens + bcrypt passwords
-  - `/transactions` — full CRUD (create, list, filter by category, delete)
-  - `/budgets` — full CRUD with partial updates
-  - `/goals` — full CRUD for savings goals with progress tracking
-  - `/recommendations` — read endpoint for ML-driven suggestions
-- **PostgreSQL** with 5 tables: users, transactions, budgets, goals, recommendations
-- **Docker Compose** — one command spins up DB + API + pgAdmin
+- Spend more time testing how parts work together
+- Add better error logs to find bugs faster
+- Write down API details before building screens
+- Use health checks in Docker to catch network problems
 
 ---
 
-## What's Working — Frontend (Flutter)
+## Weekly Progress
 
-- **9 screen modules:** Home, Auth, Transactions, Budget, Goals, Analytics, Recommendations, Account, Settings
-- **Bottom navigation** with 5 tabs: Home, Transactions, Budget, Goals, Account
-- **Service layer** — dedicated API client services for each entity
-- **Spending analytics** — category breakdowns, period selector (week/month/year), month comparison
-- **Reusable widgets** — summary cards, transaction tiles, goal progress cards, category cards
-
----
-
-## Demo Highlights
-
-- **Auth flow:** Register → Login → JWT stored → authenticated API calls
-- **Transaction management:** Add transactions with amount, category, description, date → view list → delete
-- **Dashboard:** Spending summary cards, recent transactions, quick navigation
-- **Analytics:** Category breakdown bars, spending by period, month-over-month comparison
-- **Budget & Goals:** Create/edit budgets per category, set savings goals with progress tracking
+| Week  | What I Built                                                                      |
+| ----- | --------------------------------------------------------------------------------- |
+| **1** | GitHub repo, Docker setup (PostgreSQL + pgAdmin),<br>Flutter & FastAPI init       |
+| **2** | User auth — JWT endpoints, bcrypt passwords,<br>login/register screens, DB schema |
+| **3** | Transactions — CRUD API,<br>transaction list & add-transaction screens            |
+| **4** | Dashboard — budgets/goals/recommendations API<br>+ analytics screens              |
+| **5** | Testing suite, bug fixes, UI polish across all screens                            |
 
 ---
 
-## Learning with AI — Topic 1
+## Sprint 1 Metrics
 
-### Sports Betting Analytics
-
-Using AI (Claude, ChatGPT) as a **tutor** to learn:
-
-- **Probability & odds** — how sportsbooks set lines
-- **Expected value (EV)** — calculating whether a bet has positive EV
-- **Statistical models** — Elo ratings, regression models for predictions
-- **Bankroll management** — Kelly Criterion, unit sizing, risk management
-
-**Approach:** Ask AI to explain concepts, then verify understanding through examples and discussion.
+- **Lines of Code:** ~3,200
+- **Tests:** 8 unit · 1 integration
+- **Features:** 5 / 5 completed
+- **Requirements:** 12 / 12 completed
+- **Burndown:** 100%
 
 ---
 
-## Learning with AI — Topic 2
+## Sprint 2 Goals
 
-### Stock Market Analysis
+- Make all app screens show real-time API data
+- Keep users logged in with secure tokens
+- Use ML to auto-categorize transactions
+- Auto-generate budgets from spending
+- Recommend ways to save money with ML
+- Send alerts when budgets are close to limits
 
-Using AI as a **guided learning assistant** to understand:
-
-- **Fundamental analysis** — reading income statements, balance sheets, P/E ratios
-- **Technical analysis** — candlestick charts, RSI, moving averages, MACD
-- **Portfolio diversification** — asset allocation and risk management
-- **Trading strategies** — understanding market mechanics and order types
-
-**Approach:** Break down complex financial concepts with AI, study real-world examples, deepen understanding iteratively.
+**Planned:** 6 features · 15 requirements
 
 ---
 
-## AI Tools Used
+## Sprint 2 Timeline
 
-| Tool | How I Used It |
-|------|--------------|
-| **Claude / ChatGPT** | Tutor for sports betting & stock market concepts — explanations, follow-up Q&A |
-| **GitHub Copilot** | Code assistance for Flutter widgets, FastAPI endpoints, SQL schemas |
-
-**Philosophy:** Use AI to *explain and teach*, not just provide answers. Ask follow-up questions to build genuine understanding.
-
----
-
-## Sprint 2 Plan
-
-| Week | Goal |
-|------|------|
-| **9** | Budget generation ML model |
-| **10** | Budget adaptation system |
-| **11** | Savings recommendations engine |
-| **12** | Goal setting & progress tracking enhancements |
-| **13** | Alerts & notifications system |
-| **14** | Flutter mobile app polish & integration testing |
-| **15** | Final testing, deployment, Final Presentation |
-
-**Deployment:** Android app + public web application via Docker
+| Week | Milestone                        |
+| ---- | -------------------------------- |
+| 1    | Connect Flutter UI to API        |
+| 2    | Persistent auth, ML categorizing |
+| 3    | ML budget generation             |
+| 4    | ML savings suggestions           |
+| 5    | Alerts, push notifications       |
+| 6    | Polish, testing, deploy setup    |
+| 7    | Final test & presentation        |
 
 ---
 
-## Key Dates
+## AI-Assisted Learning Research
 
-- **Project submissions deadline:** 4/25/2026
-- **Final Presentation:** 4/27/2026
-- **HW4 Deployment deadline:** 5/1/2026
+**Topics:**
+
+1. **Stock Market Analysis** — Technical indicators and risk management
+2. **Sports Betting Analytics** — Probability and expected value
+
+**Approach:**
+
+- Use AI to explain core concepts with worked examples
+- Implement calculations in Python to verify understanding
+- Build small tools to practice applying the concepts
 
 ---
 
-## Repositories
+## Stock Market Analysis — What I'm Learning
 
-- **Capstone Project:** https://github.com/Jolteer/ase485-capstone-finance-ml
-- **Learning with AI:** https://github.com/Jolteer/ase485-learning-with-ai
+- How the stock market works
+- Simple chart signals (like averages)
+- Basic company stats
+- Ways to avoid big losses
 
 ---
 
-# Thank You — Questions?
+## Sports Betting Analytics — What I'm Learning
 
-**Joshua Day**
-dayj16@mymail.nku.edu
-ASE 485 — Spring 2026
+- How betting odds work
+- How sportsbooks make money
+- How to know if a bet is good or bad
+- How to manage betting money
+- Simple systems to predict games
+
+---
+
+# Questions?

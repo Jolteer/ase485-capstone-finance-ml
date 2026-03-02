@@ -39,7 +39,7 @@ class SmartSpendApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
         routes: AppRoutes.routes,
-        initialRoute: AppRoutes.home,
+        initialRoute: AppRoutes.login,
         debugShowCheckedModeBanner: false,
       ),
     );

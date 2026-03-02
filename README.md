@@ -2,7 +2,7 @@
 
 ## Developer
 
-- **Josh**
+- **Joshua Day** — dayj16@mymail.nku.edu
 
 ## Project Description
 
@@ -23,13 +23,14 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Mobile App** | Flutter 3 / Dart (Provider state management) |
-| **Backend API** | Python 3.12 · FastAPI · Uvicorn |
-| **Database** | PostgreSQL 16 |
-| **Auth** | JWT (PyJWT) · bcrypt via Passlib |
-| **Containers** | Docker Compose (API + DB + pgAdmin) |
+| Layer           | Technology                                   |
+| --------------- | -------------------------------------------- |
+| **Mobile App**  | Flutter 3 / Dart (Provider state management) |
+| **Backend API** | Python 3.12 · FastAPI · Uvicorn              |
+| **Database**    | PostgreSQL 16                                |
+| **Auth**        | JWT (PyJWT) · bcrypt via Passlib             |
+| **Containers**  | Docker Compose (API + DB + pgAdmin)          |
+| **Validation**  | Pydantic v2                                  |
 
 ---
 
@@ -37,22 +38,31 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 
 ### Implemented Features
 
-1. **User Authentication** — Secure JWT-based register / login flow with hashed passwords.
-2. **Transaction Management** — Create, list (with category filter), and delete spending transactions.
-3. **Budget Management** — Create, update, and delete per-category budgets with configurable periods.
-4. **Goal Tracking** — Create, update, and delete savings goals with progress tracking.
-5. **Savings Recommendations** — View ML-generated, personalized savings recommendations.
-6. **Spending Visualization** — Dashboard with summary cards, category breakdowns, and spending charts.
-7. **Analytics Screen** — Dedicated analytics view for deeper spending insights.
-8. **Multi-Screen Navigation** — Bottom navigation across Home, Transactions, Budget, Goals, and Account tabs.
-9. **Theming** — Light and dark mode support (follows system preference).
-10. **Settings & Account** — Account management and application settings screens.
+#### Backend (Fully Functional)
+
+1. **User Authentication** — Secure JWT-based register / login with bcrypt-hashed passwords and 24-hour token expiry.
+2. **Transaction Management** — Create, list (with optional `?category=` filter ordered by date), and delete transactions per user.
+3. **Budget Management** — Full CRUD for per-category budgets with configurable periods and partial updates.
+4. **Goal Tracking** — Full CRUD for savings goals with numeric progress tracking ordered by target date.
+5. **Savings Recommendations** — Read endpoint for personalized savings suggestions seeded from spending data.
+
+#### Frontend (Flutter — Fully Scaffolded)
+
+6. **11-Screen Navigation** — Complete screen set: Login, Register, Home/Dashboard, Transactions, Add Transaction, Budget, Goals, Analytics, Recommendations, Settings, and Account.
+7. **Bottom Navigation** — 5-tab `BottomNavigationBar` with `IndexedStack` (Home, Transactions, Budget, Goals, Account).
+8. **Spending Analytics** — Category breakdown progress bars, period selector (Week/Month/Year), month-over-month comparison view.
+9. **Theming** — Material 3 light and dark mode (follows system preference), seeded from a custom green color palette.
+10. **Reusable Widget Library** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, `LoadingOverlay`.
+
+> **Current State:** The backend API is fully operational. The Flutter frontend is completely scaffolded with all screens, navigation, models, services, and providers in place. Most screens currently display rich sample data (`lib/data/sample_data.dart`) while provider-to-screen wiring is finalized in Sprint 2.
 
 ### Planned / In Progress
 
+- Live provider integration (connecting all screens to real API data).
 - ML-powered automatic transaction categorization.
 - Budget adaptation that learns from new spending data over time.
 - Push notifications when approaching or exceeding budget limits.
+- Persistent auth state (secure token storage across app restarts).
 - Data import from external sources (CSV / bank feeds).
 
 **Total: 10 features, 14 requirements**
@@ -61,7 +71,7 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 
 - Cross-platform mobile application (Flutter/Dart — iOS, Android, Web).
 - User passwords stored with bcrypt hashing; API secured with JWT bearer tokens.
-- PostgreSQL data integrity enforced via foreign keys and indexes.
+- PostgreSQL data integrity enforced via foreign keys and UUID primary keys.
 - The application should respond to user actions within 2 seconds.
 - The ML model should process and categorize transactions with at least 80% accuracy.
 
@@ -72,71 +82,120 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 ```
 ├── lib/                    # Flutter application source
 │   ├── main.dart           # Entry point
-│   ├── app.dart            # Root widget, providers, routing
+│   ├── app.dart            # Root widget, MultiProvider setup, routing
 │   ├── config/             # Theme, colors, constants, route definitions
-│   ├── models/             # Dart data classes (User, Transaction, Budget, Goal, …)
-│   ├── providers/          # ChangeNotifier state management (auth, transactions, budgets, goals)
-│   ├── services/           # API client & per-resource service classes
-│   ├── screens/            # UI screens (home, auth, transactions, budget, goals, analytics, …)
-│   ├── widgets/            # Reusable UI components (SummaryCard, TransactionTile, …)
-│   └── utils/              # Validators, error helpers, category utilities
+│   │   ├── colors.dart     # AppColors (primary green, income/expense/warning)
+│   │   ├── constants.dart  # AppConstants (apiBaseUrl, spacing, radius)
+│   │   ├── routes.dart     # AppRoutes — 11 named routes
+│   │   └── theme.dart      # AppTheme — Material 3 light & dark ThemeData
+│   ├── models/             # Immutable Dart data classes (fromJson, toJson, copyWith)
+│   │   ├── user.dart
+│   │   ├── transaction.dart
+│   │   ├── budget.dart
+│   │   ├── goal.dart       # includes progressPercent, isCompleted, icon
+│   │   ├── recommendation.dart
+│   │   ├── budget_item.dart  # view model: spent/limit ratio, isOverBudget
+│   │   └── category_breakdown.dart  # view model for analytics charts
+│   ├── providers/          # ChangeNotifier state management
+│   │   ├── auth_provider.dart
+│   │   ├── transaction_provider.dart
+│   │   ├── budget_provider.dart
+│   │   └── goal_provider.dart
+│   ├── services/           # HTTP API client & per-resource service classes
+│   │   ├── api_client.dart      # JWT-injecting HTTP wrapper
+│   │   ├── auth_service.dart
+│   │   ├── transaction_service.dart
+│   │   ├── budget_service.dart
+│   │   ├── goal_service.dart
+│   │   └── recommendation_service.dart
+│   ├── screens/            # 11 UI screens
+│   │   ├── auth/           # login, register
+│   │   ├── home/           # dashboard + bottom nav host
+│   │   ├── transactions/   # list view + add transaction form
+│   │   ├── budget/         # per-category budget overview
+│   │   ├── goals/          # savings goals with progress
+│   │   ├── analytics/      # category breakdowns, period selector
+│   │   ├── recommendations/  # AI-powered savings suggestions
+│   │   ├── settings/       # app preferences & toggles
+│   │   └── account/        # profile & navigation hub
+│   ├── widgets/            # Reusable UI components
+│   │   ├── summary_card.dart
+│   │   ├── transaction_tile.dart
+│   │   ├── goal_progress_card.dart
+│   │   ├── category_card.dart
+│   │   └── loading_overlay.dart
+│   ├── utils/              # Formatters, validators, categories, error helpers
+│   │   ├── formatters.dart      # currency, date, percent (via intl)
+│   │   ├── validators.dart      # form field validators (email, password, amount)
+│   │   ├── categories.dart      # 8 category constants, icon/color maps
+│   │   └── error_helpers.dart   # formatError strips "Exception: " prefix
+│   └── data/
+│       └── sample_data.dart     # Static demo data used while provider wiring is in progress
 ├── backend/                # FastAPI backend
-│   ├── Dockerfile
+│   ├── Dockerfile          # python:3.12-slim, Uvicorn on port 8000
 │   ├── requirements.txt
 │   └── app/
-│       ├── main.py         # FastAPI app, CORS, router mounts
-│       ├── auth.py         # JWT creation & verification
+│       ├── main.py         # FastAPI app, CORS middleware, router mounts, /health
+│       ├── auth.py         # JWT creation & HTTPBearer verification dependency
 │       ├── database.py     # psycopg2 connection pool, query/execute helpers
-│       ├── schemas.py      # Pydantic request/response models
+│       ├── schemas.py      # Pydantic v2 request/response models
 │       └── routers/        # auth, transactions, budgets, goals, recommendations
-├── docker/                 # SQL init & seed scripts
-│   ├── init.sql            # Schema creation (DDL)
-│   └── seed.sql            # Sample data
-├── docker-compose.yml      # PostgreSQL + FastAPI + pgAdmin
+├── docker/
+│   ├── init.sql            # Schema DDL (5 tables, UUID PKs, FK cascade)
+│   └── seed.sql            # Demo user + 30 transactions + budgets/goals/recommendations
+├── docker-compose.yml      # PostgreSQL 16 + FastAPI + pgAdmin services
+├── scripts/
+│   ├── start.ps1           # One-command dev startup (PowerShell)
+│   └── start.sh            # One-command dev startup (bash / WSL / macOS)
 ├── test/                   # Flutter unit & widget tests
-├── integration_test/       # Flutter integration tests
+│   ├── models/             # transaction, user, budget, goal, recommendation
+│   ├── utils/              # validators, error_helpers
+│   └── widgets/            # summary_card
+├── integration_test/       # Flutter integration test (full app smoke test)
 └── docs/                   # Project documentation & presentations
+    └── presentation/
+        └── sprint1_presentation.md
 ```
 
 ---
 
 ## Data Model
 
-Five core tables, all using UUID primary keys:
+Five core tables, all using UUID primary keys and `ON DELETE CASCADE` foreign keys:
 
-| Table | Key Columns |
-|-------|-------------|
-| **users** | `id`, `email`, `name`, `password`, `created_at` |
-| **transactions** | `id`, `user_id` → users, `amount`, `category`, `description`, `date` |
-| **budgets** | `id`, `user_id` → users, `category`, `limit_amount`, `period`, `created_at` |
-| **goals** | `id`, `user_id` → users, `target_amount`, `target_date`, `description`, `progress` |
+| Table               | Key Columns                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| **users**           | `id`, `email` (UNIQUE), `name`, `password` (bcrypt), `created_at`                              |
+| **transactions**    | `id`, `user_id` → users, `amount`, `category`, `description`, `date`                           |
+| **budgets**         | `id`, `user_id` → users, `category`, `limit_amount`, `period`, `created_at`                    |
+| **goals**           | `id`, `user_id` → users, `target_amount`, `target_date`, `description`, `progress`             |
 | **recommendations** | `id`, `user_id` → users, `category`, `title`, `description`, `potential_savings`, `created_at` |
 
-Schema definition: [docker/init.sql](docker/init.sql)
+Schema definition: [docker/init.sql](docker/init.sql) · Seed data: [docker/seed.sql](docker/seed.sql)
 
 ---
 
 ## API Endpoints
 
-All routes are mounted under `/api/v1`. Authenticated endpoints require a `Bearer <JWT>` header.
+All routes are mounted under `/api/v1`. Authenticated endpoints require an `Authorization: Bearer <JWT>` header.
 
-| Method | Path | Auth | Description |
-|--------|------|:----:|-------------|
-| `GET` | `/health` | — | Health check |
-| `POST` | `/api/v1/auth/register` | — | Create account, receive JWT |
-| `POST` | `/api/v1/auth/login` | — | Authenticate, receive JWT |
-| `GET` | `/api/v1/transactions` | ✔ | List transactions (optional `?category=` filter) |
-| `POST` | `/api/v1/transactions` | ✔ | Create a transaction |
-| `DELETE` | `/api/v1/transactions/{id}` | ✔ | Delete a transaction |
-| `GET` | `/api/v1/budgets` | ✔ | List budgets |
-| `POST` | `/api/v1/budgets` | ✔ | Create a budget |
-| `PUT` | `/api/v1/budgets/{id}` | ✔ | Update a budget |
-| `DELETE` | `/api/v1/budgets/{id}` | ✔ | Delete a budget |
-| `GET` | `/api/v1/goals` | ✔ | List goals |
-| `POST` | `/api/v1/goals` | ✔ | Create a goal |
-| `PUT` | `/api/v1/goals/{id}` | ✔ | Update a goal |
-| `DELETE` | `/api/v1/goals/{id}` | ✔ | Delete a goal |
-| `GET` | `/api/v1/recommendations` | ✔ | List recommendations |
+| Method   | Path                        | Auth | Description                                      |
+| -------- | --------------------------- | :--: | ------------------------------------------------ |
+| `GET`    | `/health`                   |  —   | Health check                                     |
+| `POST`   | `/api/v1/auth/register`     |  —   | Create account, receive JWT + user               |
+| `POST`   | `/api/v1/auth/login`        |  —   | Authenticate, receive JWT + user                 |
+| `GET`    | `/api/v1/transactions`      |  ✔   | List transactions (optional `?category=` filter) |
+| `POST`   | `/api/v1/transactions`      |  ✔   | Create a transaction                             |
+| `DELETE` | `/api/v1/transactions/{id}` |  ✔   | Delete a transaction                             |
+| `GET`    | `/api/v1/budgets`           |  ✔   | List budgets                                     |
+| `POST`   | `/api/v1/budgets`           |  ✔   | Create a budget                                  |
+| `PUT`    | `/api/v1/budgets/{id}`      |  ✔   | Partial-update a budget                          |
+| `DELETE` | `/api/v1/budgets/{id}`      |  ✔   | Delete a budget                                  |
+| `GET`    | `/api/v1/goals`             |  ✔   | List goals (ordered by target date)              |
+| `POST`   | `/api/v1/goals`             |  ✔   | Create a goal                                    |
+| `PUT`    | `/api/v1/goals/{id}`        |  ✔   | Partial-update a goal                            |
+| `DELETE` | `/api/v1/goals/{id}`        |  ✔   | Delete a goal                                    |
+| `GET`    | `/api/v1/recommendations`   |  ✔   | List recommendations                             |
 
 Interactive API docs available at `http://localhost:8000/api/v1/docs` when the backend is running.
 
@@ -152,7 +211,7 @@ Interactive API docs available at `http://localhost:8000/api/v1/docs` when the b
 
 ### Environment Variables
 
-Create a `.env` file:
+Create a `.env` file (see [`.env.example`](.env.example)):
 
 ```env
 POSTGRES_USER=smartspend
@@ -163,17 +222,42 @@ PGADMIN_EMAIL=admin@smartspend.dev
 PGADMIN_PASSWORD=admin
 ```
 
+### Quick Start (one command)
+
+Start the database, API, and Flutter app all at once:
+
+**Windows (PowerShell):**
+
+```powershell
+.\scripts\start.ps1                  # prompts if multiple devices
+.\scripts\start.ps1 -Device chrome   # launch directly in Chrome
+```
+
+**WSL / macOS / Linux:**
+
+```bash
+./scripts/start.sh                   # prompts if multiple devices
+./scripts/start.sh chrome            # launch directly in Chrome
+```
+
+The script starts Docker Compose, waits for the API to become healthy, then runs `flutter pub get` and `flutter run`.
+
 ### Run the Backend
 
 ```bash
 docker compose up -d          # starts PostgreSQL, FastAPI, and pgAdmin
 ```
 
-| Service | URL |
-|---------|-----|
-| API | http://localhost:8000 |
-| API Docs | http://localhost:8000/api/v1/docs |
-| pgAdmin | http://localhost:5050 |
+| Service            | URL                               |
+| ------------------ | --------------------------------- |
+| API                | http://localhost:8000             |
+| API Docs (Swagger) | http://localhost:8000/api/v1/docs |
+| pgAdmin            | http://localhost:5050             |
+
+The seed script automatically creates a demo account:
+
+- **Email:** `demo@smartspend.dev`
+- **Password:** `password123`
 
 ### Run the Flutter App
 
@@ -198,13 +282,13 @@ flutter test integration_test/
 
 ### Unit & Widget Tests (`test/`)
 
-- **Model tests** — serialization & defaults for `Transaction`, `Budget`, `Goal`, `Recommendation`, `User`.
-- **Utility tests** — input validators, error helpers.
-- **Widget tests** — `SummaryCard` rendering.
+- **Model tests** — `fromJson`/`toJson` round-trips and computed properties for `Transaction`, `Budget`, `Goal`, `Recommendation`, `User`.
+- **Utility tests** — Form validators (email, password min-length, numeric amount) and `formatError` error string helper.
+- **Widget tests** — `SummaryCard` renders title and value text correctly.
 
 ### Integration Tests (`integration_test/`)
 
-- End-to-end app test covering navigation flow.
+- Full app smoke test — launches `SmartSpendApp`, verifies the app title renders. Extended E2E flow tests planned for Sprint 2.
 
 ### Acceptance Criteria
 
@@ -217,26 +301,29 @@ flutter test integration_test/
 
 ## Schedule & Milestones
 
-### Sprint 1 (Weeks 4–8)
+### Sprint 1 (Weeks 4–8) — Complete
 
-- Week 4: Project setup (Docker, database) + FastAPI foundation
-- Week 5: User authentication + Transaction input
-- Week 6: Import functionality + ML categorization model
-- Week 7: Spending visualization + Dashboard UI
-- Week 8: Testing, polish & Sprint 1 Presentation
+- Week 4: Project setup (GitHub, Docker, PostgreSQL schema, Flutter & FastAPI scaffolding)
+- Week 5: User authentication (JWT endpoints, login/register screens, init.sql + seed.sql)
+- Week 6: Transaction management (CRUD API, Flutter transaction list & add screens)
+- Week 7: Dashboard & visualization (budget/goals/recommendations API, spending analytics screens)
+- Week 8: Testing, bug fixes, UI polish (account, settings, analytics), Sprint 1 Presentation
 
 ### Sprint 2 (Weeks 9–15)
 
-- Week 9: Budget generation ML model
-- Week 10: Budget adaptation system
-- Week 11: Savings recommendations engine
-- Week 12: Goal setting & progress tracking
-- Week 13: Alerts & notifications system
-- Week 14: Flutter mobile app development & integration
-- Week 15: Testing, deployment, Final Presentation (4/27, 4/29)
+- Week 9: Live provider integration — connect all Flutter screens to real API data
+- Week 10: Persistent auth state (secure token storage) + ML categorization model
+- Week 11: Budget adaptation system (ML-driven budget generation)
+- Week 12: Savings recommendations engine (ML inference pipeline)
+- Week 13: Alerts & push notifications when approaching budget limits
+- Week 14: Flutter app polish, full integration testing, deployment
+- Week 15: Final testing, deployment, Final Presentation (4/27, 4/29)
 
 ---
 
 ## Project Documentation
 
-- [Project Plan Presentation (PPP)](docs/presentation/ppp_smartspend.md)
+- [Sprint 1 Presentation](docs/presentation/sprint1_presentation.md)
+- **Repositories:**
+  - Capstone Project: https://github.com/Jolteer/ase485-capstone-finance-ml
+  - Learning with AI: https://github.com/Jolteer/ase485-learning-with-ai

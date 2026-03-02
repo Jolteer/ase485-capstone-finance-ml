@@ -36,6 +36,13 @@ class TransactionCreate(BaseModel):
     date: datetime | None = None
 
 
+class TransactionUpdate(BaseModel):
+    amount: float | None = None
+    category: str | None = None
+    description: str | None = None
+    date: datetime | None = None
+
+
 class TransactionResponse(BaseModel):
     id: str
     user_id: str
