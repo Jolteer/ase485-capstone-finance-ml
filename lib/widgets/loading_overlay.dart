@@ -1,5 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 
+/// Displays a semi-transparent barrier with a spinner over [child]
+/// when [isLoading] is true.
 class LoadingOverlay extends StatelessWidget {
   final bool isLoading;
   final Widget child;
@@ -16,7 +18,12 @@ class LoadingOverlay extends StatelessWidget {
       children: [
         child,
         if (isLoading)
-          const Center(child: CircularProgressIndicator()),
+          Positioned.fill(
+            child: ColoredBox(
+              color: Colors.black26,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
       ],
     );
   }

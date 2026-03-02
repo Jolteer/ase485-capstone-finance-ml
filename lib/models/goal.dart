@@ -1,4 +1,6 @@
-﻿/// A savings goal with a [targetAmount] and deadline ([targetDate]).
+﻿import 'package:flutter/material.dart';
+
+/// A savings goal with a [targetAmount] and deadline ([targetDate]).
 class Goal {
   final String id;
   final String userId;
@@ -79,4 +81,16 @@ class Goal {
   @override
   String toString() =>
       'Goal(id: $id, description: $description, progress: $progress/$targetAmount)';
+
+  /// Returns a descriptive icon based on the goal's [description].
+  IconData get icon {
+    final desc = description.toLowerCase();
+    if (desc.contains('vacation')) return Icons.beach_access;
+    if (desc.contains('down payment') || desc.contains('home')) {
+      return Icons.home;
+    }
+    if (desc.contains('emergency')) return Icons.warning_amber;
+    if (desc.contains('car')) return Icons.directions_car;
+    return Icons.flag;
+  }
 }

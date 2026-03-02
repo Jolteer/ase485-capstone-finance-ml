@@ -15,10 +15,11 @@ class GoalsScreen extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (_, index) {
           final goal = sampleGoals[index];
-          return GoalProgressCard(goal: goal, icon: iconForGoal(goal));
+          return GoalProgressCard(goal: goal, icon: goal.icon);
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'goals_fab',
         onPressed: () {}, // TODO: implement add goal
         icon: const Icon(Icons.add),
         label: const Text('New Goal'),

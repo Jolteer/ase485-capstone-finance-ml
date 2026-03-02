@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/models/budget_item.dart';
+import 'package:ase485_capstone_finance_ml/models/category_breakdown.dart';
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
 import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
+
+export 'package:ase485_capstone_finance_ml/models/budget_item.dart';
+export 'package:ase485_capstone_finance_ml/models/category_breakdown.dart';
 
 // ---------------------------------------------------------------------------
 // Shared sample data used across screens until real provider/service
@@ -117,26 +121,7 @@ final sampleGoals = [
   ),
 ];
 
-/// Returns a descriptive icon for a [Goal] based on its description.
-IconData iconForGoal(Goal goal) {
-  final desc = goal.description.toLowerCase();
-  if (desc.contains('vacation')) return Icons.beach_access;
-  if (desc.contains('down payment') || desc.contains('home')) {
-    return Icons.home;
-  }
-  if (desc.contains('emergency')) return Icons.warning_amber;
-  if (desc.contains('car')) return Icons.directions_car;
-  return Icons.flag;
-}
-
 // -- Budget items -----------------------------------------------------------
-
-class BudgetItem {
-  final String category;
-  final double spent;
-  final double limit;
-  const BudgetItem(this.category, this.spent, this.limit);
-}
 
 const sampleBudgetItems = [
   BudgetItem('Food', 420, 500),
@@ -149,13 +134,6 @@ const sampleBudgetItems = [
 ];
 
 // -- Category breakdown (analytics) -----------------------------------------
-
-class CategoryBreakdown {
-  final String category;
-  final double amount;
-  final double ratio;
-  const CategoryBreakdown(this.category, this.amount, this.ratio);
-}
 
 const sampleCategoryBreakdown = [
   CategoryBreakdown('Food', 420, 0.84),

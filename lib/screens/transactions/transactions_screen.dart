@@ -40,6 +40,7 @@ class TransactionsScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'transactions_fab',
         onPressed: () => Navigator.pushNamed(context, AppRoutes.addTransaction),
         icon: const Icon(Icons.add),
         label: const Text('Add'),
