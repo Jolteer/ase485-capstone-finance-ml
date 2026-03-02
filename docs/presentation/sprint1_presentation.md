@@ -32,7 +32,7 @@ ASE 485 — Spring 2026
 
 Build a **full-stack application** that learns from spending patterns:
 
-- **Frontend:** Flutter (Android + Web)
+- **Frontend:** Flutter (iOS, Android, Web)
 - **Backend:** FastAPI (Python)
 - **Database:** PostgreSQL
 - **ML:** Scikit-learn for transaction categorization & budget generation
@@ -43,15 +43,15 @@ Build a **full-stack application** that learns from spending patterns:
 ## Architecture Overview
 
 ```
-┌─────────────────┐     REST API      ┌──────────────────┐
-│  Flutter App     │ ◄──────────────► │  FastAPI Backend  │
-│  (Android + Web) │                   │  (Python)         │
-└─────────────────┘                   └────────┬─────────┘
-                                               │
-                                      ┌────────▼─────────┐
-                                      │   PostgreSQL DB   │
-                                      │   (via Docker)    │
-                                      └──────────────────┘
+┌──────────────────┐     REST API      ┌──────────────────┐
+│   Flutter App    │ ◄──────────────► │  FastAPI Backend  │
+│ (iOS/Android/Web)│                   │  (Python)         │
+└──────────────────┘                   └────────┬─────────┘
+                                                │
+                                       ┌────────▼─────────┐
+                                       │   PostgreSQL DB   │
+                                       │   (via Docker)    │
+                                       └──────────────────┘
 ```
 
 ---
@@ -76,7 +76,7 @@ Build a **full-stack application** that learns from spending patterns:
   - `/budgets` — full CRUD with partial updates
   - `/goals` — full CRUD for savings goals with progress tracking
   - `/recommendations` — read endpoint for ML-driven suggestions
-- **PostgreSQL** with 4 tables: users, transactions, budgets, goals
+- **PostgreSQL** with 5 tables: users, transactions, budgets, goals, recommendations
 - **Docker Compose** — one command spins up DB + API + pgAdmin
 
 ---
