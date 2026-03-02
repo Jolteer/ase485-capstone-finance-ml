@@ -46,6 +46,7 @@ class BudgetScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'budget_fab',
         onPressed: () {}, // TODO: implement add budget category
         child: const Icon(Icons.add),
       ),
