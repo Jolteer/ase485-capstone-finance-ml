@@ -1,5 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
+/// Settings screen for app configuration.
+/// 
+/// Provides options for appearance (dark mode), notifications,
+/// security (biometric login), data management, and logout.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -7,9 +11,15 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
+/// State for the [SettingsScreen].
 class _SettingsScreenState extends State<SettingsScreen> {
+  /// Whether dark mode is enabled.
   bool _darkMode = false;
+  
+  /// Whether push notifications are enabled.
   bool _notifications = true;
+  
+  /// Whether biometric authentication is enabled.
   bool _biometric = false;
 
   @override
@@ -81,8 +91,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
+/// Section header for grouping related settings.
+/// 
+/// Displays a styled label to separate different settings categories.
 class _SectionHeader extends StatelessWidget {
+  /// The header title text.
   final String title;
+  
   const _SectionHeader(this.title);
 
   @override

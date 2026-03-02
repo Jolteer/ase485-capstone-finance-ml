@@ -1,7 +1,14 @@
 import 'package:ase485_capstone_finance_ml/models/models.dart';
 
-// -- Transactions -----------------------------------------------------------
+/// Sample data for development and testing.
+/// 
+/// Provides mock data for transactions, goals, budgets, analytics,
+/// and recommendations to populate the UI during development.
 
+/// Sample transaction history for demonstration.
+/// 
+/// Contains a mix of income (positive amounts) and expenses (negative amounts)
+/// across various categories.
 final sampleTransactions = [
   Transaction(
     id: '1',
@@ -69,11 +76,16 @@ final sampleTransactions = [
   ),
 ];
 
-/// First 5 transactions for the home dashboard "recent" view.
+/// Recent transactions subset for home dashboard.
+/// 
+/// Contains the first 5 transactions from [sampleTransactions]
+/// for display in the dashboard's recent transactions section.
 final recentTransactions = sampleTransactions.take(5).toList();
 
-// -- Goals ------------------------------------------------------------------
-
+/// Sample savings goals for demonstration.
+/// 
+/// Includes various goal types with different progress levels
+/// and target dates to showcase the goals feature.
 final sampleGoals = [
   Goal(
     id: '1',
@@ -109,8 +121,10 @@ final sampleGoals = [
   ),
 ];
 
-// -- Budget items -----------------------------------------------------------
-
+/// Sample budget items for demonstration.
+/// 
+/// Represents spending budgets for different categories with
+/// current spent amount versus limit.
 const sampleBudgetItems = [
   BudgetItem('Food', 420, 500),
   BudgetItem('Entertainment', 180, 200),
@@ -121,8 +135,10 @@ const sampleBudgetItems = [
   BudgetItem('Education', 50, 100),
 ];
 
-// -- Category breakdown (analytics) -----------------------------------------
-
+/// Sample category breakdown data for analytics visualization.
+/// 
+/// Contains spending amounts and ratios for each category,
+/// used to generate bar charts in the analytics screen.
 const sampleCategoryBreakdown = [
   CategoryBreakdown('Food', 420, 0.84),
   CategoryBreakdown('Bills', 650, 1.0),
@@ -133,8 +149,10 @@ const sampleCategoryBreakdown = [
   CategoryBreakdown('Education', 50, 0.10),
 ];
 
-// -- Recommendations --------------------------------------------------------
-
+/// Sample ML-generated recommendations for demonstration.
+/// 
+/// Contains spending optimization suggestions with potential
+/// savings estimates across various categories.
 const sampleRecommendations = [
   Recommendation(
     id: '1',

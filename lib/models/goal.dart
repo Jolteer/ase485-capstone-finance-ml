@@ -1,12 +1,27 @@
-﻿/// A savings goal with a [targetAmount] and deadline ([targetDate]).
+/// Represents a savings goal with a target amount and deadline.
+/// 
+/// Goals help users save toward specific objectives by tracking progress
+/// toward a [targetAmount] by a given [targetDate].
 class Goal {
+  /// Unique identifier for the goal.
   final String id;
+  
+  /// ID of the user who owns this goal.
   final String userId;
+  
+  /// Target amount of money to save for this goal.
   final double targetAmount;
+  
+  /// Deadline by which the goal should be achieved.
   final DateTime targetDate;
+  
+  /// Descriptive text explaining what this goal is for.
   final String description;
+  
+  /// Current progress toward the goal (amount saved so far).
   final double progress;
 
+  /// Creates a new [Goal] instance.
   const Goal({
     required this.id,
     required this.userId,
@@ -16,10 +31,19 @@ class Goal {
     required this.progress,
   });
 
+  /// Calculates the progress as a percentage (0.0 to 1.0) of the target amount.
+  /// 
+  /// Returns 0 if [targetAmount] is 0 or negative.
   double get progressPercent => targetAmount > 0 ? progress / targetAmount : 0;
 
+  /// Returns true if the goal has been fully achieved.
+  /// 
+  /// A goal is considered completed when [progress] meets or exceeds [targetAmount].
   bool get isCompleted => progress >= targetAmount;
 
+  /// Creates a [Goal] instance from a JSON map.
+  /// 
+  /// Expects keys: 'id', 'user_id', 'target_amount', 'target_date', 'description', and 'progress'.
   factory Goal.fromJson(Map<String, dynamic> json) {
     return Goal(
       id: json['id'] as String,
@@ -31,6 +55,9 @@ class Goal {
     );
   }
 
+  /// Converts this [Goal] instance to a JSON map.
+  /// 
+  /// Returns a map with keys: 'id', 'user_id', 'target_amount', 'target_date', 'description', and 'progress'.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -42,6 +69,9 @@ class Goal {
     };
   }
 
+  /// Creates a copy of this [Goal] with the given fields replaced.
+  /// 
+  /// Any field left as null will retain its current value.
   Goal copyWith({
     String? id,
     String? userId,

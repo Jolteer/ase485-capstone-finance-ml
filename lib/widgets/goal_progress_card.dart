@@ -2,9 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/models/models.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// Card widget displaying progress toward a savings goal.
+/// 
+/// Shows goal description, icon, progress amount, target amount,
+/// completion percentage, progress bar, and target date. Displays
+/// a "Done" chip if the goal is completed.
 class GoalProgressCard extends StatelessWidget {
+  /// The goal data to display.
   final Goal goal;
+  
+  /// Icon representing this goal.
   final IconData icon;
+  
+  /// Optional callback when the card is tapped.
   final VoidCallback? onTap;
 
   const GoalProgressCard({
@@ -55,10 +65,16 @@ class GoalProgressCard extends StatelessWidget {
   }
 }
 
+/// Header section of the goal card showing title and completion status.
+/// 
+/// Displays the goal icon, description, and a "Done" chip if completed.
 class _Header extends StatelessWidget {
   const _Header({required this.goal, required this.icon});
 
+  /// The goal data to display.
   final Goal goal;
+  
+  /// Icon for this goal.
   final IconData icon;
 
   @override
@@ -89,10 +105,17 @@ class _Header extends StatelessWidget {
   }
 }
 
+/// Progress row showing current vs target amounts and percentage.
+/// 
+/// Displays progress and target amounts in currency format along
+/// with the completion percentage.
 class _ProgressRow extends StatelessWidget {
   const _ProgressRow({required this.goal, required this.percent});
 
+  /// The goal data to display.
   final Goal goal;
+  
+  /// Progress percentage (0.0 to 1.0).
   final double percent;
 
   @override

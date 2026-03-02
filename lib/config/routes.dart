@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/screens/auth/login_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/auth/register_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/home/home_screen.dart';
@@ -11,21 +11,50 @@ import 'package:ase485_capstone_finance_ml/screens/recommendations/recommendatio
 import 'package:ase485_capstone_finance_ml/screens/settings/settings_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/account/account_screen.dart';
 
+/// Centralized route configuration for app navigation.
+/// 
+/// Defines all route paths and their corresponding screen widgets
+/// for use with Flutter's Navigator.
 class AppRoutes {
+  /// Private constructor to prevent instantiation.
   AppRoutes._();
 
+  /// Home screen route (root path).
   static const String home = '/';
+  
+  /// Login screen route.
   static const String login = '/login';
+  
+  /// Registration screen route.
   static const String register = '/register';
+  
+  /// Transactions list screen route.
   static const String transactions = '/transactions';
+  
+  /// Add transaction form screen route.
   static const String addTransaction = '/transactions/add';
+  
+  /// Budget management screen route.
   static const String budget = '/budget';
+  
+  /// Goals management screen route.
   static const String goals = '/goals';
+  
+  /// Analytics dashboard screen route.
   static const String analytics = '/analytics';
+  
+  /// Recommendations screen route.
   static const String recommendations = '/recommendations';
+  
+  /// Settings screen route.
   static const String settings = '/settings';
+  
+  /// Account management screen route.
   static const String account = '/account';
 
+  /// Returns a map of route paths to widget builders.
+  /// 
+  /// Used by MaterialApp's routes parameter to define all named routes.
   static Map<String, WidgetBuilder> get routes => {
     login: (_) => const LoginScreen(),
     register: (_) => const RegisterScreen(),

@@ -1,9 +1,20 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
+/// Reusable card widget displaying a financial summary metric.
+/// 
+/// Shows an icon, title, and value in a compact card layout.
+/// Commonly used for displaying key metrics like balance, income, or expenses.
 class SummaryCard extends StatelessWidget {
+  /// The title label for this metric (e.g., "Balance", "Income").
   final String title;
+  
+  /// The formatted value to display (e.g., "$4,250.00").
   final String value;
+  
+  /// Icon representing this metric.
   final IconData icon;
+  
+  /// Optional custom color for the icon. Defaults to primary color if not provided.
   final Color? color;
 
   const SummaryCard({

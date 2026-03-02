@@ -1,6 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 
+/// Account management screen showing user profile and navigation.
+/// 
+/// Displays user profile information with navigation links to
+/// Analytics, Recommendations, Settings, and logout functionality.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -38,10 +42,9 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Profile header
-// ---------------------------------------------------------------------------
-
+/// Profile header showing user information.
+/// 
+/// Displays user avatar, name, email, and edit profile button.
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader();
 
@@ -83,14 +86,19 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Menu items
-// ---------------------------------------------------------------------------
-
+/// Menu item data class for account navigation.
+/// 
+/// Contains icon, label, and route for navigating to different screens.
 class _MenuItem {
+  /// Icon to display for this menu item.
   final IconData icon;
+  
+  /// Label text for this menu item.
   final String label;
+  
+  /// Route path to navigate to when tapped.
   final String route;
+  
   const _MenuItem(this.icon, this.label, this.route);
 }
 

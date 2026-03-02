@@ -4,6 +4,10 @@ import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 import 'package:ase485_capstone_finance_ml/widgets/widgets.dart';
 
+/// Transactions list screen showing all user transactions.
+/// 
+/// Displays a scrollable list of transactions with month selector,
+/// category filters, search, and ability to add new transactions.
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
 
@@ -48,10 +52,9 @@ class TransactionsScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Sub-widgets
-// ---------------------------------------------------------------------------
-
+/// Month selector widget for filtering transactions by month.
+/// 
+/// Allows users to navigate between months using arrow buttons.
 class _MonthSelector extends StatelessWidget {
   const _MonthSelector();
 
@@ -77,6 +80,9 @@ class _MonthSelector extends StatelessWidget {
   }
 }
 
+/// Horizontal scrolling list of category filter chips.
+/// 
+/// Allows users to filter transactions by category with "All" option.
 class _CategoryChips extends StatelessWidget {
   const _CategoryChips();
 

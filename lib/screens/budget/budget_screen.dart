@@ -3,6 +3,10 @@ import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 import 'package:ase485_capstone_finance_ml/widgets/widgets.dart';
 
+/// Budget management screen showing spending limits by category.
+/// 
+/// Displays monthly budget overview and category-specific budgets
+/// with spending progress indicators.
 class BudgetScreen extends StatelessWidget {
   const BudgetScreen({super.key});
 
@@ -52,10 +56,10 @@ class BudgetScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Monthly overview
-// ---------------------------------------------------------------------------
-
+/// Monthly budget overview card.
+/// 
+/// Shows total spending versus total budget for the current month
+/// with a progress bar and percentage indicator.
 class _MonthlyOverviewCard extends StatelessWidget {
   const _MonthlyOverviewCard();
 

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// Card widget showing budget progress for a spending category.
+/// 
+/// Displays category name, icon, spending amounts, and a progress bar.
+/// The card shows an error state (red) if spending exceeds the budget limit.
 class CategoryCard extends StatelessWidget {
+  /// The spending category name (e.g., "Food", "Transportation").
   final String category;
+  
+  /// Amount already spent in this category.
   final double spent;
+  
+  /// Budget limit for this category.
   final double limit;
+  
+  /// Icon representing this category.
   final IconData icon;
+  
+  /// Optional callback when the card is tapped.
   final VoidCallback? onTap;
 
   const CategoryCard({

@@ -1,12 +1,27 @@
-﻿/// A spending budget for a given [category] over a [period] (e.g. 'monthly').
+/// Represents a spending budget for a specific category over a defined period.
+/// 
+/// Budgets help users track and limit their spending in various categories
+/// (e.g., 'Food', 'Entertainment') over periods like 'monthly' or 'weekly'.
 class Budget {
+  /// Unique identifier for the budget.
   final String id;
+  
+  /// ID of the user who owns this budget.
   final String userId;
+  
+  /// Spending category this budget applies to (e.g., 'Food', 'Transport').
   final String category;
+  
+  /// Maximum allowed spending amount for this category in the given period.
   final double limitAmount;
+  
+  /// Time period for the budget (e.g., 'monthly', 'weekly', 'yearly').
   final String period;
+  
+  /// Timestamp when this budget was created.
   final DateTime createdAt;
 
+  /// Creates a new [Budget] instance.
   const Budget({
     required this.id,
     required this.userId,
@@ -16,6 +31,9 @@ class Budget {
     required this.createdAt,
   });
 
+  /// Creates a [Budget] instance from a JSON map.
+  /// 
+  /// Expects keys: 'id', 'user_id', 'category', 'limit_amount', 'period', and 'created_at'.
   factory Budget.fromJson(Map<String, dynamic> json) {
     return Budget(
       id: json['id'] as String,
@@ -27,6 +45,9 @@ class Budget {
     );
   }
 
+  /// Converts this [Budget] instance to a JSON map.
+  /// 
+  /// Returns a map with keys: 'id', 'user_id', 'category', 'limit_amount', 'period', and 'created_at'.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -38,6 +59,9 @@ class Budget {
     };
   }
 
+  /// Creates a copy of this [Budget] with the given fields replaced.
+  /// 
+  /// Any field left as null will retain its current value.
   Budget copyWith({
     String? id,
     String? userId,

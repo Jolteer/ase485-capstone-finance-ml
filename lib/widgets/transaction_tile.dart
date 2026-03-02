@@ -3,12 +3,20 @@ import 'package:ase485_capstone_finance_ml/config/colors.dart';
 import 'package:ase485_capstone_finance_ml/models/models.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// List tile widget displaying a single transaction.
+/// 
+/// Shows category icon, description, date, and amount with appropriate
+/// color coding (red for expenses, green for income).
 class TransactionTile extends StatelessWidget {
+  /// The transaction data to display.
   final Transaction transaction;
+  
+  /// Optional callback when the tile is tapped.
   final VoidCallback? onTap;
 
   const TransactionTile({super.key, required this.transaction, this.onTap});
 
+  /// Returns true if the transaction is an expense (negative amount).
   bool get _isExpense => transaction.amount < 0;
 
   @override

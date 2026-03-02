@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// Screen for adding a new transaction.
+/// 
+/// Provides a form to input transaction details including amount, category,
+/// description, date, and type (income or expense).
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 
@@ -8,12 +12,24 @@ class AddTransactionScreen extends StatefulWidget {
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
+/// State for the [AddTransactionScreen].
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  /// Form key for validation.
   final _formKey = GlobalKey<FormState>();
+  
+  /// Controller for the amount input field.
   final _amountController = TextEditingController();
+  
+  /// Controller for the description input field.
   final _descriptionController = TextEditingController();
+  
+  /// Selected transaction category.
   String _category = Categories.food;
+  
+  /// Whether the transaction is an expense (true) or income (false).
   bool _isExpense = true;
+  
+  /// Selected transaction date.
   DateTime _date = DateTime.now();
 
   @override

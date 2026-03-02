@@ -4,6 +4,10 @@ import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/models/models.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// Analytics dashboard screen showing spending insights.
+/// 
+/// Displays spending summary, category breakdown with visual bars,
+/// and month-over-month comparison. Supports filtering by week, month, or year.
 class AnalyticsScreen extends StatelessWidget {
   const AnalyticsScreen({super.key});
 
@@ -35,10 +39,9 @@ class AnalyticsScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Period selector
-// ---------------------------------------------------------------------------
-
+/// Period selector for filtering analytics by time range.
+/// 
+/// Allows users to switch between week, month, and year views.
 class _PeriodSelector extends StatelessWidget {
   const _PeriodSelector();
 
@@ -56,10 +59,10 @@ class _PeriodSelector extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Spending summary
-// ---------------------------------------------------------------------------
-
+/// Spending summary card showing total spending with comparison.
+/// 
+/// Displays the total spending amount for the selected period
+/// with a comparison to the previous period.
 class _SpendingSummaryCard extends StatelessWidget {
   const _SpendingSummaryCard();
 
@@ -94,13 +97,14 @@ class _SpendingSummaryCard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Category breakdown bar
-// ---------------------------------------------------------------------------
-
+/// Visual bar showing spending for a single category.
+/// 
+/// Displays category name, progress bar scaled by spending ratio,
+/// and the actual spending amount.
 class _CategoryBar extends StatelessWidget {
   const _CategoryBar({required this.item});
 
+  /// The category breakdown data to display.
   final CategoryBreakdown item;
 
   @override
@@ -142,10 +146,10 @@ class _CategoryBar extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Month-over-month comparison
-// ---------------------------------------------------------------------------
-
+/// Month-over-month spending comparison card.
+/// 
+/// Shows spending amounts for the last three months to visualize
+/// spending trends over time.
 class _MonthComparisonCard extends StatelessWidget {
   const _MonthComparisonCard();
 
@@ -175,9 +179,18 @@ class _MonthComparisonCard extends StatelessWidget {
   }
 }
 
+/// Individual month statistic display.
+/// 
+/// Shows spending amount for a single month with optional highlight
+/// for the current month.
 class _MonthStat extends StatelessWidget {
+  /// Month abbreviation (e.g., "Jan", "Feb").
   final String month;
+  
+  /// Spending amount for this month.
   final double amount;
+  
+  /// Whether this is the current month (highlighted if true).
   final bool isCurrent;
 
   const _MonthStat({

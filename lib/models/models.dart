@@ -1,3 +1,7 @@
+/// Central export file for all data models.
+/// 
+/// This file re-exports all model classes for convenient importing
+/// throughout the application.
 export 'budget.dart';
 export 'budget_item.dart';
 export 'category_breakdown.dart';

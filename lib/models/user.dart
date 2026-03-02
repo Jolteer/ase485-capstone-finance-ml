@@ -1,10 +1,21 @@
-﻿/// The authenticated user's profile information.
+/// Represents an authenticated user's profile information.
+/// 
+/// This model contains the core user data including identification,
+/// contact information, and account creation timestamp.
 class User {
+  /// Unique identifier for the user.
   final String id;
+  
+  /// User's email address used for authentication and communication.
   final String email;
+  
+  /// Display name for the user.
   final String name;
+  
+  /// Timestamp when the user account was created.
   final DateTime createdAt;
 
+  /// Creates a new [User] instance.
   const User({
     required this.id,
     required this.email,
@@ -12,6 +23,9 @@ class User {
     required this.createdAt,
   });
 
+  /// Creates a [User] instance from a JSON map.
+  /// 
+  /// Expects keys: 'id', 'email', 'name', and 'created_at'.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
@@ -21,6 +35,9 @@ class User {
     );
   }
 
+  /// Converts this [User] instance to a JSON map.
+  /// 
+  /// Returns a map with keys: 'id', 'email', 'name', and 'created_at'.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -30,6 +47,9 @@ class User {
     };
   }
 
+  /// Creates a copy of this [User] with the given fields replaced.
+  /// 
+  /// Any field left as null will retain its current value.
   User copyWith({
     String? id,
     String? email,

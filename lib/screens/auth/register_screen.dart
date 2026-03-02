@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// Registration screen for new user account creation.
+/// 
+/// Provides a form for users to create a new account with their
+/// name, email, and password. Includes validation and password visibility toggle.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -8,11 +12,21 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
+/// State for the [RegisterScreen].
 class _RegisterScreenState extends State<RegisterScreen> {
+  /// Form key for validation.
   final _formKey = GlobalKey<FormState>();
+  
+  /// Controller for the name input field.
   final _nameController = TextEditingController();
+  
+  /// Controller for the email input field.
   final _emailController = TextEditingController();
+  
+  /// Controller for the password input field.
   final _passwordController = TextEditingController();
+  
+  /// Whether the password field is obscured.
   bool _obscure = true;
 
   @override

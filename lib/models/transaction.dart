@@ -1,12 +1,27 @@
-﻿/// A single financial transaction (positive = income, negative = expense).
+/// Represents a single financial transaction.
+/// 
+/// A transaction can be either income (positive amount) or expense (negative amount).
+/// Each transaction is categorized and includes a description and date.
 class Transaction {
+  /// Unique identifier for the transaction.
   final String id;
+  
+  /// ID of the user who owns this transaction.
   final String userId;
+  
+  /// Transaction amount (positive for income, negative for expense).
   final double amount;
+  
+  /// Category of the transaction (e.g., 'Food', 'Salary', 'Entertainment').
   final String category;
+  
+  /// Descriptive text explaining the transaction.
   final String description;
+  
+  /// Date when the transaction occurred.
   final DateTime date;
 
+  /// Creates a new [Transaction] instance.
   const Transaction({
     required this.id,
     required this.userId,
@@ -16,6 +31,9 @@ class Transaction {
     required this.date,
   });
 
+  /// Creates a [Transaction] instance from a JSON map.
+  /// 
+  /// Expects keys: 'id', 'user_id', 'amount', 'category', 'description', and 'date'.
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       id: json['id'] as String,
@@ -27,6 +45,9 @@ class Transaction {
     );
   }
 
+  /// Converts this [Transaction] instance to a JSON map.
+  /// 
+  /// Returns a map with keys: 'id', 'user_id', 'amount', 'category', 'description', and 'date'.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -38,6 +59,9 @@ class Transaction {
     };
   }
 
+  /// Creates a copy of this [Transaction] with the given fields replaced.
+  /// 
+  /// Any field left as null will retain its current value.
   Transaction copyWith({
     String? id,
     String? userId,

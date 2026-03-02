@@ -3,6 +3,10 @@ import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 import 'package:ase485_capstone_finance_ml/widgets/widgets.dart';
 
+/// Savings goals screen showing user's financial goals.
+/// 
+/// Displays a list of savings goals with progress indicators
+/// and allows adding new goals.
 class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
 

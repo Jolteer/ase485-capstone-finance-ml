@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
+/// Login screen for user authentication.
+/// 
+/// Provides a form for users to sign in with their email and password.
+/// Includes validation and password visibility toggle.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -9,10 +13,18 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+/// State for the [LoginScreen].
 class _LoginScreenState extends State<LoginScreen> {
+  /// Form key for validation.
   final _formKey = GlobalKey<FormState>();
+  
+  /// Controller for the email input field.
   final _emailController = TextEditingController();
+  
+  /// Controller for the password input field.
   final _passwordController = TextEditingController();
+  
+  /// Whether the password field is obscured.
   bool _obscure = true;
 
   @override
