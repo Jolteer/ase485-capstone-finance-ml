@@ -33,10 +33,10 @@ ASE 485 — Spring 2026
 Build a **full-stack application** that learns from spending patterns:
 
 - **Frontend:** Flutter (iOS, Android, Web)
-- **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL
-- **ML:** Scikit-learn for transaction categorization & budget generation
-- **Deployment:** Docker containers
+- **Backend:** FastAPI (Python 3.12)
+- **Database:** PostgreSQL 16
+- **ML:** Scikit-learn for transaction categorization & budget generation _(Sprint 2)_
+- **Deployment:** Docker Compose containers
 
 ---
 
@@ -54,50 +54,84 @@ Build a **full-stack application** that learns from spending patterns:
                                        └──────────────────┘
 ```
 
+**State management:** Flutter Provider pattern — `ApiClient → Services → Providers → Screens`
+
 ---
 
 ## Sprint 1 Progress — Week by Week
 
-| Week | What I Built |
-|------|-------------|
-| **4** | Project setup — GitHub repo, Docker (docker-compose + PostgreSQL), Flutter & FastAPI scaffolding |
-| **5** | User authentication — JWT auth endpoints, login/signup screens, DB schema (init.sql, seed.sql) |
-| **6** | Transaction management — CRUD API endpoints, Flutter UI for adding/viewing transactions |
-| **7** | Dashboard & visualization — spending breakdowns by category, API services for budgets, goals, recommendations |
-| **8** | Testing, bug fixes, UI polish (account, settings, analytics screens) |
+| Week  | What I Built                                                                                                      |
+| ----- | ----------------------------------------------------------------------------------------------------------------- |
+| **4** | Project setup — GitHub repo, Docker Compose (PostgreSQL + pgAdmin), Flutter & FastAPI scaffolding                 |
+| **5** | User authentication — JWT endpoints, bcrypt passwords, login/register screens, DB schema (`init.sql`, `seed.sql`) |
+| **6** | Transaction management — full CRUD API, Flutter transaction list & add-transaction screens                        |
+| **7** | Dashboard & visualization — budgets/goals/recommendations API + services, analytics & spending breakdown screens  |
+| **8** | Testing suite, bug fixes, UI polish (analytics, account, settings, recommendations screens)                       |
 
 ---
 
 ## What's Working — Backend
 
 - **FastAPI** server with 5 routers:
-  - `/auth` — register & login with JWT tokens + bcrypt passwords
-  - `/transactions` — full CRUD (create, list, filter by category, delete)
-  - `/budgets` — full CRUD with partial updates
-  - `/goals` — full CRUD for savings goals with progress tracking
-  - `/recommendations` — read endpoint for ML-driven suggestions
-- **PostgreSQL** with 5 tables: users, transactions, budgets, goals, recommendations
+  - `/auth` — register & login with JWT tokens + bcrypt password hashing
+  - `/transactions` — full CRUD (create, list with `?category=` filter, delete)
+  - `/budgets` — full CRUD with partial `PUT` updates
+  - `/goals` — full CRUD, ordered by target date
+  - `/recommendations` — read endpoint for AI-driven savings suggestions
+- **PostgreSQL 16** with 5 tables: `users`, `transactions`, `budgets`, `goals`, `recommendations`
 - **Docker Compose** — one command spins up DB + API + pgAdmin
+- **Seed data** — demo account with 30 transactions across 3 months pre-loaded
 
 ---
 
-## What's Working — Frontend (Flutter)
+## What's Working — Flutter Architecture
 
-- **9 screen modules:** Home, Auth, Transactions, Budget, Goals, Analytics, Recommendations, Account, Settings
-- **Bottom navigation** with 5 tabs: Home, Transactions, Budget, Goals, Account
-- **Service layer** — dedicated API client services for each entity
-- **Spending analytics** — category breakdowns, period selector (week/month/year), month comparison
-- **Reusable widgets** — summary cards, transaction tiles, goal progress cards, category cards
+- **11 screens:** Login, Register, Home/Dashboard, Transactions, Add Transaction, Budget, Goals, Analytics, Recommendations, Settings, Account
+- **Provider layer** — `AuthProvider`, `TransactionProvider`, `BudgetProvider`, `GoalProvider` (all wired to services)
+- **Service layer** — `ApiClient` (JWT-injecting HTTP wrapper) + 5 dedicated service classes
+- **7 data models** — `User`, `Transaction`, `Budget`, `Goal`, `Recommendation`, `BudgetItem`, `CategoryBreakdown`
+- **5 reusable widgets** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, `LoadingOverlay`
+
+> Most screens currently display rich **sample data** while live provider-to-screen wiring is completed in Sprint 2.
+
+---
+
+## What's Working — Flutter Screens
+
+- **Bottom navigation** — 5 tabs: Home, Transactions, Budget, Goals, Account
+- **Dashboard** — summary cards (Balance, Spent, Income, Savings), recent transactions, quick-action buttons
+- **Transactions** — category filter chips, scrollable transaction list, add-transaction form (amount, category, date, description)
+- **Analytics** — category breakdown bars, period selector (Week/Month/Year), month-over-month comparison
+- **Budget** — per-category spend vs. limit progress cards (red highlight when over budget)
+- **Goals** — savings goals with icon, progress bar, target date, "Done" chip on completion
+- **Recommendations** — AI-powered savings insight cards with estimated savings amounts
+
+---
+
+## Testing
+
+| Test Suite                        | Coverage                                           |
+| --------------------------------- | -------------------------------------------------- |
+| `models/transaction_test.dart`    | `fromJson` / `toJson` round-trip                   |
+| `models/user_test.dart`           | Field mapping, `toJson`                            |
+| `models/budget_test.dart`         | `fromJson` field mapping                           |
+| `models/goal_test.dart`           | `progressPercent` calc, `isCompleted` logic        |
+| `models/recommendation_test.dart` | `fromJson` / `toJson` round-trip                   |
+| `utils/validators_test.dart`      | Email, password (min 8), amount validators         |
+| `utils/error_helpers_test.dart`   | Strips `"Exception: "` prefix, handles edge cases  |
+| `widgets/summary_card_test.dart`  | Renders title and value text correctly             |
+| `integration_test/app_test.dart`  | Full app smoke test — app launches & title visible |
 
 ---
 
 ## Demo Highlights
 
-- **Auth flow:** Register → Login → JWT stored → authenticated API calls
-- **Transaction management:** Add transactions with amount, category, description, date → view list → delete
-- **Dashboard:** Spending summary cards, recent transactions, quick navigation
-- **Analytics:** Category breakdown bars, spending by period, month-over-month comparison
-- **Budget & Goals:** Create/edit budgets per category, set savings goals with progress tracking
+- **Backend API** — live at `localhost:8000`, Swagger docs at `/api/v1/docs`
+- **Auth endpoints** — register creates account & returns JWT; login verifies bcrypt hash & returns JWT
+- **Transaction API** — POST/GET (with category filter)/DELETE all functional
+- **Dashboard screen** — summary cards, recent transactions, quick-navigation buttons
+- **Analytics screen** — category breakdown bars, period selector, month comparison
+- **Budget & Goals screens** — per-category progress cards, goals with progress bars
 
 ---
 
@@ -133,35 +167,36 @@ Using AI as a **guided learning assistant** to understand:
 
 ## AI Tools Used
 
-| Tool | How I Used It |
-|------|--------------|
-| **Claude / ChatGPT** | Tutor for sports betting & stock market concepts — explanations, follow-up Q&A |
-| **GitHub Copilot** | Code assistance for Flutter widgets, FastAPI endpoints, SQL schemas |
+| Tool                | How I Used It                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| **Claude / Cursor** | Code generation for Flutter widgets, FastAPI routers, SQL schemas; architecture decisions |
+| **ChatGPT**         | Tutor for sports betting & stock market concepts — explanations, follow-up Q&A            |
+| **GitHub Copilot**  | Inline completions for repetitive boilerplate (model classes, test assertions)            |
 
-**Philosophy:** Use AI to *explain and teach*, not just provide answers. Ask follow-up questions to build genuine understanding.
+**Philosophy:** Use AI to _explain and teach_, not just provide answers. Ask follow-up questions to build genuine understanding.
 
 ---
 
 ## Sprint 2 Plan
 
-| Week | Goal |
-|------|------|
-| **9** | Budget generation ML model |
-| **10** | Budget adaptation system |
-| **11** | Savings recommendations engine |
-| **12** | Goal setting & progress tracking enhancements |
-| **13** | Alerts & notifications system |
-| **14** | Flutter mobile app polish & integration testing |
-| **15** | Final testing, deployment, Final Presentation |
+| Week   | Goal                                                                         |
+| ------ | ---------------------------------------------------------------------------- |
+| **9**  | Live provider integration — connect all Flutter screens to real API data     |
+| **10** | Persistent auth (secure token storage) + ML transaction categorization model |
+| **11** | Budget generation ML model (learn spending patterns → generate budgets)      |
+| **12** | Savings recommendations engine (ML inference pipeline)                       |
+| **13** | Alerts & push notifications (budget limit warnings)                          |
+| **14** | Flutter app polish, full integration testing, deployment pipeline            |
+| **15** | Final testing, deployment, Final Presentation                                |
 
-**Deployment:** Android app + public web application via Docker
+**Deployment target:** Android APK + public web app via Docker
 
 ---
 
 ## Key Dates
 
 - **Project submissions deadline:** 4/25/2026
-- **Final Presentation:** 4/27/2026
+- **Final Presentation:** 4/27/2026 & 4/29/2026
 - **HW4 Deployment deadline:** 5/1/2026
 
 ---
