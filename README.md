@@ -60,7 +60,7 @@ Many people struggle with managing their finances effectively:
 
 **Total: 10 features, 14 requirements**
 
-Link: [docs/features/overall.md](docs/features/overall.md)
+<!-- TODO: create docs/features/overall.md -->
 
 ### Non-Functional Requirements
 
@@ -78,7 +78,7 @@ The data model consists of four core entities:
 - **Budget:** id, user_id, category, limit_amount, period, created_at
 - **Goal:** id, user_id, target_amount, target_date, description, progress
 
-  Link: [docs/architecture/data_model.md](docs/architecture/data_model.md)
+  <!-- TODO: create docs/architecture/data_model.md -->
 
 ## Architecture
 
@@ -96,9 +96,7 @@ The application follows a client-server architecture:
 - **ML Pipeline:** Scikit-learn and pandas for transaction categorization, spending pattern analysis, and budget generation.
 - **Deployment:** Docker containers for consistent development and production environments.
 
-  [Architecture diagram will be added here]
-
-  Link: [docs/architecture/system_architecture.png](docs/architecture/system_architecture.png)
+  <!-- TODO: add architecture diagram (docs/architecture/system_architecture.png) -->
 
 ## Tests
 
@@ -109,7 +107,7 @@ The application follows a client-server architecture:
 - Verify that savings recommendations are relevant to the user's top spending categories.
 - Verify that alerts trigger when a user approaches their budget limit.
 
-  Link: [docs/requirements/acceptance_tests.md](docs/requirements/acceptance_tests.md)
+  <!-- TODO: create docs/requirements/acceptance_tests.md -->
 
 ### Integration Tests
 
@@ -117,7 +115,7 @@ The application follows a client-server architecture:
 - Test database operations for creating, reading, and updating transactions and budgets.
 - Test ML pipeline integration with the backend API.
 
-  Link: [tests/integration_tests/](tests/integration_tests/)
+  Link: [integration_test/](integration_test/)
 
 ### E2E Tests
 
@@ -126,8 +124,8 @@ The application follows a client-server architecture:
 
 ## Project Documentation
 
-- [Project Plan Presentation (PPP)](docs/presentation/ppp_smartspend.md)
-- [Individual Contributions - Josh](individual/josh/progress.md)
+<!-- TODO: create docs/presentation/ppp_smartspend.md -->
+<!-- TODO: create individual/josh/progress.md -->
 
 ## Schedule & Milestones
 
@@ -149,4 +147,4 @@ The application follows a client-server architecture:
 - Week 14: Flutter mobile app development & integration
 - Week 15: Testing, deployment, Final Presentation (4/27, 4/29)
 
-  Link: [docs/plan/milestones.md](docs/plan/milestones.md)
+  <!-- TODO: create docs/plan/milestones.md -->
