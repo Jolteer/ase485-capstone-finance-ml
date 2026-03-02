@@ -28,12 +28,23 @@ def get_current_user_id(
 ) -> str:
     """FastAPI dependency – extracts and validates the JWT, returns user_id."""
     try:
-        payload = jwt.decode(creds.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            creds.credentials, SECRET_KEY, algorithms=[ALGORITHM]
+        )
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
         return user_id
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+        )
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ase485_capstone_finance_ml/models/user.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 import 'package:ase485_capstone_finance_ml/services/auth_service.dart';
@@ -13,7 +13,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  AuthProvider({ApiClient? apiClient}) : _api = apiClient ?? ApiClient() {
+  AuthProvider({required ApiClient apiClient}) : _api = apiClient {
     _authService = AuthService(_api);
   }
 

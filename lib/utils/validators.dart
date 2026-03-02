@@ -1,7 +1,14 @@
-﻿class Validators {
+import 'package:flutter/widgets.dart';
+
+class Validators {
   Validators._();
 
   static final _emailRegex = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.]+$');
+
+  /// Generic non-empty check with a custom field [name].
+  static FormFieldValidator<String> required(String name) {
+    return (value) => (value == null || value.isEmpty) ? '$name is required' : null;
+  }
 
   static String? email(String? value) {
     if (value == null || value.isEmpty) return 'Email is required';

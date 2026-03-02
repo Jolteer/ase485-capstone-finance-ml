@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
@@ -36,7 +36,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Expense / Income toggle
               SegmentedButton<bool>(
                 segments: const [
                   ButtonSegment(value: true, label: Text('Expense')),
@@ -46,8 +45,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 onSelectionChanged: (v) => setState(() => _isExpense = v.first),
               ),
               const SizedBox(height: 20),
-
-              // Amount
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
@@ -61,8 +58,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 validator: Validators.amount,
               ),
               const SizedBox(height: 16),
-
-              // Category dropdown
               DropdownButtonFormField<String>(
                 initialValue: _category,
                 decoration: const InputDecoration(
@@ -75,20 +70,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 onChanged: (v) => setState(() => _category = v ?? _category),
               ),
               const SizedBox(height: 16),
-
-              // Description
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   border: OutlineInputBorder(),
                 ),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Enter a description' : null,
+                validator: Validators.required('Description'),
               ),
               const SizedBox(height: 16),
-
-              // Date picker
               ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -112,12 +102,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 },
               ),
               const SizedBox(height: 24),
-
-              // Submit
               FilledButton.icon(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    // TODO: construct Transaction from controllers and save via TransactionProvider
+                    // TODO: save via TransactionProvider
                     Navigator.pop(context);
                   }
                 },

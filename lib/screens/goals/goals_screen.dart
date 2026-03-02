@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/widgets/goal_progress_card.dart';
 
@@ -20,7 +20,7 @@ class GoalsScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'goals_fab',
-        onPressed: () {}, // TODO: implement add goal
+        onPressed: () {}, // TODO: add goal
         icon: const Icon(Icons.add),
         label: const Text('New Goal'),
       ),
