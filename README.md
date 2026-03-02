@@ -144,6 +144,9 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   ├── init.sql            # Schema DDL (5 tables, UUID PKs, FK cascade)
 │   └── seed.sql            # Demo user + 30 transactions + budgets/goals/recommendations
 ├── docker-compose.yml      # PostgreSQL 16 + FastAPI + pgAdmin services
+├── scripts/
+│   ├── start.ps1           # One-command dev startup (PowerShell)
+│   └── start.sh            # One-command dev startup (bash / WSL / macOS)
 ├── test/                   # Flutter unit & widget tests
 │   ├── models/             # transaction, user, budget, goal, recommendation
 │   ├── utils/              # validators, error_helpers
@@ -218,6 +221,26 @@ JWT_SECRET=change-me-in-production
 PGADMIN_EMAIL=admin@smartspend.dev
 PGADMIN_PASSWORD=admin
 ```
+
+### Quick Start (one command)
+
+Start the database, API, and Flutter app all at once:
+
+**Windows (PowerShell):**
+
+```powershell
+.\scripts\start.ps1                  # prompts if multiple devices
+.\scripts\start.ps1 -Device chrome   # launch directly in Chrome
+```
+
+**WSL / macOS / Linux:**
+
+```bash
+./scripts/start.sh                   # prompts if multiple devices
+./scripts/start.sh chrome            # launch directly in Chrome
+```
+
+The script starts Docker Compose, waits for the API to become healthy, then runs `flutter pub get` and `flutter run`.
 
 ### Run the Backend
 
