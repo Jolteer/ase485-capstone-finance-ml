@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
 
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {}, // TODO: implement forgot password
+                      onPressed: () {}, // TODO: forgot password
                       child: const Text('Forgot password?'),
                     ),
                   ),
@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: FilledButton(
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          // TODO: call AuthService.login(_emailController.text, _passwordController.text)
+                          // TODO: wire up AuthProvider.login
                           Navigator.pushReplacementNamed(
                             context,
                             AppRoutes.home,

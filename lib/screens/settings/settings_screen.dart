@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -52,13 +52,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.download),
             title: const Text('Export Data'),
             subtitle: const Text('Download transactions as CSV'),
-            onTap: () {}, // TODO: implement CSV export
+            onTap: () {}, // TODO: CSV export
           ),
           ListTile(
             leading: const Icon(Icons.delete_outline),
             title: const Text('Clear Data'),
             subtitle: const Text('Remove all local data'),
-            onTap: () {}, // TODO: implement clear data with confirmation
+            onTap: () {}, // TODO: clear data with confirmation
           ),
           const Divider(),
           const _SectionHeader('About'),
@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Logout',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            onTap: () {}, // TODO: implement logout via AuthProvider
+            onTap: () {}, // TODO: logout via AuthProvider
           ),
         ],
       ),

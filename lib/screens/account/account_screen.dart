@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -30,7 +30,7 @@ class AccountScreen extends StatelessWidget {
               'Logout',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            onTap: () {}, // TODO: implement logout via AuthProvider
+            onTap: () {}, // TODO: logout via AuthProvider
           ),
         ],
       ),
@@ -74,7 +74,7 @@ class _ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
-          onPressed: () {}, // TODO: implement edit profile
+          onPressed: () {}, // TODO: edit profile
           icon: const Icon(Icons.edit, size: 16),
           label: const Text('Edit Profile'),
         ),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -41,8 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   prefixIcon: Icon(Icons.person_outlined),
                   border: OutlineInputBorder(),
                 ),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Name is required' : null,
+                validator: Validators.required('Name'),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -76,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               FilledButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    // TODO: call AuthService.register(_nameController.text, _emailController.text, _passwordController.text)
+                    // TODO: wire up AuthProvider.register
                     Navigator.pop(context);
                   }
                 },

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/screens/transactions/transactions_screen.dart';
@@ -64,7 +64,7 @@ class _HomeDashboard extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {}, // TODO: implement notifications
+            onPressed: () {}, // TODO: notifications
           ),
         ],
       ),

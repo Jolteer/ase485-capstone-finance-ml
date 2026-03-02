@@ -48,4 +48,3 @@ def login(body: LoginRequest):
 
     token = create_token(user["id"])
     return TokenResponse(token=token, user=UserResponse(**user))
-    )

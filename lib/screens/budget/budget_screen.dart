@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
@@ -16,8 +16,8 @@ class BudgetScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () {},
-          ), // TODO: implement budget edit
+            onPressed: () {}, // TODO: budget edit
+          ),
         ],
       ),
       body: ListView(
@@ -47,7 +47,7 @@ class BudgetScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'budget_fab',
-        onPressed: () {}, // TODO: implement add budget category
+        onPressed: () {}, // TODO: add budget category
         child: const Icon(Icons.add),
       ),
     );

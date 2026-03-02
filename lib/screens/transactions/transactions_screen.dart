@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
@@ -15,12 +15,12 @@ class TransactionsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
-            onPressed: () {},
-          ), // TODO: implement filter
+            onPressed: () {}, // TODO: filter
+          ),
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {},
-          ), // TODO: implement search
+            onPressed: () {}, // TODO: search
+          ),
         ],
       ),
       body: Column(
