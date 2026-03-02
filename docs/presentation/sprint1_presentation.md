@@ -14,106 +14,105 @@ footer: "Joshua Day | ASE 485 | Spring 2026"
 
 ---
 
-## What Went Wrong:
+## The Problem
 
-- Underestimated time for Flutter-FastAPI integration
-- Docker networking issues delayed database connectivity
-- Struggled with JWT token refresh logic implementation
-- Provider state management edge cases caused UI issues
+**70% of Americans live paycheck-to-paycheck**
 
----
+- Lack visibility into spending patterns
+- Struggle to create realistic budgets
 
-## What Went Well:
+## My Solution: SmartSpend
 
-- Successfully built full-stack architecture from scratch
-- All Sprint 1 features completed on time
-- Backend API endpoints are robust and well-documented
-- Flutter UI is polished with reusable component library
-- Testing suite provides good coverage for core functionality
+**AI-powered personal finance assistant that:**
 
----
+- Automatically categorizes transactions using ML
+- Generates personalized budgets from spending patterns
+- Provides intelligent savings recommendations
 
-## Analysis & Improvement Plan:
-
-- Allocate more time for integration testing between layers
-- Set up better error logging for provider state debugging
-- Create more granular milestones for complex features
-- Document API contracts before building frontend screens
-- Use Docker health checks to catch networking issues early
+**Built with:** Flutter + FastAPI + PostgreSQL + ML (scikit-learn)
 
 ---
 
-## Weekly Progress Sprint 1
+## What Went Wrong
 
-| Week  | What I Built                                                                          |
-| ----- | ------------------------------------------------------------------------------------- |
-| **1** | GitHub repo, Docker setup (PostgreSQL + pgAdmin),<br>Flutter & FastAPI initialization |
-| **2** | User auth — JWT endpoints, bcrypt passwords,<br>login/register screens, DB schema     |
-| **3** | Transactions — CRUD API,<br>transaction list & add-transaction screens                |
-| **4** | Dashboard — budgets/goals/recommendations API<br>+ analytics screens                  |
-| **5** | Testing suite, bug fixes, UI polish across all screens                                |
+- Underestimated Flutter-FastAPI integration time
+- Docker networking issues delayed DB connectivity
+- JWT token refresh logic was tricky to implement
+- Provider state management edge cases broke UI
+
+---
+
+## What Went Well
+
+- Built full-stack architecture
+- All 5 features completed on time
+- Backend API is working and well-documented
+- Flutter UI is polished with reusable components
+- Good test coverage for core functionality
+
+---
+
+## Improvement Plan
+
+- Spend more time testing how parts work together
+- Add better error logs to find bugs faster
+- Write down API details before building screens
+- Use health checks in Docker to catch network problems
+
+---
+
+## Weekly Progress
+
+| Week  | What I Built                                                                      |
+| ----- | --------------------------------------------------------------------------------- |
+| **1** | GitHub repo, Docker setup (PostgreSQL + pgAdmin),<br>Flutter & FastAPI init       |
+| **2** | User auth — JWT endpoints, bcrypt passwords,<br>login/register screens, DB schema |
+| **3** | Transactions — CRUD API,<br>transaction list & add-transaction screens            |
+| **4** | Dashboard — budgets/goals/recommendations API<br>+ analytics screens              |
+| **5** | Testing suite, bug fixes, UI polish across all screens                            |
 
 ---
 
 ## Sprint 1 Metrics
 
-- **Lines of Code:** 3,247
-- **Tests:** Unit: 8 · Integration: 1
+- **Lines of Code:** ~3,200
+- **Tests:** 8 unit · 1 integration
 - **Features:** 5 / 5 completed
 - **Requirements:** 12 / 12 completed
-- **Feature burndown:** 100%
-- **Requirement burndown:** 100%
+- **Burndown:** 100%
 
 ---
 
-## Sprint 2
+## Sprint 2 Goals
+
+- Make all app screens show real-time API data
+- Keep users logged in with secure tokens
+- Use ML to auto-categorize transactions
+- Auto-generate budgets from spending
+- Recommend ways to save money with ML
+- Send alerts when budgets are close to limits
+
+**Planned:** 6 features · 15 requirements
 
 ---
 
-## Individual Sprint 2 Goals/Features:
+## Sprint 2 Timeline
 
-- Connect all Flutter screens to live API data
-- Implement persistent authentication with secure token storage
-- Build ML transaction categorization model (scikit-learn)
-- Create budget generation ML model from spending patterns
-- Develop savings recommendations engine with ML inference
-- Add alerts & push notifications for budget warnings
-
----
-
-## Individual Sprint 2 Metrics:
-
-- **Number of features planned for this sprint:** 6
-- **Number of requirements planned for this sprint:** 15
-
----
-
-## Updated Timeline and Milestones:
-
-| Week  | Milestone                                                                   |
-| ----- | --------------------------------------------------------------------------- |
-| **1** | Live provider integration —<br>connect all Flutter screens to real API data |
-| **2** | Persistent auth (secure token storage)<br>+ ML transaction categorization   |
-| **3** | Budget generation ML model<br>(learn spending patterns → generate budgets)  |
-| **4** | Savings recommendations engine<br>(ML inference pipeline)                   |
-| **5** | Alerts & push notifications<br>(budget limit warnings)                      |
-| **6** | Flutter app polish, full integration testing,<br>deployment pipeline        |
-| **7** | Final testing, deployment, Final Presentation                               |
-
----
-
-## Key Dates
-
-- **Live API integration complete:** Week 1
-- **ML inference pipeline complete:** Week 4
-- **Full integration testing:** Week 6
-- **Final Presentation:** Week 7 — April 27 & 29, 2026
+| Week | Milestone                        |
+| ---- | -------------------------------- |
+| 1    | Connect Flutter UI to API        |
+| 2    | Persistent auth, ML categorizing |
+| 3    | ML budget generation             |
+| 4    | ML savings suggestions           |
+| 5    | Alerts, push notifications       |
+| 6    | Polish, testing, deploy setup    |
+| 7    | Final test & presentation        |
 
 ---
 
 ## AI-Assisted Learning Research
 
-**Research Plan:**
+**Topics:**
 
 1. **Stock Market Analysis** — Technical indicators and risk management
 2. **Sports Betting Analytics** — Probability and expected value
@@ -128,59 +127,20 @@ footer: "Joshua Day | ASE 485 | Spring 2026"
 
 ## Stock Market Analysis — What I'm Learning
 
-**Core Concepts:**
-
-- Market mechanics (bid-ask spread, order types, slippage)
-- Technical indicators (SMA, EMA, RSI)
-- Key financial ratios (P/E, ROE, debt-to-equity)
-- Risk management (1-2% rule, position sizing)
-
-**Key Insight:**
-
-The bid-ask spread is real money — a $0.10 spread on multiple trades adds up fast for day trading.
-
----
-
-## Stock Market Analysis — What I'm Building
-
-**Tools I'm Creating:**
-
-- Python scripts to calculate SMA, EMA, RSI from scratch
-- Stock price plotting with indicator overlays
-- Simple day trading strategy backtester
-
-**Goal:**
-
-Verify my understanding by implementing the formulas and testing strategies on historical data.
+- How the stock market works
+- Simple chart signals (like averages)
+- Basic company stats
+- Ways to avoid big losses
 
 ---
 
 ## Sports Betting Analytics — What I'm Learning
 
-**Core Concepts:**
-
-- Odds formats (American, decimal) and implied probability
-- The vig: Sportsbook profit margin built into odds
-- Expected Value (EV): Average profit/loss per bet
-- Why probabilities add to >100% in betting odds
-
-**Key Insight:**
-
-With -110 odds on both sides, you need 52.4% accuracy just to break even because of the vig.
-
----
-
-## Sports Betting Analytics — What I'm Building
-
-**Tools I'm Creating:**
-
-- Odds-to-probability converter with vig calculation
-- EV calculator to find value bets
-- Simulation tool to test betting strategies over 1,000+ bets
-
-**Goal:**
-
-Understand if consistent profitability is mathematically possible and what edge is required to beat the vig.
+- How betting odds work
+- How sportsbooks make money
+- How to know if a bet is good or bad
+- How to manage betting money
+- Simple systems to predict games
 
 ---
 
