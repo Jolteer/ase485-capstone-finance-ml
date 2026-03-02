@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
 
 class Categories {
   Categories._();
@@ -47,5 +48,17 @@ class Categories {
       education => Colors.indigo,
       _ => Colors.grey,
     };
+  }
+
+  /// Returns a descriptive icon for a [Goal] based on its description.
+  static IconData iconForGoal(Goal goal) {
+    final desc = goal.description.toLowerCase();
+    if (desc.contains('vacation')) return Icons.beach_access;
+    if (desc.contains('down payment') || desc.contains('home')) {
+      return Icons.home;
+    }
+    if (desc.contains('emergency')) return Icons.warning_amber;
+    if (desc.contains('car')) return Icons.directions_car;
+    return Icons.flag;
   }
 }

@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
-import 'package:ase485_capstone_finance_ml/widgets/goal_progress_card.dart';
+import 'package:ase485_capstone_finance_ml/utils/utils.dart';
+import 'package:ase485_capstone_finance_ml/widgets/widgets.dart';
 
 class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
@@ -15,7 +16,7 @@ class GoalsScreen extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (_, index) {
           final goal = sampleGoals[index];
-          return GoalProgressCard(goal: goal, icon: iconForGoal(goal));
+          return GoalProgressCard(goal: goal, icon: Categories.iconForGoal(goal));
         },
       ),
       floatingActionButton: FloatingActionButton.extended(

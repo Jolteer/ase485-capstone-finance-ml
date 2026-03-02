@@ -1,5 +1,5 @@
-﻿import 'package:flutter/foundation.dart';
-import 'package:ase485_capstone_finance_ml/models/transaction.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
 
 /// Manages transaction list state and CRUD operations.
 class TransactionProvider extends ChangeNotifier {

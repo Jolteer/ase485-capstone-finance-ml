@@ -1,6 +1,6 @@
-﻿import 'package:flutter/material.dart';
-import 'package:ase485_capstone_finance_ml/models/goal.dart';
-import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
+import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
+import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
 class GoalProgressCard extends StatelessWidget {
   final Goal goal;

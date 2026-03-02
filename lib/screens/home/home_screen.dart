@@ -1,12 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
-import 'package:ase485_capstone_finance_ml/screens/transactions/transactions_screen.dart';
+import 'package:ase485_capstone_finance_ml/screens/account/account_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/budget/budget_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/goals/goals_screen.dart';
-import 'package:ase485_capstone_finance_ml/screens/account/account_screen.dart';
-import 'package:ase485_capstone_finance_ml/widgets/summary_card.dart';
-import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
+import 'package:ase485_capstone_finance_ml/screens/transactions/transactions_screen.dart';
+import 'package:ase485_capstone_finance_ml/widgets/widgets.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

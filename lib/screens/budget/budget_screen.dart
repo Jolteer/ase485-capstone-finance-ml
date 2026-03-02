@@ -1,8 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
-import 'package:ase485_capstone_finance_ml/utils/categories.dart';
-import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
-import 'package:ase485_capstone_finance_ml/widgets/category_card.dart';
+import 'package:ase485_capstone_finance_ml/utils/utils.dart';
+import 'package:ase485_capstone_finance_ml/widgets/widgets.dart';
 
 class BudgetScreen extends StatelessWidget {
   const BudgetScreen({super.key});

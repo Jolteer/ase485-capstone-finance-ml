@@ -1,8 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/colors.dart';
-import 'package:ase485_capstone_finance_ml/models/transaction.dart';
-import 'package:ase485_capstone_finance_ml/utils/categories.dart';
-import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
+import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
 class TransactionTile extends StatelessWidget {
   final Transaction transaction;

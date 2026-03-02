@@ -1,5 +1,5 @@
-﻿import 'package:flutter/foundation.dart';
-import 'package:ase485_capstone_finance_ml/models/goal.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
 
 /// Manages savings-goal list state and CRUD operations.
 class GoalProvider extends ChangeNotifier {

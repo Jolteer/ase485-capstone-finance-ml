@@ -1,5 +1,5 @@
-﻿import 'package:flutter/foundation.dart';
-import 'package:ase485_capstone_finance_ml/models/user.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
 
 /// Manages authentication state (current user, loading, errors).
 class AuthProvider extends ChangeNotifier {

@@ -1,9 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/colors.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
-import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
-import 'package:ase485_capstone_finance_ml/utils/categories.dart';
-import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
+import 'package:ase485_capstone_finance_ml/utils/utils.dart';
 
 class RecommendationsScreen extends StatelessWidget {
   const RecommendationsScreen({super.key});

@@ -1,5 +1,5 @@
-﻿import 'package:flutter/foundation.dart';
-import 'package:ase485_capstone_finance_ml/models/budget.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ase485_capstone_finance_ml/models/models.dart';
 
 /// Manages budget list state and exposes helpers for CRUD operations.
 class BudgetProvider extends ChangeNotifier {
