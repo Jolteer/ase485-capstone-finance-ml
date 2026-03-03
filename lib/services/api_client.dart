@@ -1,4 +1,7 @@
-﻿import 'dart:convert';
+/// Shared HTTP client for backend API: base URL, auth token, GET/POST/PUT/DELETE, error extraction.
+///
+/// All services use this client; configure [AppConstants.apiBaseUrl] at build time.
+import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:ase485_capstone_finance_ml/config/constants.dart';
@@ -13,13 +16,13 @@ class ApiClient {
 
   ApiClient({http.Client? client}) : _client = client ?? http.Client();
 
-  /// Base URL sourced from build-time environment variable.
+  /// Base URL for all requests (from [AppConstants.apiBaseUrl]).
   String get baseUrl => AppConstants.apiBaseUrl;
 
-  /// Set the JWT token for authenticated requests.
+  /// Set the JWT token for authenticated requests. Call after login; clear on logout.
   void setToken(String? token) => _token = token;
 
-  /// Common headers for JSON requests (+ auth if available).
+  /// Headers for every request: Content-Type: application/json, plus Authorization if [_token] is set.
   Map<String, String> get _headers {
     final h = <String, String>{'Content-Type': 'application/json'};
     if (_token != null) {
@@ -60,10 +63,13 @@ class ApiClient {
   }
 
   /// Extracts a human-readable error message from an API [response].
+  /// Prefers JSON `detail` field when present; otherwise returns a generic message.
   static String extractError(http.Response response) {
     try {
       final body = jsonDecode(response.body);
-      return (body['detail'] ?? 'Request failed') as String;
+      return (body is Map && body['detail'] != null)
+          ? body['detail'] as String
+          : 'Request failed';
     } catch (_) {
       return 'Request failed (${response.statusCode})';
     }

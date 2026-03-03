@@ -1,9 +1,13 @@
-﻿import 'package:flutter/material.dart';
+/// Analytics view: period selector, total spending card, category breakdown bars, month comparison.
+///
+/// Uses [sampleCategoryBreakdown] and sample totals; period selector not wired.
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/colors.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 
+/// Analytics screen with spending summary, category breakdown, and month-over-month comparison.
 class AnalyticsScreen extends StatelessWidget {
   const AnalyticsScreen({super.key});
 
@@ -35,10 +39,7 @@ class AnalyticsScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Period selector
-// ---------------------------------------------------------------------------
-
+/// Week / Month / Year segmented control (selection not wired).
 class _PeriodSelector extends StatelessWidget {
   const _PeriodSelector();
 
@@ -56,10 +57,7 @@ class _PeriodSelector extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Spending summary
-// ---------------------------------------------------------------------------
-
+/// Card showing total spending and comparison text (e.g. "12% less than last month").
 class _SpendingSummaryCard extends StatelessWidget {
   const _SpendingSummaryCard();
 
@@ -94,13 +92,11 @@ class _SpendingSummaryCard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Category breakdown bar
-// ---------------------------------------------------------------------------
-
+/// One row: category name, progress bar by [CategoryBreakdown.ratio], amount.
 class _CategoryBar extends StatelessWidget {
   const _CategoryBar({required this.item});
 
+  /// Category and amount/ratio for this bar.
   final CategoryBreakdown item;
 
   @override
@@ -142,10 +138,7 @@ class _CategoryBar extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Month-over-month comparison
-// ---------------------------------------------------------------------------
-
+/// Card with "Month over Month" and a row of [_MonthStat] (e.g. Dec, Jan, Feb).
 class _MonthComparisonCard extends StatelessWidget {
   const _MonthComparisonCard();
 
@@ -175,6 +168,7 @@ class _MonthComparisonCard extends StatelessWidget {
   }
 }
 
+/// Single month label and amount in the month-comparison row.
 class _MonthStat extends StatelessWidget {
   final String month;
   final double amount;

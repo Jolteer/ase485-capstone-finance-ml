@@ -1,15 +1,18 @@
-﻿import 'dart:convert';
+/// Authentication API: register, login, logout. Returns token and [User]; used by [AuthProvider].
+///
+/// All methods throw on non-success status; caller should catch and format errors.
+import 'dart:convert';
 
 import 'package:ase485_capstone_finance_ml/models/user.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
-/// Handles authentication-related API calls (login, register, logout).
+/// Authentication API: register, login (return JWT + user), and client-side logout.
 class AuthService {
   final ApiClient _api;
 
   AuthService(this._api);
 
-  /// Register a new user. Returns `{token, user}`.
+  /// Register a new user. Returns token and [User]. Throws on duplicate email or server error.
   Future<({String token, User user})> register(
     String name,
     String email,
@@ -23,7 +26,6 @@ class AuthService {
     if (res.statusCode != 201) {
       throw Exception(ApiClient.extractError(res));
     }
-
     final json = jsonDecode(res.body) as Map<String, dynamic>;
     return (
       token: json['token'] as String,
@@ -31,7 +33,7 @@ class AuthService {
     );
   }
 
-  /// Log in an existing user. Returns `{token, user}`.
+  /// Log in by email/password. Returns token and [User]. Throws on invalid credentials or server error.
   Future<({String token, User user})> login(
     String email,
     String password,
@@ -52,7 +54,7 @@ class AuthService {
     );
   }
 
-  /// Log out (client-side – clears the stored token).
+  /// Clear the stored token (client-side only; no API call).
   void logout() {
     _api.setToken(null);
   }

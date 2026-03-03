@@ -10,10 +10,13 @@
 
 set -euo pipefail
 
+# Optional first arg: Flutter device id (e.g. chrome) for "flutter run -d <device>".
 DEVICE="${1:-}"
+# Repository root (parent of scripts/); used for docker-compose and flutter.
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 # --- Pre-flight checks ------------------------------------------------------
+# Ensure docker and flutter are on PATH before starting services.
 if ! command -v docker &>/dev/null; then
     echo "ERROR: 'docker' not found. Make sure Docker is installed and running." >&2
     exit 1
@@ -25,11 +28,13 @@ if ! command -v flutter &>/dev/null; then
 fi
 
 # --- Start Docker Compose ----------------------------------------------------
+# Start db, backend (FastAPI), and pgAdmin in detached mode from repo root.
 echo ""
 echo ">> Starting Docker Compose services (db, backend, pgadmin)..."
 docker compose -f "$REPO_ROOT/docker-compose.yml" up -d
 
 # --- Wait for the API --------------------------------------------------------
+# Poll backend health endpoint until 200 or max retries; then start Flutter.
 API_URL="http://localhost:8000/health"
 MAX_RETRIES=20
 RETRY_DELAY=2
@@ -52,6 +57,7 @@ for i in $(seq 1 "$MAX_RETRIES"); do
 done
 
 # --- Launch Flutter -----------------------------------------------------------
+# Run from repo root: pub get, then flutter run (with -d DEVICE if set).
 cd "$REPO_ROOT"
 echo ""
 echo ">> Installing Flutter dependencies..."

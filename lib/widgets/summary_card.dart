@@ -1,9 +1,20 @@
-﻿import 'package:flutter/material.dart';
+/// Small card for a single summary metric: icon, title label, and value (e.g. Balance, Spent, Income).
+///
+/// Used on home dashboard [SummaryCards]. Optional [color] for the icon.
+import 'package:flutter/material.dart';
 
+/// Summary metric card: icon, [title], and [value] text (e.g. "Balance", "\$4,250.00").
 class SummaryCard extends StatelessWidget {
+  /// Label (e.g. "Balance", "Spent", "Income").
   final String title;
+
+  /// Formatted value (e.g. currency string).
   final String value;
+
+  /// Icon for the metric (e.g. [Icons.account_balance_wallet]).
   final IconData icon;
+
+  /// Optional icon color; defaults to theme primary.
   final Color? color;
 
   const SummaryCard({

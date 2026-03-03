@@ -1,16 +1,22 @@
-/// A snapshot of spending against a budget limit for a single [category].
+/// View model for one category's spending vs budget (e.g. for progress bars).
 ///
-/// Used to display budget-vs-actual comparisons in the UI.
+/// Use [ratio] for UI (0.0–1.0) and [isOverBudget] for over-limit styling.
+/// Not persisted; typically built from [Budget] and transaction totals.
 class BudgetItem {
+  /// Category name (e.g. "Groceries").
   final String category;
+
+  /// Amount spent in this category for the period.
   final double spent;
+
+  /// Budget limit for this category.
   final double limit;
 
   const BudgetItem(this.category, this.spent, this.limit);
 
-  /// The spend-to-limit ratio clamped to [0, 1].
+  /// Fraction of budget spent (0.0–1.0); 0 if limit is zero.
   double get ratio => limit > 0 ? (spent / limit).clamp(0.0, 1.0) : 0;
 
-  /// Whether spending has exceeded the budget limit.
+  /// True when [spent] exceeds [limit].
   bool get isOverBudget => spent > limit;
 }

@@ -1,6 +1,11 @@
+/// New-account screen: name, email, password form and create-account action.
+///
+/// Uses [Validators] for required name, email, and password. On success pops back
+/// (e.g. to login). Auth is not yet wired to [AuthProvider].
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
 
+/// Registration form with name, email, password, and create-account button.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -13,6 +18,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  /// Toggles password visibility in the password field.
   bool _obscure = true;
 
   @override

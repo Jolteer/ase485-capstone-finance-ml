@@ -1,10 +1,14 @@
-﻿import 'package:flutter/foundation.dart';
+/// Budget list state and CRUD: fetch, add, update, delete.
+///
+/// Use with [ChangeNotifierProvider]; requires [ApiClient]. Call [fetchBudgets]
+/// to load; [budgets], [isLoading], and [error] notify listeners.
+import 'package:flutter/foundation.dart';
 import 'package:ase485_capstone_finance_ml/models/budget.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 import 'package:ase485_capstone_finance_ml/services/budget_service.dart';
 import 'package:ase485_capstone_finance_ml/utils/error_helpers.dart';
 
-/// Manages budget list state and exposes helpers for CRUD operations.
+/// Manages the list of [Budget]s and delegates to [BudgetService] for API calls.
 class BudgetProvider extends ChangeNotifier {
   late final BudgetService _service;
 
@@ -16,16 +20,22 @@ class BudgetProvider extends ChangeNotifier {
     _service = BudgetService(apiClient);
   }
 
+  /// Unmodifiable list of budgets; load with [fetchBudgets].
   List<Budget> get budgets => List.unmodifiable(_budgets);
+
+  /// True while [fetchBudgets] is running.
   bool get isLoading => _isLoading;
+
+  /// Last error from a budget operation, or null. Clear with [clearError].
   String? get error => _error;
 
-  /// Clears any previous error.
+  /// Clears [error] and notifies listeners.
   void clearError() {
     _error = null;
     notifyListeners();
   }
 
+  /// Fetches budgets from the API and updates [budgets].
   Future<void> fetchBudgets() async {
     _isLoading = true;
     _error = null;
@@ -41,6 +51,7 @@ class BudgetProvider extends ChangeNotifier {
     }
   }
 
+  /// Creates a budget via API and inserts it at the start of [budgets].
   Future<void> addBudget(Budget budget) async {
     _error = null;
     try {
@@ -54,6 +65,7 @@ class BudgetProvider extends ChangeNotifier {
     }
   }
 
+  /// Updates a budget via API and replaces it in [budgets].
   Future<void> updateBudget(Budget budget) async {
     _error = null;
     try {
@@ -68,6 +80,7 @@ class BudgetProvider extends ChangeNotifier {
     }
   }
 
+  /// Deletes the budget with [id] via API and removes it from [budgets].
   Future<void> deleteBudget(String id) async {
     _error = null;
     try {

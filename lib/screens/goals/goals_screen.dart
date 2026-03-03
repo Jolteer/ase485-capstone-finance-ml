@@ -1,7 +1,11 @@
+/// Savings goals list: [GoalProgressCard] for each goal and FAB to add a new goal.
+///
+/// Uses [sampleGoals]; add-goal flow is TODO (wire to [GoalProvider]).
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/widgets/goal_progress_card.dart';
 
+/// Full-screen list of savings goals with progress and "New Goal" FAB.
 class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
 

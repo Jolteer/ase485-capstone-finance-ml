@@ -1,3 +1,7 @@
+/// Main shell: bottom nav (Home, Transactions, Budget, Goals, Account) and dashboard tab.
+///
+/// Uses [IndexedStack] to keep tab state. Dashboard shows greeting, summary cards,
+/// quick actions (Add, Analytics, Tips, Settings), and recent transactions from sample data.
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
@@ -8,6 +12,7 @@ import 'package:ase485_capstone_finance_ml/screens/account/account_screen.dart';
 import 'package:ase485_capstone_finance_ml/widgets/summary_card.dart';
 import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
 
+/// Root screen with bottom navigation and dashboard (summary, quick actions, recent transactions).
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,8 +21,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// Index of the selected bottom nav tab (0 = Home, 1 = Transactions, etc.).
   int _currentIndex = 0;
 
+  /// One widget per tab; [IndexedStack] keeps state when switching.
   static const List<Widget> _screens = [
     _HomeDashboard(),
     TransactionsScreen(),
@@ -49,10 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Dashboard tab
-// ---------------------------------------------------------------------------
-
+/// Dashboard tab: greeting, summary cards, quick actions, recent transactions.
 class _HomeDashboard extends StatelessWidget {
   const _HomeDashboard();
 
@@ -84,10 +88,7 @@ class _HomeDashboard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Greeting
-// ---------------------------------------------------------------------------
-
+/// "Welcome back" and subtitle for the dashboard.
 class _Greeting extends StatelessWidget {
   const _Greeting();
 
@@ -115,10 +116,7 @@ class _Greeting extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Summary cards grid
-// ---------------------------------------------------------------------------
-
+/// Grid of [SummaryCard]s: Balance, Spent, Income, Savings (sample data).
 class _SummaryCards extends StatelessWidget {
   const _SummaryCards();
 
@@ -170,10 +168,7 @@ class _SummaryCards extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Quick actions
-// ---------------------------------------------------------------------------
-
+/// Row of quick actions: Add, Analytics, Tips, Settings (navigate via [AppRoutes]).
 class _QuickActionsBar extends StatelessWidget {
   const _QuickActionsBar();
 
@@ -222,6 +217,7 @@ class _QuickActionsBar extends StatelessWidget {
   }
 }
 
+/// Single quick-action button with icon and label.
 class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -256,10 +252,7 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Recent transactions
-// ---------------------------------------------------------------------------
-
+/// "Recent Transactions" section with "See all" and [TransactionTile] list from sample data.
 class _RecentTransactionsSection extends StatelessWidget {
   const _RecentTransactionsSection();
 

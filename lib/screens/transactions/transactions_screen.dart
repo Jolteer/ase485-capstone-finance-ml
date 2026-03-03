@@ -1,9 +1,13 @@
+/// Transactions list: month selector, category chips, and scrollable list with FAB to add.
+///
+/// Uses [sample_data] for now; filter/search are TODO. FAB navigates to [AppRoutes.addTransaction].
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
 
+/// Full-screen list of transactions with month selector, category filter chips, and add FAB.
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
 
@@ -49,10 +53,7 @@ class TransactionsScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Sub-widgets
-// ---------------------------------------------------------------------------
-
+/// Month navigation (prev/next) and current month label (e.g. "February 2026").
 class _MonthSelector extends StatelessWidget {
   const _MonthSelector();
 
@@ -78,6 +79,7 @@ class _MonthSelector extends StatelessWidget {
   }
 }
 
+/// Horizontal filter chips: "All" plus [Categories.all]; selection not wired yet.
 class _CategoryChips extends StatelessWidget {
   const _CategoryChips();
 

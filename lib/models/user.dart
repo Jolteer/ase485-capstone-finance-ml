@@ -1,8 +1,18 @@
-﻿/// The authenticated user's profile information.
+/// Logged-in user profile (identity and display info).
+///
+/// Supports JSON via [fromJson] / [toJson] and [copyWith]. Used for auth
+/// context, account screen, and any user-scoped data.
 class User {
+  /// Unique identifier for the user (e.g. from auth backend).
   final String id;
+
+  /// User's email address (login and contact).
   final String email;
+
+  /// Display name shown in the UI.
   final String name;
+
+  /// When the account was created.
   final DateTime createdAt;
 
   const User({
@@ -12,6 +22,7 @@ class User {
     required this.createdAt,
   });
 
+  /// Creates a [User] from a JSON map (e.g. API or auth response).
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
@@ -21,6 +32,7 @@ class User {
     );
   }
 
+  /// Converts this user to a JSON map (snake_case keys for API).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -30,6 +42,7 @@ class User {
     };
   }
 
+  /// Returns a copy of this user with the given fields replaced.
   User copyWith({
     String? id,
     String? email,

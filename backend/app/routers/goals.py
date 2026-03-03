@@ -1,4 +1,8 @@
-"""Goal CRUD routes."""
+"""Savings goal CRUD routes.
+
+GET/POST /goals, PUT/DELETE /goals/:id. All require a valid JWT; goals are
+scoped to the authenticated user. Goals are ordered by target_date ascending.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -8,13 +12,13 @@ from app.schemas import GoalCreate, GoalResponse, GoalUpdate
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 
-# Columns that may be updated dynamically.
+# Allowed request body fields for PUT; only these columns are updated.
 _GOAL_UPDATABLE = {"target_amount", "target_date", "description", "progress"}
 
 
 @router.get("", response_model=list[GoalResponse])
 def list_goals(user_id: str = Depends(get_current_user_id)):
-    """Return all goals for the authenticated user."""
+    """List all savings goals for the current user, ordered by target date (soonest first)."""
     return query(
         "SELECT * FROM goals WHERE user_id = %s ORDER BY target_date ASC",
         (user_id,),
@@ -30,7 +34,7 @@ def create_goal(
     body: GoalCreate,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Create a new savings goal."""
+    """Create a savings goal (target amount, date, description, optional initial progress)."""
     row = execute(
         """INSERT INTO goals (user_id, target_amount, target_date, description, progress)
            VALUES (%s, %s, %s, %s, %s)
@@ -46,7 +50,7 @@ def update_goal(
     body: GoalUpdate,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Partially update a goal (only provided fields)."""
+    """Partially update a goal (e.g. bump progress). Only include fields to change; 404 if not found."""
     updates = {
         k: v
         for k, v in body.model_dump(exclude_unset=True).items()
@@ -73,7 +77,7 @@ def delete_goal(
     goal_id: str,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Delete a goal by ID."""
+    """Delete a goal. 204 on success; 404 if id not found or not owned by user."""
     affected = execute(
         "DELETE FROM goals WHERE id = %s AND user_id = %s",
         (goal_id, user_id),

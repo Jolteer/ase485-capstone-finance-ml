@@ -1,5 +1,9 @@
+/// App settings: appearance (dark mode), notifications, security (biometric), data (export/clear), about, logout.
+///
+/// Toggles are local state; logout/export/clear are TODO (wire to [AuthProvider] and data layer).
 import 'package:flutter/material.dart';
 
+/// Settings screen with grouped options and logout at bottom.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -8,8 +12,13 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  /// User preference for dark theme (not yet persisted).
   bool _darkMode = false;
+
+  /// Push notifications enabled (not yet persisted).
   bool _notifications = true;
+
+  /// Biometric login enabled (not yet wired to auth).
   bool _biometric = false;
 
   @override
@@ -81,6 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
+/// Section label (e.g. "Appearance", "Notifications") for settings list.
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader(this.title);

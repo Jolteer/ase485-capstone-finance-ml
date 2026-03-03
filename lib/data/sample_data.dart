@@ -1,3 +1,8 @@
+/// Sample/mock data for development and fallback UI.
+///
+/// Shared lists of [Transaction], [Goal], [BudgetItem], [CategoryBreakdown],
+/// and [Recommendation] used when the backend is unavailable or for demos.
+/// Replace with real provider/service data in production.
 import 'package:ase485_capstone_finance_ml/models/budget_item.dart';
 import 'package:ase485_capstone_finance_ml/models/category_breakdown.dart';
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
@@ -8,11 +13,8 @@ export 'package:ase485_capstone_finance_ml/models/budget_item.dart';
 export 'package:ase485_capstone_finance_ml/models/category_breakdown.dart';
 
 // ---------------------------------------------------------------------------
-// Shared sample data used across screens until real provider/service
-// integration replaces it.
+// Transactions (sample list for demo/fallback when API is unavailable)
 // ---------------------------------------------------------------------------
-
-// -- Transactions -----------------------------------------------------------
 
 final sampleTransactions = [
   Transaction(
@@ -84,7 +86,9 @@ final sampleTransactions = [
 /// First 5 transactions for the home dashboard "recent" view.
 final recentTransactions = sampleTransactions.take(5).toList();
 
-// -- Goals ------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Goals (sample savings goals for demo/fallback)
+// ---------------------------------------------------------------------------
 
 final sampleGoals = [
   Goal(
@@ -121,7 +125,9 @@ final sampleGoals = [
   ),
 ];
 
-// -- Budget items -----------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Budget items (category spent/limit for budget screen)
+// ---------------------------------------------------------------------------
 
 const sampleBudgetItems = [
   BudgetItem('Food', 420, 500),
@@ -133,7 +139,9 @@ const sampleBudgetItems = [
   BudgetItem('Education', 50, 100),
 ];
 
-// -- Category breakdown (analytics) -----------------------------------------
+// ---------------------------------------------------------------------------
+// Category breakdown (for analytics spending-by-category)
+// ---------------------------------------------------------------------------
 
 const sampleCategoryBreakdown = [
   CategoryBreakdown('Food', 420, 0.84),
@@ -145,7 +153,9 @@ const sampleCategoryBreakdown = [
   CategoryBreakdown('Education', 50, 0.10),
 ];
 
-// -- Recommendations --------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Recommendations (savings tips; typically from backend/ML)
+// ---------------------------------------------------------------------------
 
 const sampleRecommendations = [
   Recommendation(

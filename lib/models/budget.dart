@@ -1,10 +1,24 @@
-﻿/// A spending budget for a given [category] over a [period] (e.g. 'monthly').
+/// Domain model for a category budget over a time period (e.g. monthly).
+///
+/// Supports JSON via [fromJson] / [toJson], immutability via [copyWith],
+/// and value equality. Use with budget management and spending limits.
 class Budget {
+  /// Unique identifier for this budget.
   final String id;
+
+  /// ID of the user this budget belongs to.
   final String userId;
+
+  /// Budget category (e.g. "Groceries", "Entertainment").
   final String category;
+
+  /// Maximum amount allowed to spend in this category for the period.
   final double limitAmount;
+
+  /// Period this budget covers (e.g. "monthly", "weekly").
   final String period;
+
+  /// When this budget was created.
   final DateTime createdAt;
 
   const Budget({
@@ -16,6 +30,7 @@ class Budget {
     required this.createdAt,
   });
 
+  /// Creates a [Budget] from a JSON map (e.g. API response).
   factory Budget.fromJson(Map<String, dynamic> json) {
     return Budget(
       id: json['id'] as String,
@@ -27,6 +42,7 @@ class Budget {
     );
   }
 
+  /// Converts this budget to a JSON map (snake_case keys for API).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -38,6 +54,7 @@ class Budget {
     };
   }
 
+  /// Returns a copy of this budget with the given fields replaced.
   Budget copyWith({
     String? id,
     String? userId,
