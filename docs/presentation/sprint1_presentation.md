@@ -35,10 +35,10 @@ footer: "Joshua Day | ASE 485 | Spring 2026"
 
 ## What Went Wrong
 
-- Underestimated Flutter-FastAPI integration time
-- Docker networking issues delayed DB connectivity
-- JWT token refresh logic was tricky to implement
-- Provider state management edge cases broke UI
+- Flutter and FastAPI took longer to connect than expected
+- Docker had network issues with the database
+- JWT token refresh was hard to set up
+- Provider state bugs broke the UI
 
 ---
 
