@@ -1,9 +1,21 @@
-﻿/// An ML-generated spending recommendation with estimated [potentialSavings].
+/// A savings or spending recommendation with estimated impact.
+///
+/// Supports JSON via [fromJson] / [toJson] and [copyWith]. Used by the
+/// recommendations screen to show actionable tips and [potentialSavings].
 class Recommendation {
+  /// Unique identifier for this recommendation.
   final String id;
+
+  /// Category this recommendation applies to (e.g. "Food", "Subscriptions").
   final String category;
+
+  /// Short title or summary for the recommendation.
   final String title;
+
+  /// Detailed description or steps.
   final String description;
+
+  /// Estimated amount the user could save by following the recommendation.
   final double potentialSavings;
 
   const Recommendation({
@@ -14,6 +26,7 @@ class Recommendation {
     required this.potentialSavings,
   });
 
+  /// Creates a [Recommendation] from a JSON map (e.g. API response).
   factory Recommendation.fromJson(Map<String, dynamic> json) {
     return Recommendation(
       id: json['id'] as String,
@@ -24,6 +37,7 @@ class Recommendation {
     );
   }
 
+  /// Converts this recommendation to a JSON map (snake_case keys for API).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -34,6 +48,7 @@ class Recommendation {
     };
   }
 
+  /// Returns a copy of this recommendation with the given fields replaced.
   Recommendation copyWith({
     String? id,
     String? category,

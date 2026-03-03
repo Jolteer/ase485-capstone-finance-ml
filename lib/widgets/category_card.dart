@@ -1,11 +1,24 @@
-﻿import 'package:flutter/material.dart';
+/// Card showing one category's budget: name, spent/limit, progress bar; red when over budget.
+///
+/// Used on [BudgetScreen]. Optional [onTap] for edit/detail.
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 
+/// Budget category card with icon, spent/limit text, and progress bar (turns error color when over).
 class CategoryCard extends StatelessWidget {
+  /// Category name (e.g. "Food", "Bills").
   final String category;
+
+  /// Amount spent in this category.
   final double spent;
+
+  /// Budget limit for this category.
   final double limit;
+
+  /// Icon for the category (e.g. from [Categories.icon]).
   final IconData icon;
+
+  /// Optional tap handler (e.g. open edit).
   final VoidCallback? onTap;
 
   const CategoryCard({
@@ -20,6 +33,7 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Progress bar value (0..1); cap at 1 so bar doesn't overflow
     final ratio = (spent / limit).clamp(0.0, 1.0);
     final overBudget = spent > limit;
 

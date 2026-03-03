@@ -1,10 +1,24 @@
-﻿/// A single financial transaction (positive = income, negative = expense).
+/// A single financial transaction (income or expense).
+///
+/// [amount] is positive for income, negative for expense. Supports JSON via
+/// [fromJson] / [toJson] and [copyWith]. Used for lists, analytics, and budgets.
 class Transaction {
+  /// Unique identifier for this transaction.
   final String id;
+
+  /// ID of the user this transaction belongs to.
   final String userId;
+
+  /// Amount; positive = income, negative = expense.
   final double amount;
+
+  /// Category (e.g. "Groceries", "Salary").
   final String category;
+
+  /// Description or memo for the transaction.
   final String description;
+
+  /// Date and time when the transaction occurred.
   final DateTime date;
 
   const Transaction({
@@ -16,6 +30,7 @@ class Transaction {
     required this.date,
   });
 
+  /// Creates a [Transaction] from a JSON map (e.g. API response).
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       id: json['id'] as String,
@@ -27,6 +42,7 @@ class Transaction {
     );
   }
 
+  /// Converts this transaction to a JSON map (snake_case keys for API).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -38,6 +54,7 @@ class Transaction {
     };
   }
 
+  /// Returns a copy of this transaction with the given fields replaced.
   Transaction copyWith({
     String? id,
     String? userId,

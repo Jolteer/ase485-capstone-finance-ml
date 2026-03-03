@@ -1,7 +1,12 @@
+/// Sign-in screen: email/password form, validation, and navigation to home or register.
+///
+/// Uses [Validators] for email and password. On success navigates to [AppRoutes.home];
+/// "Sign Up" goes to [AppRoutes.register].
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
 
+/// Login form with email, password, visibility toggle, and sign-in / sign-up actions.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -13,6 +18,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  /// Toggles password visibility in the password field.
   bool _obscure = true;
 
   @override

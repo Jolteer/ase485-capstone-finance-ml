@@ -1,8 +1,13 @@
+/// Form to add an income or expense: type, amount, category, description, date.
+///
+/// Uses [Validators] and [Formatters]. Save is TODO (wire to [TransactionProvider]);
+/// on save pops back.
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 import 'package:ase485_capstone_finance_ml/utils/validators.dart';
 
+/// Add/edit transaction form with expense/income toggle, amount, category, description, date picker.
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 
@@ -14,8 +19,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  /// Selected category; one of [Categories.all].
   String _category = Categories.food;
+
+  /// True for expense (negative amount), false for income.
   bool _isExpense = true;
+
+  /// Transaction date; user can change via date picker.
   DateTime _date = DateTime.now();
 
   @override

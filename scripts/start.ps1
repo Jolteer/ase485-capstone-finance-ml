@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Starts the full SmartSpend dev stack: PostgreSQL + FastAPI + pgAdmin via
     Docker Compose, waits for the API to become healthy, then launches the
@@ -14,6 +14,7 @@
                               or:  .\scripts\start.ps1 -Device chrome
     Prerequisites: Docker Desktop running, Flutter SDK on PATH.
 #>
+# Optional: Flutter device id for "flutter run -d <Device>" (e.g. chrome, windows).
 param(
     [string]$Device
 )
@@ -21,9 +22,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Repository root (parent of scripts folder); used for docker-compose and flutter.
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
 # --- Pre-flight checks -----------------------------------------------------
+# Ensure docker and flutter are on PATH before starting services.
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Write-Host "ERROR: 'docker' not found. Make sure Docker Desktop is installed and running." -ForegroundColor Red
     exit 1
@@ -35,6 +38,7 @@ if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
 }
 
 # --- Start Docker Compose ---------------------------------------------------
+# Start db, backend (FastAPI), and pgAdmin in detached mode from repo root.
 Write-Host "`n>> Starting Docker Compose services (db, backend, pgadmin)..." -ForegroundColor Cyan
 docker compose -f "$repoRoot\docker-compose.yml" up -d
 if ($LASTEXITCODE -ne 0) {
@@ -43,6 +47,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # --- Wait for the API -------------------------------------------------------
+# Poll backend health endpoint until 200 or max retries; then start Flutter.
 $apiUrl     = 'http://localhost:8000/health'
 $maxRetries = 20
 $retryDelay = 2
@@ -70,6 +75,7 @@ for ($i = 1; $i -le $maxRetries; $i++) {
 }
 
 # --- Launch Flutter ----------------------------------------------------------
+# Run from repo root: pub get, then flutter run (with -d $Device if provided).
 Write-Host "`n>> Installing Flutter dependencies..." -ForegroundColor Cyan
 Push-Location $repoRoot
 try {

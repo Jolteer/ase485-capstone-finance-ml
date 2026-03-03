@@ -1,12 +1,26 @@
-﻿import 'package:flutter/material.dart';
+/// Domain model for a user savings goal with target amount and date.
+///
+/// Supports JSON via [fromJson] / [toJson], [copyWith], and [icon] for UI.
+/// Use [progressPercent] and [isCompleted] for progress display.
+import 'package:flutter/material.dart';
 
-/// A savings goal with a [targetAmount] and deadline ([targetDate]).
 class Goal {
+  /// Unique identifier for this goal.
   final String id;
+
+  /// ID of the user who owns this goal.
   final String userId;
+
+  /// Target amount to save.
   final double targetAmount;
+
+  /// Date by which the goal should be reached.
   final DateTime targetDate;
+
+  /// Short description of the goal (e.g. "Vacation", "Emergency fund").
   final String description;
+
+  /// Current amount saved toward the goal.
   final double progress;
 
   const Goal({
@@ -18,10 +32,13 @@ class Goal {
     required this.progress,
   });
 
+  /// Fraction of goal completed (0.0–1.0+); 0 if target is zero.
   double get progressPercent => targetAmount > 0 ? progress / targetAmount : 0;
 
+  /// True when [progress] meets or exceeds [targetAmount].
   bool get isCompleted => progress >= targetAmount;
 
+  /// Creates a [Goal] from a JSON map (e.g. API response).
   factory Goal.fromJson(Map<String, dynamic> json) {
     return Goal(
       id: json['id'] as String,
@@ -33,6 +50,7 @@ class Goal {
     );
   }
 
+  /// Converts this goal to a JSON map (snake_case keys for API).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -44,6 +62,7 @@ class Goal {
     };
   }
 
+  /// Returns a copy of this goal with the given fields replaced.
   Goal copyWith({
     String? id,
     String? userId,
@@ -82,7 +101,7 @@ class Goal {
   String toString() =>
       'Goal(id: $id, description: $description, progress: $progress/$targetAmount)';
 
-  /// Returns a descriptive icon based on the goal's [description].
+  /// Icon for this goal based on [description] (e.g. vacation → beach, home → home).
   IconData get icon {
     final desc = description.toLowerCase();
     if (desc.contains('vacation')) return Icons.beach_access;

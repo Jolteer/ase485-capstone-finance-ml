@@ -1,15 +1,23 @@
-﻿import 'package:flutter/material.dart';
+/// List tile for one [Transaction]: category icon, description, category + date, amount (red/green by sign).
+///
+/// Used on [TransactionsScreen] and home dashboard recent list. Optional [onTap] for detail/edit.
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/colors.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 
+/// [ListTile] showing transaction description, category, date, and amount (expense = error color, income = green).
 class TransactionTile extends StatelessWidget {
+  /// The transaction to display.
   final Transaction transaction;
+
+  /// Optional tap handler (e.g. edit or delete).
   final VoidCallback? onTap;
 
   const TransactionTile({super.key, required this.transaction, this.onTap});
 
+  /// True when amount is negative (expense); used for trailing text color.
   bool get _isExpense => transaction.amount < 0;
 
   @override

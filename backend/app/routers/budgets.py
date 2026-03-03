@@ -1,4 +1,8 @@
-"""Budget CRUD routes."""
+"""Budget CRUD routes.
+
+GET/POST /budgets, PUT/DELETE /budgets/:id. All require a valid JWT; operations
+are scoped to the authenticated user.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -8,13 +12,13 @@ from app.schemas import BudgetCreate, BudgetResponse, BudgetUpdate
 
 router = APIRouter(prefix="/budgets", tags=["budgets"])
 
-# Columns that may be updated dynamically.
+# Allowed request body fields for PUT; only these columns are updated.
 _BUDGET_UPDATABLE = {"category", "limit_amount", "period"}
 
 
 @router.get("", response_model=list[BudgetResponse])
 def list_budgets(user_id: str = Depends(get_current_user_id)):
-    """Return all budgets for the authenticated user."""
+    """List all budgets for the current user, newest first."""
     return query(
         "SELECT * FROM budgets WHERE user_id = %s ORDER BY created_at DESC",
         (user_id,),
@@ -30,7 +34,7 @@ def create_budget(
     body: BudgetCreate,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Create a new budget."""
+    """Create a category budget (e.g. monthly limit for Food, Entertainment)."""
     row = execute(
         """INSERT INTO budgets (user_id, category, limit_amount, period)
            VALUES (%s, %s, %s, %s)
@@ -46,7 +50,7 @@ def update_budget(
     body: BudgetUpdate,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Partially update a budget (only provided fields)."""
+    """Partially update a budget. Only include fields to change; 404 if not found."""
     updates = {
         k: v
         for k, v in body.model_dump(exclude_unset=True).items()
@@ -73,7 +77,7 @@ def delete_budget(
     budget_id: str,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Delete a budget by ID."""
+    """Delete a budget. 204 on success; 404 if id not found or not owned by user."""
     affected = execute(
         "DELETE FROM budgets WHERE id = %s AND user_id = %s",
         (budget_id, user_id),

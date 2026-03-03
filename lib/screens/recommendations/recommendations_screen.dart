@@ -1,10 +1,14 @@
-﻿import 'package:flutter/material.dart';
+/// Recommendations list: AI insights banner and tiles showing tip + potential savings.
+///
+/// Uses [sampleRecommendations]; each tile shows [Recommendation] title, description, and savings.
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/colors.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 
+/// Screen listing savings recommendations with an "AI-Powered Insights" banner and [Recommendation] tiles.
 class RecommendationsScreen extends StatelessWidget {
   const RecommendationsScreen({super.key});
 
@@ -26,10 +30,7 @@ class RecommendationsScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// AI-Powered Insights banner
-// ---------------------------------------------------------------------------
-
+/// Primary-container card with "AI-Powered Insights" icon and subtitle.
 class _InsightsBanner extends StatelessWidget {
   const _InsightsBanner();
 
@@ -76,13 +77,11 @@ class _InsightsBanner extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Recommendation tile
-// ---------------------------------------------------------------------------
-
+/// Card row for one [Recommendation]: category icon, title, description, potential savings.
 class _RecommendationTile extends StatelessWidget {
   const _RecommendationTile({required this.recommendation});
 
+  /// The recommendation to display.
   final Recommendation recommendation;
 
   @override

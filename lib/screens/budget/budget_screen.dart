@@ -1,9 +1,13 @@
+/// Budget overview: monthly summary card and category budget cards (spent vs limit).
+///
+/// Uses [sampleBudgetItems] and [CategoryCard]. Edit/add budget are TODO.
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/data/sample_data.dart';
 import 'package:ase485_capstone_finance_ml/utils/categories.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 import 'package:ase485_capstone_finance_ml/widgets/category_card.dart';
 
+/// Budget tab: monthly overview and list of category budgets with progress.
 class BudgetScreen extends StatelessWidget {
   const BudgetScreen({super.key});
 
@@ -54,10 +58,7 @@ class BudgetScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Monthly overview
-// ---------------------------------------------------------------------------
-
+/// Card showing current month, spent/total, progress bar, and percent used (sample values).
 class _MonthlyOverviewCard extends StatelessWidget {
   const _MonthlyOverviewCard();
 

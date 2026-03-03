@@ -1,3 +1,6 @@
+/// Root widget: [MultiProvider] (API client + auth, transaction, budget, goal providers) and [MaterialApp].
+///
+/// Sets [AppTheme], [AppRoutes], and [AppRoutes.login] as [initialRoute]. Theme follows system.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
@@ -8,6 +11,7 @@ import 'package:ase485_capstone_finance_ml/providers/goal_provider.dart';
 import 'package:ase485_capstone_finance_ml/providers/transaction_provider.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
+/// Top-level app widget: providers and [MaterialApp] with routes and theme.
 class SmartSpendApp extends StatelessWidget {
   const SmartSpendApp({super.key});
 
@@ -15,6 +19,7 @@ class SmartSpendApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        /// Singleton HTTP client; injected into auth and feature providers.
         Provider(
           create: (_) => ApiClient(),
           dispose: (_, client) => client.dispose(),

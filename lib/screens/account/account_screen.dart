@@ -1,6 +1,10 @@
+/// Account tab: profile header (avatar, name, email, edit) and menu (Analytics, Recommendations, Settings, Logout).
+///
+/// Profile data is placeholder; edit and logout are TODO (wire to [AuthProvider]).
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 
+/// Account screen with profile header and navigation to analytics, recommendations, settings.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -38,10 +42,7 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Profile header
-// ---------------------------------------------------------------------------
-
+/// Avatar, name, email, and "Edit Profile" button (placeholder data).
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader();
 
@@ -83,10 +84,7 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Menu items
-// ---------------------------------------------------------------------------
-
+/// One account menu entry: icon, label, and route to push.
 class _MenuItem {
   final IconData icon;
   final String label;
@@ -94,6 +92,7 @@ class _MenuItem {
   const _MenuItem(this.icon, this.label, this.route);
 }
 
+/// Account tab menu items (Analytics, Recommendations, Settings).
 const _menuItems = [
   _MenuItem(Icons.analytics_outlined, 'Analytics', AppRoutes.analytics),
   _MenuItem(

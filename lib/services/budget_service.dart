@@ -1,4 +1,7 @@
-﻿import 'dart:convert';
+/// Budget CRUD via API: fetch all, create, update, delete. Used by [BudgetProvider].
+///
+/// All methods throw on non-success; paths use `/budgets` and `/budgets/:id`.
+import 'dart:convert';
 
 import 'package:ase485_capstone_finance_ml/models/budget.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
@@ -9,6 +12,7 @@ class BudgetService {
 
   BudgetService(this._api);
 
+  /// GET /budgets; returns list of [Budget].
   Future<List<Budget>> fetchBudgets() async {
     final res = await _api.get('/budgets');
     if (res.statusCode != 200) throw Exception('Failed to fetch budgets');
@@ -17,6 +21,7 @@ class BudgetService {
     return list.map((j) => Budget.fromJson(j as Map<String, dynamic>)).toList();
   }
 
+  /// POST /budgets; returns created [Budget] with id.
   Future<Budget> createBudget(Budget budget) async {
     final res = await _api.post(
       '/budgets',
@@ -31,6 +36,7 @@ class BudgetService {
     return Budget.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
+  /// PUT /budgets/:id; returns updated [Budget].
   Future<Budget> updateBudget(Budget budget) async {
     final res = await _api.put(
       '/budgets/${budget.id}',
@@ -45,6 +51,7 @@ class BudgetService {
     return Budget.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
+  /// DELETE /budgets/:id.
   Future<void> deleteBudget(String id) async {
     final res = await _api.delete('/budgets/$id');
     if (res.statusCode != 204) throw Exception('Failed to delete budget');

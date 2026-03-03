@@ -1,10 +1,19 @@
-﻿import 'package:flutter/material.dart';
+/// Card for one savings goal: description, progress/target, progress bar, target date, optional "Done" chip.
+///
+/// Used on [GoalsScreen]. Optional [onTap] for edit/detail.
+import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
 
+/// Goal card with header, progress text, bar, and target date; shows "Done" when [Goal.isCompleted].
 class GoalProgressCard extends StatelessWidget {
+  /// The goal to display (description, progress, targetAmount, targetDate).
   final Goal goal;
+
+  /// Icon for the goal (e.g. from [Goal.icon]).
   final IconData icon;
+
+  /// Optional tap handler (e.g. open edit or add funds).
   final VoidCallback? onTap;
 
   const GoalProgressCard({
@@ -55,6 +64,7 @@ class GoalProgressCard extends StatelessWidget {
   }
 }
 
+/// Private row: goal icon, description, and "Done" chip when completed.
 class _Header extends StatelessWidget {
   const _Header({required this.goal, required this.icon});
 
@@ -89,6 +99,7 @@ class _Header extends StatelessWidget {
   }
 }
 
+/// Private row: "progress of target" currency and percent label.
 class _ProgressRow extends StatelessWidget {
   const _ProgressRow({required this.goal, required this.percent});
 
