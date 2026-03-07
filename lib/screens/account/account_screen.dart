@@ -1,23 +1,43 @@
 /// Account tab: profile header (avatar, name, email, edit) and menu (Analytics, Recommendations, Settings, Logout).
 ///
-/// Profile data is placeholder; edit and logout are TODO (wire to [AuthProvider]).
+/// Profile data is sourced from [AuthProvider.currentUser]. Logout clears the
+/// session via [AuthProvider.logout] and navigates to [AppRoutes.login].
+library;
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
+import 'package:ase485_capstone_finance_ml/config/spacing.dart';
+import 'package:ase485_capstone_finance_ml/models/user.dart';
+import 'package:ase485_capstone_finance_ml/providers/auth_provider.dart';
 
 /// Account screen with profile header and navigation to analytics, recommendations, settings.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
+  Future<void> _logout(BuildContext context) async {
+    context.read<AuthProvider>().logout();
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.login,
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = context.select<AuthProvider, User?>(
+      (auth) => auth.currentUser,
+    );
+
     return Scaffold(
       appBar: AppBar(title: const Text('Account')),
       body: ListView(
         children: [
-          const SizedBox(height: 24),
-          const _ProfileHeader(),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
+          _ProfileHeader(name: user?.name ?? '', email: user?.email ?? ''),
+          const SizedBox(height: AppSpacing.md),
           const Divider(),
           ..._menuItems.map(
             (item) => ListTile(
@@ -34,7 +54,7 @@ class AccountScreen extends StatelessWidget {
               'Logout',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            onTap: () {}, // TODO: logout via AuthProvider
+            onTap: () => _logout(context),
           ),
         ],
       ),
@@ -42,9 +62,12 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-/// Avatar, name, email, and "Edit Profile" button (placeholder data).
+/// Avatar, name, email, and "Edit Profile" button.
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+  final String name;
+  final String email;
+
+  const _ProfileHeader({required this.name, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -60,20 +83,20 @@ class _ProfileHeader extends StatelessWidget {
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.s12),
         Text(
-          'User Name',
+          name,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
-          'user@example.com',
+          email,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         OutlinedButton.icon(
           onPressed: () {}, // TODO: edit profile
           icon: const Icon(Icons.edit, size: 16),

@@ -2,12 +2,15 @@
 ///
 /// Use [AppRoutes] route name constants with [Navigator] (e.g. pushNamed)
 /// and pass [routes] to [MaterialApp.routes] for screen resolution.
+library;
+
 import 'package:flutter/material.dart';
 
 import 'package:ase485_capstone_finance_ml/screens/auth/login_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/auth/register_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/home/home_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/transactions/transactions_screen.dart';
+import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/screens/transactions/add_transaction_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/budget/budget_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/goals/goals_screen.dart';
@@ -59,7 +62,9 @@ class AppRoutes {
     register: (_) => const RegisterScreen(),
     home: (_) => const HomeScreen(),
     transactions: (_) => const TransactionsScreen(),
-    addTransaction: (_) => const AddTransactionScreen(),
+    addTransaction: (context) => AddTransactionScreen(
+      initial: ModalRoute.of(context)?.settings.arguments as Transaction?,
+    ),
     budget: (_) => const BudgetScreen(),
     goals: (_) => const GoalsScreen(),
     analytics: (_) => const AnalyticsScreen(),

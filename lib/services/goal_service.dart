@@ -1,6 +1,8 @@
 /// Savings-goal CRUD via API: fetch all, create, update, delete. Used by [GoalProvider].
 ///
 /// All methods throw on non-success; paths use `/goals` and `/goals/:id`.
+library;
+
 import 'dart:convert';
 
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
@@ -15,47 +17,43 @@ class GoalService {
   /// GET /goals; returns list of [Goal].
   Future<List<Goal>> fetchGoals() async {
     final res = await _api.get('/goals');
-    if (res.statusCode != 200) throw Exception('Failed to fetch goals');
+    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
 
     final list = jsonDecode(res.body) as List;
     return list.map((j) => Goal.fromJson(j as Map<String, dynamic>)).toList();
   }
 
   /// POST /goals; returns created [Goal] with id.
+  ///
+  /// Delegates serialization to [Goal.toJson] and strips server-managed
+  /// fields ([id], [userId]) that the API generates on creation.
   Future<Goal> createGoal(Goal goal) async {
-    final res = await _api.post(
-      '/goals',
-      body: {
-        'target_amount': goal.targetAmount,
-        'target_date': goal.targetDate.toIso8601String(),
-        'description': goal.description,
-        'progress': goal.progress,
-      },
-    );
+    final body = goal.toJson()
+      ..remove('id')
+      ..remove('user_id');
 
-    if (res.statusCode != 201) throw Exception('Failed to create goal');
+    final res = await _api.post('/goals', body: body);
+    if (res.statusCode != 201) throw Exception(ApiClient.extractError(res));
     return Goal.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
   /// PUT /goals/:id; returns updated [Goal].
+  ///
+  /// Delegates serialization to [Goal.toJson] and strips server-managed
+  /// fields ([id], [userId]).
   Future<Goal> updateGoal(Goal goal) async {
-    final res = await _api.put(
-      '/goals/${goal.id}',
-      body: {
-        'target_amount': goal.targetAmount,
-        'target_date': goal.targetDate.toIso8601String(),
-        'description': goal.description,
-        'progress': goal.progress,
-      },
-    );
+    final body = goal.toJson()
+      ..remove('id')
+      ..remove('user_id');
 
-    if (res.statusCode != 200) throw Exception('Failed to update goal');
+    final res = await _api.put('/goals/${goal.id}', body: body);
+    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
     return Goal.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
   /// DELETE /goals/:id.
   Future<void> deleteGoal(String id) async {
     final res = await _api.delete('/goals/$id');
-    if (res.statusCode != 204) throw Exception('Failed to delete goal');
+    if (res.statusCode != 204) throw Exception(ApiClient.extractError(res));
   }
 }

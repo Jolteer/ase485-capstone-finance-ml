@@ -1,7 +1,8 @@
-/// App theme: light and dark [ThemeData] using Material 3.
+﻿/// App theme: light and dark [ThemeData] using Material 3.
 ///
 /// [AppColors.primary] is the color scheme seed. Use [lightTheme] and [darkTheme]
 /// with [MaterialApp.theme] and [MaterialApp.darkTheme]; theme mode can follow system.
+library;
 import 'package:flutter/material.dart';
 import 'package:ase485_capstone_finance_ml/config/colors.dart';
 

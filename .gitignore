@@ -46,4 +46,18 @@ app.*.map.json
 
 # Docker / environment
 .env
+.env.local
+.env.*.local
+*.env
 docker/pgdata/
+
+# Local credentials reference
+CREDENTIALS.md
+credentials.md
+*credentials*
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.yaml
+secrets.yml

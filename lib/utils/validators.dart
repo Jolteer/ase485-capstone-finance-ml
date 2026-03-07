@@ -1,40 +1,100 @@
 /// Form validation helpers for login, register, and transaction forms.
 ///
-/// Return `null` when valid, or an error message string. Use with [FormFieldValidator]
-/// (e.g. [TextFormField.validator]) or call directly.
+/// Return `null` when valid, or an error message string. Use with
+/// [FormFieldValidator] (e.g. [TextFormField.validator]) or call directly.
+///
+/// Factory validators (e.g. [Validators.required], [confirmPassword]) return a
+/// [FormFieldValidator] and are used as `validator: Validators.required('Name')`.
+/// Direct validators (e.g. [email], [password]) are used as `validator: Validators.email`.
+library;
+
 import 'package:flutter/widgets.dart';
 
-/// Static validators for required fields, email, password, and amount.
+/// Static validators for required fields, email, password, amount, and confirm-password.
 class Validators {
   Validators._();
 
   /// Regex for basic email validation (local@domain.tld).
-  static final _emailRegex = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.]+$');
+  static final RegExp _emailRegex = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.]+$');
 
-  /// Generic non-empty check with a custom field [name]. Returns a [FormFieldValidator<String>].
+  /// Minimum acceptable password length.
+  static const int _minPasswordLength = 8;
+
+  // ---------------------------------------------------------------------------
+  // Private helpers
+  // ---------------------------------------------------------------------------
+
+  /// Returns an error message when [value] is null or empty, otherwise null.
+  /// Used internally to avoid repeating the null/empty pattern in every validator.
+  static String? _checkRequired(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) return '$fieldName is required';
+    return null;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Factory validators (return a FormFieldValidator)
+  // ---------------------------------------------------------------------------
+
+  /// Returns a validator that rejects null or empty input, labeling the field [name].
+  ///
+  /// Usage: `validator: Validators.required('Name')`
   static FormFieldValidator<String> required(String name) {
-    return (value) =>
-        (value == null || value.isEmpty) ? '$name is required' : null;
+    return (value) => _checkRequired(value, name);
   }
 
-  /// Validates email: non-empty and regex; returns error message or null.
+  /// Returns a validator that checks the input matches [getPassword].
+  ///
+  /// [getPassword] is typically `() => _passwordController.text`.
+  /// Usage: `validator: Validators.confirmPassword(() => _passwordController.text)`
+  static FormFieldValidator<String> confirmPassword(
+    String Function() getPassword,
+  ) {
+    return (value) {
+      final emptyError = _checkRequired(value, 'Confirm password');
+      if (emptyError != null) return emptyError;
+      if (value != getPassword()) return 'Passwords do not match';
+      return null;
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Direct validators (used as a FormFieldValidator reference)
+  // ---------------------------------------------------------------------------
+
+  /// Validates email: non-empty and matches a basic `local@domain.tld` pattern.
+  ///
+  /// Usage: `validator: Validators.email`
   static String? email(String? value) {
-    if (value == null || value.isEmpty) return 'Email is required';
-    if (!_emailRegex.hasMatch(value)) return 'Enter a valid email';
+    final emptyError = _checkRequired(value, 'Email');
+    if (emptyError != null) return emptyError;
+    if (!_emailRegex.hasMatch(value!)) return 'Enter a valid email address';
     return null;
   }
 
-  /// Validates password: non-empty and at least 8 characters; returns error message or null.
+  /// Validates password: non-empty and at least [_minPasswordLength] characters.
+  ///
+  /// Usage: `validator: Validators.password`
   static String? password(String? value) {
-    if (value == null || value.isEmpty) return 'Password is required';
-    if (value.length < 8) return 'Password must be at least 8 characters';
+    final emptyError = _checkRequired(value, 'Password');
+    if (emptyError != null) return emptyError;
+    if (value!.length < _minPasswordLength) {
+      return 'Password must be at least $_minPasswordLength characters';
+    }
     return null;
   }
 
-  /// Validates amount: non-empty and parseable as double; returns error message or null.
+  /// Validates a financial amount: non-empty, parseable as a number, and positive.
+  ///
+  /// Zero and negative values are rejected because a transaction amount must
+  /// represent a real monetary movement.
+  ///
+  /// Usage: `validator: Validators.amount`
   static String? amount(String? value) {
-    if (value == null || value.isEmpty) return 'Amount is required';
-    if (double.tryParse(value) == null) return 'Enter a valid number';
+    final emptyError = _checkRequired(value, 'Amount');
+    if (emptyError != null) return emptyError;
+    final parsed = double.tryParse(value!);
+    if (parsed == null) return 'Enter a valid number';
+    if (parsed <= 0) return 'Amount must be greater than zero';
     return null;
   }
 }

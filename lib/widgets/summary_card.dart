@@ -1,7 +1,10 @@
 /// Small card for a single summary metric: icon, title label, and value (e.g. Balance, Spent, Income).
 ///
 /// Used on home dashboard [SummaryCards]. Optional [color] for the icon.
+library;
+
 import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/config/spacing.dart';
 
 /// Summary metric card: icon, [title], and [value] text (e.g. "Balance", "\$4,250.00").
 class SummaryCard extends StatelessWidget {
@@ -32,13 +35,13 @@ class SummaryCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: iconColor),
-            const SizedBox(height: 8),
+            Icon(icon, size: AppSpacing.xl, color: iconColor),
+            const SizedBox(height: AppSpacing.sm),
             Text(title, style: theme.textTheme.bodySmall),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.xxs),
             Text(
               value,
               style: theme.textTheme.titleMedium?.copyWith(

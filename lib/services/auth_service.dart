@@ -1,6 +1,7 @@
-/// Authentication API: register, login, logout. Returns token and [User]; used by [AuthProvider].
+﻿/// Authentication API: register, login, logout. Returns token and [User]; used by [AuthProvider].
 ///
 /// All methods throw on non-success status; caller should catch and format errors.
+library;
 import 'dart:convert';
 
 import 'package:ase485_capstone_finance_ml/models/user.dart';

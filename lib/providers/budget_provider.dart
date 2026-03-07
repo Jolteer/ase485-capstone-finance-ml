@@ -2,6 +2,8 @@
 ///
 /// Use with [ChangeNotifierProvider]; requires [ApiClient]. Call [fetchBudgets]
 /// to load; [budgets], [isLoading], and [error] notify listeners.
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:ase485_capstone_finance_ml/models/budget.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
@@ -10,15 +12,16 @@ import 'package:ase485_capstone_finance_ml/utils/error_helpers.dart';
 
 /// Manages the list of [Budget]s and delegates to [BudgetService] for API calls.
 class BudgetProvider extends ChangeNotifier {
-  late final BudgetService _service;
+  final BudgetService _service;
 
   List<Budget> _budgets = [];
   bool _isLoading = false;
   String? _error;
 
-  BudgetProvider({required ApiClient apiClient}) {
-    _service = BudgetService(apiClient);
-  }
+  /// Pass [service] in tests to inject a mock; production code omits it and
+  /// requires [apiClient] to construct the default [BudgetService].
+  BudgetProvider({required ApiClient apiClient, BudgetService? service})
+    : _service = service ?? BudgetService(apiClient);
 
   /// Unmodifiable list of budgets; load with [fetchBudgets].
   List<Budget> get budgets => List.unmodifiable(_budgets);

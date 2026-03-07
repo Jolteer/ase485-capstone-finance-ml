@@ -1,7 +1,10 @@
 /// Overlay that shows a semi-transparent barrier and [CircularProgressIndicator] over content when loading.
 ///
 /// Wrap a screen or form with [LoadingOverlay] and set [isLoading] from provider state.
+library;
+
 import 'package:flutter/material.dart';
+import 'package:ase485_capstone_finance_ml/config/colors.dart';
 
 /// Displays a semi-transparent barrier with a spinner over [child] when [isLoading] is true.
 class LoadingOverlay extends StatelessWidget {
@@ -25,7 +28,7 @@ class LoadingOverlay extends StatelessWidget {
         if (isLoading)
           const Positioned.fill(
             child: ColoredBox(
-              color: Colors.black26,
+              color: AppColors.loadingBarrier,
               child: Center(child: CircularProgressIndicator()),
             ),
           ),

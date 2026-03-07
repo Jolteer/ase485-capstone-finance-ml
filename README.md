@@ -23,14 +23,16 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 
 ## Tech Stack
 
-| Layer           | Technology                                   |
-| --------------- | -------------------------------------------- |
-| **Mobile App**  | Flutter 3 / Dart (Provider state management) |
-| **Backend API** | Python 3.12 · FastAPI · Uvicorn              |
-| **Database**    | PostgreSQL 16                                |
-| **Auth**        | JWT (PyJWT) · bcrypt via Passlib             |
-| **Containers**  | Docker Compose (API + DB + pgAdmin)          |
-| **Validation**  | Pydantic v2                                  |
+| Layer            | Technology                                                                        |
+| ---------------- | --------------------------------------------------------------------------------- |
+| **Mobile App**   | Flutter 3 / Dart (Provider state management)                                      |
+| **Backend API**  | Python 3.12 · FastAPI · Uvicorn                                                   |
+| **Database**     | PostgreSQL 16                                                                     |
+| **Auth**         | JWT (PyJWT) · bcrypt via Passlib · `flutter_secure_storage` (persistent sessions) |
+| **Persistence**  | `shared_preferences` (settings), `flutter_secure_storage` (token + user cache)    |
+| **Containers**   | Docker Compose (API + DB + pgAdmin)                                               |
+| **Validation**   | Pydantic v2                                                                       |
+| **Test Mocking** | `mocktail` (Flutter unit tests)                                                   |
 
 ---
 
@@ -46,26 +48,28 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 4. **Goal Tracking** — Full CRUD for savings goals with numeric progress tracking ordered by target date.
 5. **Savings Recommendations** — Read endpoint for personalized savings suggestions seeded from spending data.
 
-#### Frontend (Flutter — Fully Scaffolded)
+#### Frontend (Flutter — Sprint 2 In Progress)
 
 6. **11-Screen Navigation** — Complete screen set: Login, Register, Home/Dashboard, Transactions, Add Transaction, Budget, Goals, Analytics, Recommendations, Settings, and Account.
 7. **Bottom Navigation** — 5-tab `BottomNavigationBar` with `IndexedStack` (Home, Transactions, Budget, Goals, Account).
 8. **Spending Analytics** — Category breakdown progress bars, period selector (Week/Month/Year), month-over-month comparison view.
-9. **Theming** — Material 3 light and dark mode (follows system preference), seeded from a custom green color palette.
+9. **Theming** — Material 3 light and dark mode (toggleable via Settings and persisted); theme mode wired reactively through `SettingsProvider` → `MaterialApp.themeMode`.
 10. **Reusable Widget Library** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, `LoadingOverlay`.
+11. **Persistent Auth State** — `AuthProvider.tryRestore` reads JWT and cached user from `flutter_secure_storage` on startup; bypasses login screen if session is still valid.
+12. **Persisted Settings** — `SettingsProvider` backed by `SharedPreferences`: dark mode, notification preference, biometric-login toggle, and currency locale (propagated to `Formatters` in real time).
+13. **6-Provider Architecture** — `SettingsProvider`, `AuthProvider`, `TransactionProvider`, `BudgetProvider`, `GoalProvider`, and `RecommendationProvider` registered in `MultiProvider`; `ApiClient` singleton injected via `Provider`.
 
-> **Current State:** The backend API is fully operational. The Flutter frontend is completely scaffolded with all screens, navigation, models, services, and providers in place. Most screens currently display rich sample data (`lib/data/sample_data.dart`) while provider-to-screen wiring is finalized in Sprint 2.
+> **Current State:** The backend API is fully operational. The Flutter frontend has all screens, providers, services, and models in place. Persistent auth and settings are complete. Live provider-to-screen wiring is in progress for Sprint 2.
 
 ### Planned / In Progress
 
-- Live provider integration (connecting all screens to real API data).
+- Live provider integration (connecting remaining screens to real API data).
 - ML-powered automatic transaction categorization.
 - Budget adaptation that learns from new spending data over time.
 - Push notifications when approaching or exceeding budget limits.
-- Persistent auth state (secure token storage across app restarts).
 - Data import from external sources (CSV / bank feeds).
 
-**Total: 10 features, 14 requirements**
+**Total: 13 features, 14 requirements**
 
 ### Non-Functional Requirements
 
@@ -82,27 +86,31 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 ```
 ├── lib/                    # Flutter application source
 │   ├── main.dart           # Entry point
-│   ├── app.dart            # Root widget, MultiProvider setup, routing
-│   ├── config/             # Theme, colors, constants, route definitions
+│   ├── app.dart            # Root widget, MultiProvider + auth-guard startup
+│   ├── config/             # Theme, colors, constants, spacing, route definitions
 │   │   ├── colors.dart     # AppColors (primary green, income/expense/warning)
-│   │   ├── constants.dart  # AppConstants (apiBaseUrl, spacing, radius)
+│   │   ├── constants.dart  # AppConstants (apiBaseUrl, radius)
+│   │   ├── spacing.dart    # AppSpacing — named pixel constants (xxs → xl)
 │   │   ├── routes.dart     # AppRoutes — 11 named routes
 │   │   └── theme.dart      # AppTheme — Material 3 light & dark ThemeData
 │   ├── models/             # Immutable Dart data classes (fromJson, toJson, copyWith)
 │   │   ├── user.dart
 │   │   ├── transaction.dart
 │   │   ├── budget.dart
-│   │   ├── goal.dart       # includes progressPercent, isCompleted, icon
-│   │   ├── recommendation.dart
-│   │   ├── budget_item.dart  # view model: spent/limit ratio, isOverBudget
-│   │   └── category_breakdown.dart  # view model for analytics charts
-│   ├── providers/          # ChangeNotifier state management
-│   │   ├── auth_provider.dart
+│   │   ├── goal.dart       # includes progressPercent, isCompleted, GoalCategory enum
+│   │   └── recommendation.dart
+│   ├── viewmodels/         # UI-layer view models (no JSON, no persistence)
+│   │   ├── budget_item.dart        # ratio, isOverBudget, remainingAmount
+│   │   └── category_breakdown.dart # analytics chart data
+│   ├── providers/          # ChangeNotifier state management (6 providers)
+│   │   ├── settings_provider.dart  # SharedPreferences: dark mode, notifications, locale
+│   │   ├── auth_provider.dart      # login, register, logout, tryRestore (secure storage)
 │   │   ├── transaction_provider.dart
 │   │   ├── budget_provider.dart
-│   │   └── goal_provider.dart
+│   │   ├── goal_provider.dart
+│   │   └── recommendation_provider.dart
 │   ├── services/           # HTTP API client & per-resource service classes
-│   │   ├── api_client.dart      # JWT-injecting HTTP wrapper
+│   │   ├── api_client.dart      # JWT-injecting HTTP wrapper, tryRestoreToken
 │   │   ├── auth_service.dart
 │   │   ├── transaction_service.dart
 │   │   ├── budget_service.dart
@@ -124,13 +132,14 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   │   ├── goal_progress_card.dart
 │   │   ├── category_card.dart
 │   │   └── loading_overlay.dart
-│   ├── utils/              # Formatters, validators, categories, error helpers
-│   │   ├── formatters.dart      # currency, date, percent (via intl)
+│   ├── utils/              # Formatters, validators, categories, helpers
+│   │   ├── formatters.dart      # currency, date, percent (via intl); updateLocale
 │   │   ├── validators.dart      # form field validators (email, password, amount)
 │   │   ├── categories.dart      # 8 category constants, icon/color maps
+│   │   ├── goal_helpers.dart    # GoalCategoryUi extension (icon per category)
 │   │   └── error_helpers.dart   # formatError strips "Exception: " prefix
 │   └── data/
-│       └── sample_data.dart     # Static demo data used while provider wiring is in progress
+│       └── sample_data.dart     # Static demo data for screens not yet live-wired
 ├── backend/                # FastAPI backend
 │   ├── Dockerfile          # python:3.12-slim, Uvicorn on port 8000
 │   ├── requirements.txt
@@ -145,12 +154,18 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   └── seed.sql            # Demo user + 30 transactions + budgets/goals/recommendations
 ├── docker-compose.yml      # PostgreSQL 16 + FastAPI + pgAdmin services
 ├── scripts/
-│   ├── start.ps1           # One-command dev startup (PowerShell)
-│   └── start.sh            # One-command dev startup (bash / WSL / macOS)
+│   ├── setup.ps1           # One-time new machine setup (PowerShell)
+│   ├── setup.sh            # One-time new machine setup (bash / WSL / macOS)
+│   ├── start.ps1           # Daily full-stack startup (PowerShell)
+│   └── start.sh            # Daily full-stack startup (bash / WSL / macOS)
 ├── test/                   # Flutter unit & widget tests
-│   ├── models/             # transaction, user, budget, goal, recommendation
+│   ├── app_test.dart       # Root widget smoke test
+│   ├── models/             # transaction, budget, goal, recommendation, user
+│   ├── providers/          # auth, transaction, budget, goal providers
+│   ├── services/           # api_client, auth, transaction, budget, goal, recommendation
 │   ├── utils/              # validators, error_helpers
-│   └── widgets/            # summary_card
+│   └── widgets/            # summary_card, transaction_tile, goal_progress_card,
+│                           #   category_card, loading_overlay
 ├── integration_test/       # Flutter integration test (full app smoke test)
 └── docs/                   # Project documentation & presentations
     └── presentation/
@@ -203,28 +218,42 @@ Interactive API docs available at `http://localhost:8000/api/v1/docs` when the b
 
 ## Getting Started
 
-### Prerequisites
+### New Machine Setup (do this once per device)
 
-- **Flutter SDK** ≥ 3.10
-- **Docker** & **Docker Compose**
-- A `.env` file in the project root (see below)
+**Step 1 — Install the two required tools** (everything else is handled by Docker):
 
-### Environment Variables
+| Tool                                                               | Download                                        |
+| ------------------------------------------------------------------ | ----------------------------------------------- |
+| [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.10 | https://docs.flutter.dev/get-started/install    |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/)  | https://www.docker.com/products/docker-desktop/ |
 
-Create a `.env` file (see [`.env.example`](.env.example)):
+**Step 2 — Run the setup script** from the repository root:
 
-```env
-POSTGRES_USER=smartspend
-POSTGRES_PASSWORD=smartspend_dev
-POSTGRES_DB=smartspend
-JWT_SECRET=change-me-in-production
-PGADMIN_EMAIL=admin@smartspend.dev
-PGADMIN_PASSWORD=admin
+```powershell
+# Windows (PowerShell)
+.\scripts\setup.ps1
 ```
 
-### Quick Start (one command)
+```bash
+# macOS / Linux / WSL
+./scripts/setup.sh
+```
 
-Start the database, API, and Flutter app all at once:
+The setup script will:
+
+- Verify Docker and Flutter are installed (with links if not)
+- Copy `.env.example` → `.env` if no `.env` exists yet
+- Run `flutter pub get` to pre-fetch packages
+
+**Step 3 — Edit `.env`** and replace the `CHANGE_ME` placeholders (especially `JWT_SECRET`).
+
+That's it. You're ready to run.
+
+---
+
+### Daily Dev Workflow
+
+Start the full stack (database + API + Flutter app) with one command:
 
 **Windows (PowerShell):**
 
@@ -233,20 +262,16 @@ Start the database, API, and Flutter app all at once:
 .\scripts\start.ps1 -Device chrome   # launch directly in Chrome
 ```
 
-**WSL / macOS / Linux:**
+**macOS / Linux / WSL:**
 
 ```bash
 ./scripts/start.sh                   # prompts if multiple devices
 ./scripts/start.sh chrome            # launch directly in Chrome
 ```
 
-The script starts Docker Compose, waits for the API to become healthy, then runs `flutter pub get` and `flutter run`.
+The script starts Docker Compose, waits for the API to become healthy, then launches the Flutter app.
 
-### Run the Backend
-
-```bash
-docker compose up -d          # starts PostgreSQL, FastAPI, and pgAdmin
-```
+### Services
 
 | Service            | URL                               |
 | ------------------ | --------------------------------- |
@@ -259,13 +284,6 @@ The seed script automatically creates a demo account:
 - **Email:** `demo@smartspend.dev`
 - **Password:** `password123`
 
-### Run the Flutter App
-
-```bash
-flutter pub get
-flutter run                   # launches on connected device / emulator
-```
-
 ### Run Tests
 
 ```bash
@@ -276,19 +294,29 @@ flutter test
 flutter test integration_test/
 ```
 
+### Project Structure — Scripts
+
+| Script                           | Purpose                        |
+| -------------------------------- | ------------------------------ |
+| `scripts/setup.ps1` / `setup.sh` | **One-time** new machine setup |
+| `scripts/start.ps1` / `start.sh` | **Daily** full-stack startup   |
+
 ---
 
 ## Tests
 
 ### Unit & Widget Tests (`test/`)
 
-- **Model tests** — `fromJson`/`toJson` round-trips and computed properties for `Transaction`, `Budget`, `Goal`, `Recommendation`, `User`.
-- **Utility tests** — Form validators (email, password min-length, numeric amount) and `formatError` error string helper.
-- **Widget tests** — `SummaryCard` renders title and value text correctly.
+- **App test** — `app_test.dart` verifies `SmartSpendApp` renders without crashing.
+- **Model tests** — `fromJson`/`toJson` round-trips and computed properties for `Transaction`, `Budget`, `Goal`, `Recommendation`, and `User`.
+- **Provider tests** — `AuthProvider`, `TransactionProvider`, `BudgetProvider`, and `GoalProvider` tested with `mocktail`-injected service mocks covering loading state, success, and error paths.
+- **Service tests** — `ApiClient`, `AuthService`, `TransactionService`, `BudgetService`, `GoalService`, and `RecommendationService` tested against mocked HTTP responses.
+- **Utility tests** — Form validators (email, password min-length, numeric amount) and `formatError` error-string helper.
+- **Widget tests** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, and `LoadingOverlay` render and behave correctly.
 
 ### Integration Tests (`integration_test/`)
 
-- Full app smoke test — launches `SmartSpendApp`, verifies the app title renders. Extended E2E flow tests planned for Sprint 2.
+- Full app smoke test — launches `SmartSpendApp` and verifies the app title renders. Extended E2E flow tests planned for later in Sprint 2.
 
 ### Acceptance Criteria
 
@@ -309,10 +337,10 @@ flutter test integration_test/
 - Week 7: Dashboard & visualization (budget/goals/recommendations API, spending analytics screens)
 - Week 8: Testing, bug fixes, UI polish (account, settings, analytics), Sprint 1 Presentation
 
-### Sprint 2 (Weeks 9–15)
+### Sprint 2 (Weeks 9–15) — In Progress
 
-- Week 9: Live provider integration — connect all Flutter screens to real API data
-- Week 10: Persistent auth state (secure token storage) + ML categorization model
+- Week 9: Persistent auth (secure token storage), `SettingsProvider` (SharedPreferences), `RecommendationProvider`; expanded test suite (providers, services, all widgets)
+- Week 10: Live provider integration — connect remaining Flutter screens to real API data; ML categorization model
 - Week 11: Budget adaptation system (ML-driven budget generation)
 - Week 12: Savings recommendations engine (ML inference pipeline)
 - Week 13: Alerts & push notifications when approaching budget limits

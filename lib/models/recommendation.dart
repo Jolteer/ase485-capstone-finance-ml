@@ -1,7 +1,8 @@
-/// A savings or spending recommendation with estimated impact.
+﻿/// A savings or spending recommendation with estimated impact.
 ///
 /// Supports JSON via [fromJson] / [toJson] and [copyWith]. Used by the
 /// recommendations screen to show actionable tips and [potentialSavings].
+library;
 class Recommendation {
   /// Unique identifier for this recommendation.
   final String id;

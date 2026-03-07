@@ -1,78 +1,152 @@
 /// Shared HTTP client for backend API: base URL, auth token, GET/POST/PUT/DELETE, error extraction.
 ///
 /// All services use this client; configure [AppConstants.apiBaseUrl] at build time.
-import 'dart:convert';
+/// The JWT token is persisted across restarts via [FlutterSecureStorage]; call
+/// [tryRestoreToken] on app startup to re-hydrate the token before any API call.
+library;
 
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:ase485_capstone_finance_ml/config/constants.dart';
 
 /// Central HTTP client for all API communication.
 ///
-/// Wraps [http.Client] and prepends [AppConstants.apiBaseUrl] to requests.
-/// Handles auth token injection and response error mapping.
+/// Wraps [http.Client] and prepends [AppConstants.apiBaseUrl] to every request.
+/// Handles auth token injection, request timeouts, offline detection, and
+/// response error mapping. The JWT is persisted in [FlutterSecureStorage] so
+/// the user stays logged in across cold starts.
 class ApiClient {
   final http.Client _client;
+  final FlutterSecureStorage _storage;
   String? _token;
 
-  ApiClient({http.Client? client}) : _client = client ?? http.Client();
+  static const String _kTokenKey = 'auth_token';
 
-  /// Base URL for all requests (from [AppConstants.apiBaseUrl]).
-  String get baseUrl => AppConstants.apiBaseUrl;
+  /// Maximum time to wait for any single HTTP request before throwing [TimeoutException].
+  static const Duration _defaultTimeout = Duration(seconds: 15);
 
-  /// Set the JWT token for authenticated requests. Call after login; clear on logout.
-  void setToken(String? token) => _token = token;
+  ApiClient({http.Client? client, FlutterSecureStorage? storage})
+    : _client = client ?? http.Client(),
+      _storage = storage ?? const FlutterSecureStorage();
 
-  /// Headers for every request: Content-Type: application/json, plus Authorization if [_token] is set.
+  /// Sets or clears the JWT token for authenticated requests.
+  ///
+  /// Persists [token] to secure storage (or deletes the stored value when
+  /// [token] is null). The in-memory value is updated synchronously; storage
+  /// write happens asynchronously as a fire-and-forget side effect.
+  void setToken(String? token) {
+    _token = token;
+    if (token != null) {
+      _storage.write(key: _kTokenKey, value: token);
+    } else {
+      _storage.delete(key: _kTokenKey);
+    }
+  }
+
+  /// Reads the previously persisted token from secure storage and restores it.
+  ///
+  /// Returns `true` when a token was found and applied; `false` otherwise.
+  /// Call this once during app startup (before any authenticated API call).
+  Future<bool> tryRestoreToken() async {
+    final token = await _storage.read(key: _kTokenKey);
+    if (token != null) {
+      _token = token;
+      return true;
+    }
+    return false;
+  }
+
+  /// Headers for every request: Content-Type JSON, plus Authorization when [_token] is set.
   Map<String, String> get _headers {
     final h = <String, String>{'Content-Type': 'application/json'};
-    if (_token != null) {
-      h['Authorization'] = 'Bearer $_token';
-    }
+    if (_token != null) h['Authorization'] = 'Bearer $_token';
     return h;
   }
 
-  /// GET request to [path] (relative to baseUrl).
-  Future<http.Response> get(String path, {Map<String, String>? queryParams}) {
-    final uri = Uri.parse(
-      '$baseUrl$path',
-    ).replace(queryParameters: queryParams);
-    return _client.get(uri, headers: _headers);
+  /// Builds a [Uri] for [path] relative to [AppConstants.apiBaseUrl],
+  /// optionally appending [queryParams].
+  Uri _uri(String path, {Map<String, String>? queryParams}) => Uri.parse(
+    '${AppConstants.apiBaseUrl}$path',
+  ).replace(queryParameters: queryParams);
+
+  /// Executes [request] and translates [SocketException] into a friendly offline error.
+  Future<http.Response> _send(Future<http.Response> Function() request) async {
+    try {
+      return await request();
+    } on SocketException {
+      throw Exception('No internet connection. Please check your network.');
+    }
   }
+
+  /// GET request to [path] (relative to baseUrl).
+  Future<http.Response> get(String path, {Map<String, String>? queryParams}) =>
+      _send(
+        () => _client
+            .get(_uri(path, queryParams: queryParams), headers: _headers)
+            .timeout(_defaultTimeout),
+      );
 
   /// POST request with a JSON [body].
-  Future<http.Response> post(String path, {Object? body}) {
-    return _client.post(
-      Uri.parse('$baseUrl$path'),
-      headers: _headers,
-      body: body != null ? jsonEncode(body) : null,
-    );
-  }
+  Future<http.Response> post(String path, {Object? body}) => _send(
+    () => _client
+        .post(
+          _uri(path),
+          headers: _headers,
+          body: body != null ? jsonEncode(body) : null,
+        )
+        .timeout(_defaultTimeout),
+  );
 
   /// PUT request with a JSON [body].
-  Future<http.Response> put(String path, {Object? body}) {
-    return _client.put(
-      Uri.parse('$baseUrl$path'),
-      headers: _headers,
-      body: body != null ? jsonEncode(body) : null,
-    );
-  }
+  Future<http.Response> put(String path, {Object? body}) => _send(
+    () => _client
+        .put(
+          _uri(path),
+          headers: _headers,
+          body: body != null ? jsonEncode(body) : null,
+        )
+        .timeout(_defaultTimeout),
+  );
 
-  /// DELETE request.
-  Future<http.Response> delete(String path) {
-    return _client.delete(Uri.parse('$baseUrl$path'), headers: _headers);
-  }
+  /// DELETE request to [path].
+  Future<http.Response> delete(String path) => _send(
+    () =>
+        _client.delete(_uri(path), headers: _headers).timeout(_defaultTimeout),
+  );
 
   /// Extracts a human-readable error message from an API [response].
-  /// Prefers JSON `detail` field when present; otherwise returns a generic message.
+  ///
+  /// Handles three FastAPI/standard shapes in priority order:
+  /// 1. `detail` as a List (FastAPI validation errors) — joins the `msg` fields.
+  /// 2. `detail`, `message`, or `error` as a plain String.
+  /// 3. Falls back to a generic message with the HTTP status code.
   static String extractError(http.Response response) {
     try {
       final body = jsonDecode(response.body);
-      return (body is Map && body['detail'] != null)
-          ? body['detail'] as String
-          : 'Request failed';
+      if (body is Map) {
+        // FastAPI validation errors: {"detail": [{"loc": [...], "msg": "...", "type": "..."}]}
+        if (body['detail'] is List) {
+          final errors = body['detail'] as List;
+          final messages = errors
+              .whereType<Map>()
+              .map((e) => e['msg'])
+              .whereType<String>()
+              .toList();
+          if (messages.isNotEmpty) return messages.join('; ');
+          return 'Validation error (${response.statusCode})';
+        }
+        for (final key in ['detail', 'message', 'error']) {
+          if (body[key] is String) return body[key] as String;
+        }
+      }
     } catch (_) {
-      return 'Request failed (${response.statusCode})';
+      // fall through to generic message
     }
+    return 'Request failed (${response.statusCode})';
   }
 
   /// Releases the underlying HTTP client resources.

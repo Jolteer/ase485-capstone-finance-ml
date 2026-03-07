@@ -2,6 +2,8 @@
 ///
 /// Use with [ChangeNotifierProvider]; requires [ApiClient] for API calls. Call
 /// [fetchTransactions] to load; [transactions], [isLoading], and [error] notify listeners.
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
@@ -10,15 +12,18 @@ import 'package:ase485_capstone_finance_ml/utils/error_helpers.dart';
 
 /// Manages the list of [Transaction]s and delegates to [TransactionService] for API calls.
 class TransactionProvider extends ChangeNotifier {
-  late final TransactionService _service;
+  final TransactionService _service;
 
   List<Transaction> _transactions = [];
   bool _isLoading = false;
   String? _error;
 
-  TransactionProvider({required ApiClient apiClient}) {
-    _service = TransactionService(apiClient);
-  }
+  /// Pass [service] in tests to inject a mock; production code omits it and
+  /// requires [apiClient] to construct the default [TransactionService].
+  TransactionProvider({
+    required ApiClient apiClient,
+    TransactionService? service,
+  }) : _service = service ?? TransactionService(apiClient);
 
   /// Unmodifiable list of transactions; load with [fetchTransactions].
   List<Transaction> get transactions => List.unmodifiable(_transactions);
@@ -36,7 +41,7 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   /// Fetches transactions from the API; optional [category] filter. Updates [transactions].
-  Future<void> fetchTransactions({String? category}) async {
+  Future<void> fetchTransactions({TransactionCategory? category}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -57,6 +62,21 @@ class TransactionProvider extends ChangeNotifier {
     try {
       final created = await _service.createTransaction(transaction);
       _transactions.insert(0, created);
+      notifyListeners();
+    } catch (e) {
+      _error = formatError(e);
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  /// Updates [transaction] via API and replaces the matching entry in [transactions].
+  Future<void> updateTransaction(Transaction transaction) async {
+    _error = null;
+    try {
+      final updated = await _service.updateTransaction(transaction);
+      final index = _transactions.indexWhere((t) => t.id == transaction.id);
+      if (index != -1) _transactions[index] = updated;
       notifyListeners();
     } catch (e) {
       _error = formatError(e);

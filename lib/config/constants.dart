@@ -2,6 +2,8 @@
 ///
 /// [apiBaseUrl] is set at build time via `--dart-define=API_BASE_URL=...`.
 /// Use [AppConstants] instead of magic numbers for layout and behavior.
+library;
+
 class AppConstants {
   AppConstants._();
 
@@ -25,6 +27,9 @@ class AppConstants {
 
   /// Extra-large spacing (32px).
   static const double spacingXl = 32;
+
+  /// Extra-small border radius (4px).
+  static const double radiusXs = 4;
 
   /// Small border radius (6px).
   static const double radiusSm = 6;

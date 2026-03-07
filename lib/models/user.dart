@@ -1,7 +1,8 @@
-/// Logged-in user profile (identity and display info).
+﻿/// Logged-in user profile (identity and display info).
 ///
 /// Supports JSON via [fromJson] / [toJson] and [copyWith]. Used for auth
 /// context, account screen, and any user-scoped data.
+library;
 class User {
   /// Unique identifier for the user (e.g. from auth backend).
   final String id;

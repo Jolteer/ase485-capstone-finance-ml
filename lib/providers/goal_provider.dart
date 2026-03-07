@@ -2,6 +2,8 @@
 ///
 /// Use with [ChangeNotifierProvider]; requires [ApiClient]. Call [fetchGoals]
 /// to load; [goals], [isLoading], and [error] notify listeners.
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
@@ -10,15 +12,16 @@ import 'package:ase485_capstone_finance_ml/utils/error_helpers.dart';
 
 /// Manages the list of [Goal]s and delegates to [GoalService] for API calls.
 class GoalProvider extends ChangeNotifier {
-  late final GoalService _service;
+  final GoalService _service;
 
   List<Goal> _goals = [];
   bool _isLoading = false;
   String? _error;
 
-  GoalProvider({required ApiClient apiClient}) {
-    _service = GoalService(apiClient);
-  }
+  /// Pass [service] in tests to inject a mock; production code omits it and
+  /// requires [apiClient] to construct the default [GoalService].
+  GoalProvider({required ApiClient apiClient, GoalService? service})
+    : _service = service ?? GoalService(apiClient);
 
   /// Unmodifiable list of goals; load with [fetchGoals].
   List<Goal> get goals => List.unmodifiable(_goals);

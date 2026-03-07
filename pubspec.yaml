@@ -1,6 +1,6 @@
 name: ase485_capstone_finance_ml
 description: "SmartSpend – AI-powered personal finance tracker."
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -13,6 +13,8 @@ dependencies:
   http: ^1.2.0
   intl: ^0.19.0
   provider: ^6.1.2
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -20,6 +22,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  mocktail: ^0.3.0
 
 flutter:
   uses-material-design: true

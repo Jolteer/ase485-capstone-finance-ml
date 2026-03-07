@@ -1,6 +1,8 @@
 /// Fetches ML-driven spending recommendations from the API (read-only). Used by recommendations feature.
 ///
 /// GET /recommendations; throws on non-success.
+library;
+
 import 'dart:convert';
 
 import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
@@ -15,9 +17,7 @@ class RecommendationService {
   /// GET /recommendations; returns list of [Recommendation].
   Future<List<Recommendation>> fetchRecommendations() async {
     final res = await _api.get('/recommendations');
-    if (res.statusCode != 200) {
-      throw Exception('Failed to fetch recommendations');
-    }
+    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
 
     final list = jsonDecode(res.body) as List;
     return list
