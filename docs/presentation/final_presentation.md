@@ -74,6 +74,25 @@ SmartSpend is a mobile app that learns from your real spending and gives back pe
 
 ---
 
+## What I Learned
+
+- ML models are only as good as their training data
+- Clean architecture early on pays off later
+- Testing builds confidence when refactoring
+- Scope creep is real — prioritize ruthlessly
+
+---
+
+## How It All Fits Together
+
+- **Flutter** handles the UI and state (Provider pattern)
+- **FastAPI** serves as the REST backend with JWT auth
+- **PostgreSQL** stores users, transactions, budgets, and goals
+- **scikit-learn** powers the ML categorization model
+- Everything runs in **Docker** for consistent local dev
+
+---
+
 ## Thank You
 
 ### Questions?
