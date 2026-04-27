@@ -53,7 +53,11 @@ mixin ProviderErrorMixin<W extends StatefulWidget> on State<W> {
     void listener() {
       final error = getError(provider);
       if (error != null && mounted) {
+        // Clear synchronously so the next provider update doesn't re-fire this
+        // listener with the same error before the SnackBar is shown.
         clearError(provider);
+        // Defer the SnackBar to the next frame: showing one inside a notifier
+        // callback can land mid-build and trigger "setState during build".
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(

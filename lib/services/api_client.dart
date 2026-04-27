@@ -118,6 +118,40 @@ class ApiClient {
         _client.delete(_uri(path), headers: _headers).timeout(_defaultTimeout),
   );
 
+  /// Throws an [Exception] with [extractError] if [res.statusCode] != [expected].
+  static void expectStatus(http.Response res, int expected) {
+    if (res.statusCode != expected) {
+      throw Exception(extractError(res));
+    }
+  }
+
+  /// Verifies status, decodes the body as a JSON list, and parses each entry.
+  ///
+  /// On non-[expected] status, throws using [extractError]. The default
+  /// [expected] is 200, matching every list-fetching endpoint we use today.
+  static List<T> decodeJsonList<T>(
+    http.Response res,
+    T Function(Map<String, dynamic>) parse, {
+    int expected = 200,
+  }) {
+    expectStatus(res, expected);
+    final list = jsonDecode(res.body) as List;
+    return list.map((j) => parse(j as Map<String, dynamic>)).toList();
+  }
+
+  /// Verifies status, decodes the body as a JSON object, and parses it.
+  ///
+  /// On non-[expected] status, throws using [extractError]. Use [expected]: 201
+  /// for create endpoints.
+  static T decodeJsonObject<T>(
+    http.Response res,
+    T Function(Map<String, dynamic>) parse, {
+    int expected = 200,
+  }) {
+    expectStatus(res, expected);
+    return parse(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
   /// Extracts a human-readable error message from an API [response].
   ///
   /// Handles three FastAPI/standard shapes in priority order:

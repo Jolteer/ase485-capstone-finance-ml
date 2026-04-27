@@ -24,6 +24,8 @@ class GoalsScreen extends StatefulWidget {
 }
 
 class _GoalsScreenState extends State<GoalsScreen> with ProviderErrorMixin {
+  bool _didTriggerInitialFetch = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -33,10 +35,16 @@ class _GoalsScreenState extends State<GoalsScreen> with ProviderErrorMixin {
       getError: (p) => p.error,
       clearError: (p) => p.clearError(),
     );
-    if (provider.goals.isEmpty && !provider.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) provider.fetchGoals();
-      });
+    // Gate auto-fetch on a one-shot flag so the screen can't re-trigger fetch
+    // every time the provider notifies (build() uses context.watch, which
+    // re-fires didChangeDependencies on every notification).
+    if (!_didTriggerInitialFetch) {
+      _didTriggerInitialFetch = true;
+      if (provider.goals.isEmpty && !provider.isLoading) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) provider.fetchGoals();
+        });
+      }
     }
   }
 

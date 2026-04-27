@@ -67,8 +67,10 @@ class SmartSpendApp extends StatelessWidget {
 /// Calls [AuthProvider.tryRestore] and [SettingsProvider.init] concurrently
 /// after the first frame. The [themeMode] is derived reactively from
 /// [SettingsProvider] so toggling dark mode in Settings takes effect immediately
-/// without a restart. Protected routes remain reachable only after authentication
-/// because the initial route is always [AppRoutes.login].
+/// without a restart. The initial navigator stack is overridden to a single
+/// [AppRoutes.login] page (see [MaterialApp.onGenerateInitialRoutes] below) so
+/// the home tree is never constructed before authentication; otherwise its
+/// post-frame fetches would fire without a JWT.
 class _AppMaterialRoot extends StatefulWidget {
   const _AppMaterialRoot();
 
@@ -114,6 +116,18 @@ class _AppMaterialRootState extends State<_AppMaterialRoot> {
       themeMode: themeMode,
       routes: AppRoutes.routes,
       initialRoute: AppRoutes.login,
+      // MaterialApp's default behaviour treats `initialRoute` as a deep link and
+      // pushes every '/'-separated segment, which would also build HomeScreen
+      // ('/') under the login screen and trigger unauthenticated API fetches.
+      // Returning a single page here keeps only the login screen on the stack.
+      onGenerateInitialRoutes: (initialRoute) => [
+        MaterialPageRoute<void>(
+          settings: RouteSettings(name: initialRoute),
+          builder:
+              AppRoutes.routes[initialRoute] ??
+              AppRoutes.routes[AppRoutes.login]!,
+        ),
+      ],
       debugShowCheckedModeBanner: false,
     );
   }

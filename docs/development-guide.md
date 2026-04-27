@@ -131,14 +131,12 @@ flutter run --dart-define=API_BASE_URL=http://192.168.1.100:8000/api/v1
 ```
 lib/
 ├── config/         App-wide constants, colors, theme, routing, spacing
-├── data/           Static sample data (used while screens are not yet live-wired)
-├── models/         Immutable domain data classes
-├── viewmodels/     UI-only composite objects (no persistence)
+├── models/         Immutable domain data classes + UI composites (e.g. budget_item, category_breakdown)
 ├── providers/      ChangeNotifier state management (6 providers)
 ├── services/       HTTP API layer (ApiClient + domain services)
 ├── screens/        11 UI screens organized by feature
-├── widgets/        5 reusable UI components
-└── utils/          Formatters, validators, category helpers, error helpers
+├── widgets/        Reusable UI components (summary, tiles, alerts, notification bell, etc.)
+└── utils/          Formatters, validators, category helpers, spending/budget helpers, error helpers
 ```
 
 ---

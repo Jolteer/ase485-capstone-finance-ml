@@ -63,7 +63,7 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 
 #### Sprint 2 Features (Delivered)
 
-14. **ML Transaction Categorization** — TF-IDF + Naive Bayes pipeline (scikit-learn) auto-categorizes transactions from description text. Standalone `/ml/categorize` endpoint and integrated into POST `/transactions` when category is omitted.
+14. **ML Transaction Categorization** — TF-IDF + Naive Bayes pipeline (scikit-learn) auto-categorizes transactions from description text. Standalone `/ml/categorize` endpoint and integrated into POST `/transactions` when category is omitted. **Eight categories:** Food, Entertainment, Bills, Shopping, Transportation, Healthcare, Education, Other.
 15. **ML Budget Generation** — Analyses transaction history per category and suggests monthly budgets with 10% buffer. POST `/ml/budgets/generate` replaces existing budgets with ML suggestions.
 16. **ML Savings Recommendations** — Rule-based engine evaluating over-budget categories, spending spikes, missing budgets, and income ratio. POST `/ml/recommendations/generate` produces personalised tips.
 17. **Budget Alerts** — Client-side alert system detecting budget usage at 80% (warning) and 100% (danger). Alert banners on Home dashboard, notification bell with badge count, and bottom-sheet detail view.
@@ -105,11 +105,10 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   │   ├── user.dart
 │   │   ├── transaction.dart
 │   │   ├── budget.dart
-│   │   ├── goal.dart       # includes progressPercent, isCompleted, GoalCategory enum
+│   │   ├── budget_item.dart        # ratio, isOverBudget, remainingAmount (budget + spend)
+│   │   ├── category_breakdown.dart # analytics chart data
+│   │   ├── goal.dart               # progressPercent, isCompleted, GoalCategory enum
 │   │   └── recommendation.dart
-│   ├── viewmodels/         # UI-layer view models (no JSON, no persistence)
-│   │   ├── budget_item.dart        # ratio, isOverBudget, remainingAmount
-│   │   └── category_breakdown.dart # analytics chart data
 │   ├── providers/          # ChangeNotifier state management (6 providers)
 │   │   ├── settings_provider.dart  # SharedPreferences: dark mode, notifications, locale
 │   │   ├── auth_provider.dart      # login, register, logout, tryRestore (secure storage)
@@ -140,15 +139,17 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   │   ├── goal_progress_card.dart
 │   │   ├── category_card.dart
 │   │   ├── loading_overlay.dart
-│   │   └── budget_alert_banner.dart
+│   │   ├── budget_alert_banner.dart
+│   │   └── notification_bell.dart
 │   ├── utils/              # Formatters, validators, categories, helpers
-│   │   ├── formatters.dart      # currency, date, percent (via intl); updateLocale
-│   │   ├── validators.dart      # form field validators (email, password, amount)
-│   │   ├── categories.dart      # 8 category constants, icon/color maps
-│   │   ├── goal_helpers.dart    # GoalCategoryUi extension (icon per category)
-│   │   └── error_helpers.dart   # formatError strips "Exception: " prefix
-│   └── data/
-│       └── sample_data.dart     # Static demo data for screens not yet live-wired
+│   │   ├── formatters.dart          # currency, date, percent (via intl); updateLocale
+│   │   ├── validators.dart          # form field validators (email, password, amount)
+│   │   ├── categories.dart          # 8 category constants, icon/color maps
+│   │   ├── goal_helpers.dart        # GoalCategoryUi extension (icon per category)
+│   │   ├── error_helpers.dart       # formatError strips "Exception: " prefix
+│   │   ├── budget_helpers.dart      # budget alert / usage helpers
+│   │   ├── spending_helpers.dart    # analytics / period spending helpers
+│   │   └── provider_error_mixin.dart # shared provider error handling
 ├── backend/                # FastAPI backend
 │   ├── Dockerfile          # python:3.12-slim, Uvicorn on port 8000
 │   ├── requirements.txt
@@ -173,9 +174,9 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   ├── models/             # transaction, budget, goal, recommendation, user
 │   ├── providers/          # auth, transaction, budget, goal providers
 │   ├── services/           # api_client, auth, transaction, budget, goal, recommendation
-│   ├── utils/              # validators, error_helpers
+│   ├── utils/              # validators, error_helpers, budget_helpers, spending_helpers
 │   └── widgets/            # summary_card, transaction_tile, goal_progress_card,
-│                           #   category_card, loading_overlay
+│                           #   category_card, loading_overlay, budget_alert_banner
 ├── integration_test/       # Flutter integration test (full app smoke test)
 └── docs/                   # Project documentation & presentations
     └── presentation/
@@ -194,7 +195,7 @@ Five core tables, all using UUID primary keys and `ON DELETE CASCADE` foreign ke
 | **users**           | `id`, `email` (UNIQUE), `name`, `password` (bcrypt), `created_at`                              |
 | **transactions**    | `id`, `user_id` → users, `amount`, `category`, `description`, `date`                           |
 | **budgets**         | `id`, `user_id` → users, `category`, `limit_amount`, `period`, `created_at`                    |
-| **goals**           | `id`, `user_id` → users, `target_amount`, `target_date`, `description`, `progress`             |
+| **goals**           | `id`, `user_id` → users, `target_amount`, `target_date`, `description`, `progress`, `category` |
 | **recommendations** | `id`, `user_id` → users, `category`, `title`, `description`, `potential_savings`, `created_at` |
 
 Schema definition: [docker/init.sql](docker/init.sql) · Seed data: [docker/seed.sql](docker/seed.sql)
@@ -326,7 +327,7 @@ flutter test integration_test/
 - **Model tests** — `fromJson`/`toJson` round-trips and computed properties for `Transaction`, `Budget`, `Goal`, `Recommendation`, and `User`.
 - **Provider tests** — `AuthProvider`, `TransactionProvider`, `BudgetProvider`, and `GoalProvider` tested with `mocktail`-injected service mocks covering loading state, success, and error paths.
 - **Service tests** — `ApiClient`, `AuthService`, `TransactionService`, `BudgetService`, `GoalService`, and `RecommendationService` tested against mocked HTTP responses.
-- **Utility tests** — Form validators (email, password min-length, numeric amount) and `formatError` error-string helper.
+- **Utility tests** — Form validators (email, password min-length, numeric amount), `formatError`, `budget_helpers`, and `spending_helpers`.
 - **Widget tests** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, `LoadingOverlay`, and `BudgetAlertBanner` render and behave correctly.
 
 ### Flutter Integration Tests (`integration_test/`)

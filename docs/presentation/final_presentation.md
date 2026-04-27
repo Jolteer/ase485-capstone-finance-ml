@@ -121,7 +121,7 @@ Interactive docs at `localhost:8000/api/v1/docs`
 ## ML Feature 1: Transaction Categorization
 
 - **Pipeline:** TF-IDF vectorizer → Multinomial Naive Bayes classifier
-- **Training:** 150+ labeled descriptions across **8 categories** (Food, Transport, Shopping, Entertainment, Bills, Healthcare, Income, Other)
+- **Training:** 150+ labeled descriptions across **8 categories** (Food, Entertainment, Bills, Shopping, Transportation, Healthcare, Education, Other)
 - **How it works:** user adds a transaction without selecting a category → the ML engine predicts the category from the description text with a confidence score
 - **Accuracy:** meets the 80% target on representative test data
 - **Endpoint:** `POST /ml/categorize` (standalone) + auto-integrated into `POST /transactions`
@@ -315,6 +315,12 @@ All registered in `MultiProvider` with `ApiClient` singleton injected via `Provi
 - Adaptive budgets that adjust month-to-month automatically
 - Deep learning categorization (BERT embeddings) for higher accuracy
 - Multi-user household support with shared budgets
+
+---
+
+## Maintainer note
+
+After editing this deck, **re-export** [`final_presentation.pdf`](final_presentation.pdf) from Marp (or your usual slide toolchain) so the PDF stays in sync with this markdown.
 
 ---
 

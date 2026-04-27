@@ -5,12 +5,14 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/config/spacing.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/providers/transaction_provider.dart';
+import 'package:ase485_capstone_finance_ml/screens/transactions/widgets/category_chips.dart';
+import 'package:ase485_capstone_finance_ml/screens/transactions/widgets/month_selector.dart';
 import 'package:ase485_capstone_finance_ml/utils/provider_error_mixin.dart';
 import 'package:ase485_capstone_finance_ml/widgets/loading_overlay.dart';
 import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
@@ -28,6 +30,7 @@ class _TransactionsScreenState extends State<TransactionsScreen>
     with ProviderErrorMixin {
   late DateTime _selectedMonth;
   TransactionCategory? _selectedCategory;
+  bool _didTriggerInitialFetch = false;
 
   @override
   void initState() {
@@ -45,8 +48,20 @@ class _TransactionsScreenState extends State<TransactionsScreen>
       getError: (p) => p.error,
       clearError: (p) => p.clearError(),
     );
-    if (provider.transactions.isEmpty && !provider.isLoading) {
-      provider.fetchTransactions();
+    // Defer to the next frame: runLoad notifies synchronously, and dispatching
+    // notifications during the build that triggered didChangeDependencies
+    // throws "setState() called during build" on web in debug mode.
+    //
+    // Gate the auto-fetch on a one-shot flag so a failed or empty response
+    // can't re-trigger fetchTransactions() forever — build() uses
+    // context.watch, so every provider notify re-runs didChangeDependencies.
+    if (!_didTriggerInitialFetch) {
+      _didTriggerInitialFetch = true;
+      if (provider.transactions.isEmpty && !provider.isLoading) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) provider.fetchTransactions();
+        });
+      }
     }
   }
 
@@ -90,12 +105,12 @@ class _TransactionsScreenState extends State<TransactionsScreen>
         ),
         body: Column(
           children: [
-            _MonthSelector(
+            MonthSelector(
               month: _selectedMonth,
               onPrevious: _previousMonth,
               onNext: _nextMonth,
             ),
-            _CategoryChips(
+            CategoryChips(
               selected: _selectedCategory,
               onSelected: (cat) => setState(() => _selectedCategory = cat),
             ),
@@ -128,87 +143,6 @@ class _TransactionsScreenState extends State<TransactionsScreen>
           icon: const Icon(Icons.add),
           label: const Text('Add'),
         ),
-      ),
-    );
-  }
-}
-
-/// Month navigation row (prev / label / next).
-class _MonthSelector extends StatelessWidget {
-  final DateTime month;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-
-  const _MonthSelector({
-    required this.month,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: onPrevious,
-          ),
-          Text(
-            DateFormat.yMMMM().format(month),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),
-        ],
-      ),
-    );
-  }
-}
-
-/// Horizontal row of filter chips: "All" plus one per [TransactionCategory].
-///
-/// Tapping the already-selected category deselects it (falls back to "All").
-class _CategoryChips extends StatelessWidget {
-  final TransactionCategory? selected;
-  final ValueChanged<TransactionCategory?> onSelected;
-
-  const _CategoryChips({required this.selected, required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            child: FilterChip(
-              label: const Text('All'),
-              selected: selected == null,
-              onSelected: (_) => onSelected(null),
-            ),
-          ),
-          ...TransactionCategory.values.map(
-            (c) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              child: FilterChip(
-                label: Text(c.label),
-                selected: selected == c,
-                onSelected: (_) => onSelected(selected == c ? null : c),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

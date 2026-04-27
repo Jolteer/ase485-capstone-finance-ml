@@ -3,8 +3,6 @@
 /// All methods throw on non-success; paths use `/goals` and `/goals/:id`.
 library;
 
-import 'dart:convert';
-
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
@@ -17,43 +15,34 @@ class GoalService {
   /// GET /goals; returns list of [Goal].
   Future<List<Goal>> fetchGoals() async {
     final res = await _api.get('/goals');
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-
-    final list = jsonDecode(res.body) as List;
-    return list.map((j) => Goal.fromJson(j as Map<String, dynamic>)).toList();
+    return ApiClient.decodeJsonList(res, Goal.fromJson);
   }
 
   /// POST /goals; returns created [Goal] with id.
   ///
-  /// Delegates serialization to [Goal.toJson] and strips server-managed
-  /// fields ([id], [userId]) that the API generates on creation.
+  /// Strips server-managed fields ([id], [userId]) since the API generates
+  /// them on creation.
   Future<Goal> createGoal(Goal goal) async {
-    final body = goal.toJson()
-      ..remove('id')
-      ..remove('user_id');
-
-    final res = await _api.post('/goals', body: body);
-    if (res.statusCode != 201) throw Exception(ApiClient.extractError(res));
-    return Goal.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _api.post('/goals', body: _stripServerFields(goal));
+    return ApiClient.decodeJsonObject(res, Goal.fromJson, expected: 201);
   }
 
   /// PUT /goals/:id; returns updated [Goal].
-  ///
-  /// Delegates serialization to [Goal.toJson] and strips server-managed
-  /// fields ([id], [userId]).
   Future<Goal> updateGoal(Goal goal) async {
-    final body = goal.toJson()
-      ..remove('id')
-      ..remove('user_id');
-
-    final res = await _api.put('/goals/${goal.id}', body: body);
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-    return Goal.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _api.put(
+      '/goals/${goal.id}',
+      body: _stripServerFields(goal),
+    );
+    return ApiClient.decodeJsonObject(res, Goal.fromJson);
   }
 
   /// DELETE /goals/:id.
   Future<void> deleteGoal(String id) async {
     final res = await _api.delete('/goals/$id');
-    if (res.statusCode != 204) throw Exception(ApiClient.extractError(res));
+    ApiClient.expectStatus(res, 204);
   }
+
+  Map<String, dynamic> _stripServerFields(Goal goal) => goal.toJson()
+    ..remove('id')
+    ..remove('user_id');
 }

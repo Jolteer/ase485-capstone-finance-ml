@@ -148,6 +148,7 @@ class TestGoals:
                 "target_date": "2026-06-01T00:00:00+00:00",
                 "description": "Vacation Fund",
                 "progress": 1800.0,
+                "category": "vacation",
             }
         ]
         res = client.get("/api/v1/goals")

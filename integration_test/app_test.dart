@@ -27,18 +27,18 @@ void main() {
       expect(find.byType(TextFormField), findsWidgets);
     });
 
-    testWidgets('login screen has a login button', (tester) async {
+    testWidgets('login screen has a sign-in button', (tester) async {
       app.main();
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(FilledButton, 'Login'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Sign In'), findsOneWidget);
     });
 
     testWidgets('can navigate to register screen', (tester) async {
       app.main();
       await tester.pumpAndSettle();
 
-      final registerLink = find.text('Register');
+      final registerLink = find.text('Sign Up');
       if (registerLink.evaluate().isNotEmpty) {
         await tester.tap(registerLink.first);
         await tester.pumpAndSettle();
@@ -52,7 +52,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      final loginButton = find.widgetWithText(FilledButton, 'Login');
+      final loginButton = find.widgetWithText(FilledButton, 'Sign In');
       await tester.tap(loginButton);
       await tester.pumpAndSettle();
 

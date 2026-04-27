@@ -33,9 +33,9 @@ SmartSpend is an AI-powered personal finance tracker that helps users with poor 
 │  │                                                     │   │
 │  │   /api/v1/auth          /api/v1/transactions        │   │
 │  │   /api/v1/budgets       /api/v1/goals               │   │
-│  │   /api/v1/recommendations                           │   │
+│  │   /api/v1/recommendations  /api/v1/ml               │   │
 │  │                                                     │   │
-│  │   auth.py (JWT)   database.py (connection pool)     │   │
+│  │   auth.py (JWT)  database.py (pool)  ml_engine.py   │   │
 │  └───────────────────────────┬─────────────────────────┘   │
 │                              │ psycopg2                     │
 │  ┌───────────────────────────▼─────────────────────────┐   │
@@ -138,21 +138,23 @@ Domain services (`AuthService`, `TransactionService`, etc.) map REST responses t
 
 Immutable value objects. All implement `==`, `hashCode`, `fromJson`, `toJson`, and `copyWith`. Business logic is kept in computed properties (`isExpense`, `progressPercent`, `daysRemaining`, etc.), not in providers or services.
 
-### 5. View Models (`lib/viewmodels/`)
+### 5. UI composites in models (`lib/models/`)
 
-Lightweight UI-only composites derived from domain models — no JSON serialization, no persistence. Used to pre-compute display values (ratios, over-budget flags) before passing to widgets.
+`budget_item.dart` and `category_breakdown.dart` are lightweight presentation composites (ratios, over-budget flags, chart slices). They live alongside domain models and are not persisted independently.
 
 ### 6. Widgets (`lib/widgets/`)
 
-Five reusable, stateless UI components used across multiple screens:
+Reusable UI components used across multiple screens:
 
-| Widget             | Used On                                    |
-| ------------------ | ------------------------------------------ |
-| `SummaryCard`      | Home dashboard                             |
-| `TransactionTile`  | Transaction list, home recent transactions |
-| `GoalProgressCard` | Goals screen                               |
-| `CategoryCard`     | Analytics, budget screen                   |
-| `LoadingOverlay`   | Any screen during async operations         |
+| Widget              | Used On                                    |
+| ------------------- | ------------------------------------------ |
+| `SummaryCard`       | Home dashboard                             |
+| `TransactionTile`   | Transaction list, home recent transactions |
+| `GoalProgressCard`  | Goals screen                               |
+| `CategoryCard`      | Analytics, budget screen                   |
+| `LoadingOverlay`    | Any screen during async operations         |
+| `BudgetAlertBanner` | Home dashboard, budget alerts              |
+| `NotificationBell`  | Home dashboard (alert badge + sheet)       |
 
 ---
 
@@ -164,37 +166,39 @@ backend/app/
 ├── auth.py         JWT creation (24h expiry), HTTPBearer verification dependency
 ├── database.py     psycopg2 connection pool, typed query/execute helpers
 ├── schemas.py      Pydantic v2 request + response models
+├── ml_engine.py    TF-IDF + Naive Bayes categorization; budget + recommendation engines
 └── routers/
-    ├── auth.py            POST /register, POST /login
-    ├── transactions.py    GET/POST/DELETE /transactions
-    ├── budgets.py         GET/POST/PUT/DELETE /budgets
-    ├── goals.py           GET/POST/PUT/DELETE /goals
-    └── recommendations.py GET /recommendations
+    ├── auth.py              POST /register, POST /login
+    ├── transactions.py      GET/POST/PUT/DELETE /transactions
+    ├── budgets.py           GET/POST/PUT/DELETE /budgets
+    ├── goals.py             GET/POST/PUT/DELETE /goals
+    ├── recommendations.py   GET /recommendations
+    └── ml.py                POST /ml/categorize, /ml/budgets/generate, /ml/recommendations/generate
 ```
 
-Authentication middleware (`auth.py`) provides a `get_current_user` FastAPI dependency injected into every protected route. All routes automatically filter results to the authenticated user's data.
+Authentication (`auth.py`) exposes a `get_current_user_id` dependency injected into every protected route. All routes automatically filter results to the authenticated user's data.
 
 ---
 
 ## Database Schema
 
-Five tables with UUID primary keys and `ON DELETE CASCADE` foreign keys:
+Five tables with UUID-as-text primary keys (`gen_random_uuid()::text`) and `ON DELETE CASCADE` foreign keys (see [docker/init.sql](docker/init.sql)):
 
 ```
 users
-  id (UUID PK), email (UNIQUE), name, password (bcrypt), created_at
+  id (TEXT PK), email (UNIQUE), name, password (bcrypt), created_at
 
 transactions
-  id (UUID PK), user_id → users, amount, category, description, date
+  id (TEXT PK), user_id → users, amount, category, description, date
 
 budgets
-  id (UUID PK), user_id → users, category, limit_amount, period, created_at
+  id (TEXT PK), user_id → users, category, limit_amount, period, created_at
 
 goals
-  id (UUID PK), user_id → users, target_amount, target_date, description, progress
+  id (TEXT PK), user_id → users, target_amount, target_date, description, progress, category
 
 recommendations
-  id (UUID PK), user_id → users, category, title, description, potential_savings, created_at
+  id (TEXT PK), user_id → users, category, title, description, potential_savings, created_at
 ```
 
 Schema is initialized by `docker/init.sql`. Seed data for development is in `docker/seed.sql` (demo account: `demo@smartspend.dev` / `password123`).

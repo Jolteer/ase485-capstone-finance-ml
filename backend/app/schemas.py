@@ -22,7 +22,7 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     """Request body for POST /auth/login."""
 
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -114,6 +114,7 @@ class GoalCreate(BaseModel):
     target_date: datetime
     description: str = ""
     progress: float = 0
+    category: str = "other"
 
 
 class GoalUpdate(BaseModel):
@@ -123,6 +124,7 @@ class GoalUpdate(BaseModel):
     target_date: datetime | None = None
     description: str | None = None
     progress: float | None = None
+    category: str | None = None
 
 
 class GoalResponse(BaseModel):
@@ -134,6 +136,7 @@ class GoalResponse(BaseModel):
     target_date: datetime
     description: str
     progress: float
+    category: str
 
 
 # ── Recommendations ─────────────────────────────────────────────────────────

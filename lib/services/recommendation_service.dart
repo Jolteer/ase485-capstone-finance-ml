@@ -3,8 +3,6 @@
 /// GET /recommendations; throws on non-success.
 library;
 
-import 'dart:convert';
-
 import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
@@ -17,22 +15,12 @@ class RecommendationService {
   /// GET /recommendations; returns list of [Recommendation].
   Future<List<Recommendation>> fetchRecommendations() async {
     final res = await _api.get('/recommendations');
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-
-    final list = jsonDecode(res.body) as List;
-    return list
-        .map((j) => Recommendation.fromJson(j as Map<String, dynamic>))
-        .toList();
+    return ApiClient.decodeJsonList(res, Recommendation.fromJson);
   }
 
   /// POST /ml/recommendations/generate; regenerates recommendations via ML.
   Future<List<Recommendation>> generateRecommendations() async {
     final res = await _api.post('/ml/recommendations/generate');
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-
-    final list = jsonDecode(res.body) as List;
-    return list
-        .map((j) => Recommendation.fromJson(j as Map<String, dynamic>))
-        .toList();
+    return ApiClient.decodeJsonList(res, Recommendation.fromJson);
   }
 }

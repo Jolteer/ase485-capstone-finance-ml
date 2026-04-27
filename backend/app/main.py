@@ -3,7 +3,7 @@
 - Root app: CORS middleware, /health endpoint, and a lifespan that closes the
   database pool on shutdown.
 - All v1 endpoints live under /api/v1: auth, transactions, budgets, goals,
-  recommendations. Each router defines its own prefix and tags.
+  recommendations, ml. Each router defines its own prefix and tags.
 """
 
 from contextlib import asynccontextmanager

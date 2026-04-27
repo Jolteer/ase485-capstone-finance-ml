@@ -30,6 +30,8 @@ class BudgetScreen extends StatefulWidget {
 }
 
 class _BudgetScreenState extends State<BudgetScreen> with ProviderErrorMixin {
+  bool _didTriggerInitialFetch = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -39,10 +41,18 @@ class _BudgetScreenState extends State<BudgetScreen> with ProviderErrorMixin {
       getError: (p) => p.error,
       clearError: (p) => p.clearError(),
     );
-    if (provider.budgets.isEmpty && !provider.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) provider.fetchBudgets();
-      });
+    // Gate the auto-fetch on a one-shot flag instead of `budgets.isEmpty`.
+    // build() calls context.watch, so every provider notify re-fires
+    // didChangeDependencies; if the user has no budgets (or the request
+    // fails), the empty-list check would re-schedule fetchBudgets() forever
+    // and strobe the screen.
+    if (!_didTriggerInitialFetch) {
+      _didTriggerInitialFetch = true;
+      if (provider.budgets.isEmpty && !provider.isLoading) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) provider.fetchBudgets();
+        });
+      }
     }
   }
 

@@ -4,11 +4,12 @@ GET/POST /transactions; GET accepts optional ?category=. PUT/DELETE /transaction
 Every endpoint requires a valid JWT (user_id from token scopes all operations).
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.auth import get_current_user_id
 from app.database import execute, query
 from app.ml_engine import predict_category
+from app.routers._crud import delete_owned, update_owned
 from app.schemas import TransactionCreate, TransactionResponse, TransactionUpdate
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -45,17 +46,14 @@ def create_transaction(
 
     When category is empty the ML model auto-categorises from description.
     """
-    category = body.category
-    if not category:
-        category = predict_category(body.description)
+    category = body.category or predict_category(body.description)
 
-    row = execute(
+    return execute(
         """INSERT INTO transactions (user_id, amount, category, description, date)
            VALUES (%s, %s, %s, %s, COALESCE(%s, now()))
            RETURNING *""",
         (user_id, body.amount, category, body.description, body.date),
     )
-    return row
 
 
 @router.put("/{transaction_id}", response_model=TransactionResponse)
@@ -65,25 +63,15 @@ def update_transaction(
     user_id: str = Depends(get_current_user_id),
 ):
     """Partially update a transaction. Only send fields that should change; 404 if not found."""
-    updates = {
-        k: v
-        for k, v in body.model_dump(exclude_unset=True).items()
-        if k in _TRANSACTION_UPDATABLE
-    }
-    if not updates:
-        raise HTTPException(status_code=400, detail="No fields to update")
-
-    set_clause = ", ".join(f"{k} = %s" for k in updates)
-    values = list(updates.values()) + [transaction_id, user_id]
-
-    row = execute(
-        f"UPDATE transactions SET {set_clause} "
-        "WHERE id = %s AND user_id = %s RETURNING *",
-        tuple(values),
+    return update_owned(
+        table="transactions",
+        allowed_columns=_TRANSACTION_UPDATABLE,
+        row_id=transaction_id,
+        user_id=user_id,
+        payload=body.model_dump(exclude_unset=True),
+        not_found_detail="Transaction not found",
+        execute=execute,
     )
-    if row is None or (isinstance(row, int) and row == 0):
-        raise HTTPException(status_code=404, detail="Transaction not found")
-    return row
 
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -92,9 +80,10 @@ def delete_transaction(
     user_id: str = Depends(get_current_user_id),
 ):
     """Delete a transaction. Returns 204 on success; 404 if id not found or not owned by user."""
-    affected = execute(
-        "DELETE FROM transactions WHERE id = %s AND user_id = %s",
-        (transaction_id, user_id),
+    delete_owned(
+        table="transactions",
+        row_id=transaction_id,
+        user_id=user_id,
+        not_found_detail="Transaction not found",
+        execute=execute,
     )
-    if affected == 0:
-        raise HTTPException(status_code=404, detail="Transaction not found")

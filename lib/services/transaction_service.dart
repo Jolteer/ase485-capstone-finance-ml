@@ -3,8 +3,6 @@
 /// All methods throw on non-success; paths use `/transactions` and `/transactions/:id`.
 library;
 
-import 'dart:convert';
-
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
@@ -19,44 +17,39 @@ class TransactionService {
     TransactionCategory? category,
   }) async {
     final params = category != null ? {'category': category.name} : null;
-
     final res = await _api.get('/transactions', queryParams: params);
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-
-    final list = jsonDecode(res.body) as List;
-    return list
-        .map((j) => Transaction.fromJson(j as Map<String, dynamic>))
-        .toList();
+    return ApiClient.decodeJsonList(res, Transaction.fromJson);
   }
 
   /// POST /transactions; returns created [Transaction] with id.
   ///
-  /// Delegates serialization to [Transaction.toJson] and strips server-managed
-  /// fields ([id], [userId]) that the API generates on creation.
+  /// Strips server-managed fields ([id], [userId]) since the API generates
+  /// them on creation.
   Future<Transaction> createTransaction(Transaction transaction) async {
-    final body = transaction.toJson()
-      ..remove('id')
-      ..remove('user_id');
-
-    final res = await _api.post('/transactions', body: body);
-    if (res.statusCode != 201) throw Exception(ApiClient.extractError(res));
-    return Transaction.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _api.post(
+      '/transactions',
+      body: _stripServerFields(transaction),
+    );
+    return ApiClient.decodeJsonObject(res, Transaction.fromJson, expected: 201);
   }
 
   /// PUT /transactions/:id; returns the updated [Transaction].
   Future<Transaction> updateTransaction(Transaction transaction) async {
-    final body = transaction.toJson()
-      ..remove('id')
-      ..remove('user_id');
-
-    final res = await _api.put('/transactions/${transaction.id}', body: body);
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-    return Transaction.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _api.put(
+      '/transactions/${transaction.id}',
+      body: _stripServerFields(transaction),
+    );
+    return ApiClient.decodeJsonObject(res, Transaction.fromJson);
   }
 
   /// DELETE /transactions/:id.
   Future<void> deleteTransaction(String id) async {
     final res = await _api.delete('/transactions/$id');
-    if (res.statusCode != 204) throw Exception(ApiClient.extractError(res));
+    ApiClient.expectStatus(res, 204);
   }
+
+  Map<String, dynamic> _stripServerFields(Transaction transaction) =>
+      transaction.toJson()
+        ..remove('id')
+        ..remove('user_id');
 }

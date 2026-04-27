@@ -30,6 +30,7 @@ class AnalyticsScreen extends StatefulWidget {
 class _AnalyticsScreenState extends State<AnalyticsScreen>
     with ProviderErrorMixin {
   AnalyticsPeriod _selectedPeriod = AnalyticsPeriod.month;
+  bool _didTriggerInitialFetch = false;
 
   @override
   void didChangeDependencies() {
@@ -40,8 +41,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       getError: (p) => p.error,
       clearError: (p) => p.clearError(),
     );
-    if (provider.transactions.isEmpty && !provider.isLoading) {
-      provider.fetchTransactions();
+    // Defer to next frame; runLoad notifies synchronously and dispatching a
+    // notification during the same build pass that triggered
+    // didChangeDependencies throws "setState() called during build".
+    //
+    // One-shot gate: build() calls context.watch, so every provider notify
+    // re-fires didChangeDependencies; without this flag, an empty or failed
+    // fetch would re-schedule fetchTransactions() forever.
+    if (!_didTriggerInitialFetch) {
+      _didTriggerInitialFetch = true;
+      if (provider.transactions.isEmpty && !provider.isLoading) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) provider.fetchTransactions();
+        });
+      }
     }
   }
 

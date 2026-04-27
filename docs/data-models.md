@@ -218,15 +218,15 @@ Represents an ML-generated savings suggestion.
 
 ---
 
-## View Models (`lib/viewmodels/`)
+## UI composites (`lib/models/`)
 
-View models are UI-only composites derived at presentation time from domain models. They have no JSON serialization and are never persisted.
+`BudgetItem` and `CategoryBreakdown` are UI-only composites derived at presentation time from domain models. They have no JSON serialization and are never persisted independently.
 
 ### BudgetItem
 
 Combines a `Budget` with its actual spending data for display in the budget screen.
 
-**Dart class:** `lib/viewmodels/budget_item.dart`
+**Dart class:** `lib/models/budget_item.dart`
 
 | Field      | Type                  | Description                           |
 | ---------- | --------------------- | ------------------------------------- |
@@ -248,7 +248,7 @@ Combines a `Budget` with its actual spending data for display in the budget scre
 
 Represents one category's share of total spending for analytics charts.
 
-**Dart class:** `lib/viewmodels/category_breakdown.dart`
+**Dart class:** `lib/models/category_breakdown.dart`
 
 | Field      | Type     | Description                                          |
 | ---------- | -------- | ---------------------------------------------------- |
@@ -260,71 +260,71 @@ Represents one category's share of total spending for analytics charts.
 
 ## Database Schema
 
-All tables use UUID primary keys (generated server-side) and `ON DELETE CASCADE` on foreign keys.
+All tables use **TEXT** primary keys with `DEFAULT gen_random_uuid()::text` (UUID values stored as text) and `ON DELETE CASCADE` on foreign keys. Amounts use **`DOUBLE PRECISION`**. This matches [docker/init.sql](docker/init.sql).
 
 ### `users`
 
 ```sql
-CREATE TABLE users (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email      VARCHAR(255) UNIQUE NOT NULL,
-  name       VARCHAR(255) NOT NULL,
-  password   VARCHAR(255) NOT NULL,  -- bcrypt hash
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS users (
+    id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    email       TEXT UNIQUE NOT NULL,
+    name        TEXT NOT NULL,
+    password    TEXT NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
 ### `transactions`
 
 ```sql
-CREATE TABLE transactions (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  amount      DECIMAL(10, 2) NOT NULL,   -- positive=income, negative=expense
-  category    VARCHAR(50) NOT NULL,
-  description TEXT NOT NULL,
-  date        TIMESTAMP WITH TIME ZONE NOT NULL
+CREATE TABLE IF NOT EXISTS transactions (
+    id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    amount      DOUBLE PRECISION NOT NULL,
+    category    TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    date        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
 ### `budgets`
 
 ```sql
-CREATE TABLE budgets (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  category     VARCHAR(50) NOT NULL,
-  limit_amount DECIMAL(10, 2) NOT NULL,
-  period       VARCHAR(20) NOT NULL,   -- weekly|biweekly|monthly|yearly
-  created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS budgets (
+    id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category      TEXT NOT NULL,
+    limit_amount  DOUBLE PRECISION NOT NULL,
+    period        TEXT NOT NULL DEFAULT 'monthly',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
 ### `goals`
 
 ```sql
-CREATE TABLE goals (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  target_amount DECIMAL(10, 2) NOT NULL,
-  target_date   TIMESTAMP WITH TIME ZONE NOT NULL,
-  description   TEXT NOT NULL,
-  progress      DECIMAL(10, 2) DEFAULT 0,
-  category      VARCHAR(50)
+CREATE TABLE IF NOT EXISTS goals (
+    id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    user_id         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    target_amount   DOUBLE PRECISION NOT NULL,
+    target_date     TIMESTAMPTZ NOT NULL,
+    description     TEXT NOT NULL DEFAULT '',
+    progress        DOUBLE PRECISION NOT NULL DEFAULT 0,
+    category        TEXT NOT NULL DEFAULT 'other'
 );
 ```
 
 ### `recommendations`
 
 ```sql
-CREATE TABLE recommendations (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  category          VARCHAR(50),
-  title             VARCHAR(255) NOT NULL,
-  description       TEXT NOT NULL,
-  potential_savings DECIMAL(10, 2),
-  created_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS recommendations (
+    id                TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    user_id           TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category          TEXT NOT NULL,
+    title             TEXT NOT NULL,
+    description       TEXT NOT NULL DEFAULT '',
+    potential_savings DOUBLE PRECISION NOT NULL DEFAULT 0,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
@@ -334,14 +334,15 @@ CREATE TABLE recommendations (
 
 JSON uses `snake_case` keys; Dart models use `camelCase` fields. The `fromJson` factories handle the conversion.
 
-| JSON key            | Dart field         |
-| ------------------- | ------------------ |
-| `user_id`           | `userId`           |
-| `limit_amount`      | `limitAmount`      |
-| `target_amount`     | `targetAmount`     |
-| `target_date`       | `targetDate`       |
-| `created_at`        | `createdAt`        |
-| `potential_savings` | `potentialSavings` |
+| JSON key            | Dart field                       |
+| ------------------- | -------------------------------- |
+| `user_id`           | `userId`                         |
+| `limit_amount`      | `limitAmount`                    |
+| `target_amount`     | `targetAmount`                   |
+| `target_date`       | `targetDate`                     |
+| `created_at`        | `createdAt`                      |
+| `potential_savings` | `potentialSavings`               |
+| `category` (goals)  | `category` (`GoalCategory` enum) |
 
 All `DateTime` fields are parsed from ISO 8601 strings via `DateTime.parse()` and serialized back with `.toIso8601String()`.
 

@@ -51,7 +51,7 @@ Register a new user account.
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "email": "jane@example.com",
     "name": "Jane Smith",
-    "createdAt": "2026-03-04T12:00:00Z"
+    "created_at": "2026-03-04T12:00:00Z"
   }
 }
 ```
@@ -87,7 +87,7 @@ Authenticate an existing user.
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "email": "jane@example.com",
     "name": "Jane Smith",
-    "createdAt": "2026-01-15T08:30:00Z"
+    "created_at": "2026-01-15T08:30:00Z"
   }
 }
 ```
@@ -111,9 +111,9 @@ Fetch all transactions for the current user, ordered by date descending.
 
 **Query parameters**
 
-| Parameter  | Type              | Description                                                                                                                    |
-| ---------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `category` | string (optional) | Filter by category. One of: `food`, `entertainment`, `bills`, `shopping`, `transportation`, `healthcare`, `education`, `other` |
+| Parameter  | Type              | Description                                                                                                  |
+| ---------- | ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `category` | string (optional) | Filter by category name (must match stored values, e.g. `Food` or `food` depending on how rows were created) |
 
 **Response `200 OK`**
 
@@ -121,9 +121,9 @@ Fetch all transactions for the current user, ordered by date descending.
 [
   {
     "id": "abc123",
-    "userId": "user456",
+    "user_id": "user456",
     "amount": -45.5,
-    "category": "food",
+    "category": "Food",
     "description": "Grocery run",
     "date": "2026-03-03T18:00:00Z"
   }
@@ -143,27 +143,62 @@ Create a new transaction.
 ```json
 {
   "amount": -45.5,
-  "category": "food",
+  "category": "Food",
   "description": "Grocery run",
   "date": "2026-03-03T18:00:00Z"
 }
 ```
 
-| Field         | Type              | Constraints                         |
-| ------------- | ----------------- | ----------------------------------- |
-| `amount`      | number            | required, non-zero                  |
-| `category`    | string            | required, one of 8 valid categories |
-| `description` | string            | required, non-empty                 |
-| `date`        | ISO 8601 datetime | required                            |
+| Field         | Type              | Constraints                                                             |
+| ------------- | ----------------- | ----------------------------------------------------------------------- |
+| `amount`      | number            | required, non-zero                                                      |
+| `category`    | string            | optional; omit or use `""` to auto-categorize from `description` via ML |
+| `description` | string            | optional in schema; provide text when relying on auto-categorization    |
+| `date`        | ISO 8601 datetime | optional; server defaults to current time if omitted                    |
 
-**Response `201 Created`** — returns the created `Transaction` object.
+**Response `201 Created`** — returns the created transaction (`snake_case` keys: `id`, `user_id`, `amount`, `category`, `description`, `date`).
 
 **Errors**
 
-| Status | Condition              |
-| ------ | ---------------------- |
-| `400`  | Invalid category value |
-| `422`  | Validation error       |
+| Status | Condition        |
+| ------ | ---------------- |
+| `422`  | Validation error |
+
+---
+
+### `PUT /api/v1/transactions/{id}`
+
+Partially update a transaction. Only include fields that should change.
+
+**Path parameter:** `id` — transaction ID.
+
+**Request body** (any subset of fields)
+
+```json
+{
+  "amount": -50.0,
+  "category": "Food",
+  "description": "Grocery run (updated)",
+  "date": "2026-03-04T12:00:00Z"
+}
+```
+
+| Field         | Type              | Constraints |
+| ------------- | ----------------- | ----------- |
+| `amount`      | number            | optional    |
+| `category`    | string            | optional    |
+| `description` | string            | optional    |
+| `date`        | ISO 8601 datetime | optional    |
+
+**Response `200 OK`** — returns the updated transaction.
+
+**Errors**
+
+| Status | Condition                                          |
+| ------ | -------------------------------------------------- |
+| `400`  | Empty body (no fields to update)                   |
+| `404`  | Transaction not found or not owned by current user |
+| `422`  | Validation error                                   |
 
 ---
 
@@ -195,16 +230,16 @@ Fetch all budgets for the current user.
 [
   {
     "id": "bgt001",
-    "userId": "user456",
-    "category": "food",
-    "limitAmount": 500.0,
+    "user_id": "user456",
+    "category": "Food",
+    "limit_amount": 500.0,
     "period": "monthly",
-    "createdAt": "2026-01-01T00:00:00Z"
+    "created_at": "2026-01-01T00:00:00Z"
   }
 ]
 ```
 
-**Valid `period` values:** `weekly`, `biweekly`, `monthly`, `yearly`
+**Valid `period` values:** `weekly`, `biweekly`, `monthly`, `yearly` (stored as free-form text; app typically uses `monthly`).
 
 ---
 
@@ -216,17 +251,17 @@ Create a new budget.
 
 ```json
 {
-  "category": "food",
-  "limitAmount": 500.0,
+  "category": "Food",
+  "limit_amount": 500.0,
   "period": "monthly"
 }
 ```
 
-| Field         | Type   | Constraints                         |
-| ------------- | ------ | ----------------------------------- |
-| `category`    | string | required, one of 8 valid categories |
-| `limitAmount` | number | required, must be > 0               |
-| `period`      | string | required, one of 4 valid periods    |
+| Field          | Type   | Constraints                     |
+| -------------- | ------ | ------------------------------- |
+| `category`     | string | required                        |
+| `limit_amount` | number | required, must be > 0           |
+| `period`       | string | optional; defaults to `monthly` |
 
 **Response `201 Created`** — returns the created `Budget` object.
 
@@ -242,7 +277,7 @@ Update an existing budget. All fields are optional (partial update).
 
 ```json
 {
-  "limitAmount": 600.0,
+  "limit_amount": 600.0,
   "period": "monthly"
 }
 ```
@@ -283,9 +318,9 @@ Fetch all savings goals for the current user, ordered by target date.
 [
   {
     "id": "goal001",
-    "userId": "user456",
-    "targetAmount": 5000.0,
-    "targetDate": "2026-12-31T00:00:00Z",
+    "user_id": "user456",
+    "target_amount": 5000.0,
+    "target_date": "2026-12-31T00:00:00Z",
     "description": "Emergency fund",
     "progress": 1250.0,
     "category": "emergency"
@@ -305,21 +340,23 @@ Create a new savings goal.
 
 ```json
 {
-  "targetAmount": 5000.0,
-  "targetDate": "2026-12-31T00:00:00Z",
+  "target_amount": 5000.0,
+  "target_date": "2026-12-31T00:00:00Z",
   "description": "Emergency fund",
+  "progress": 0,
   "category": "emergency"
 }
 ```
 
-| Field          | Type              | Constraints                         |
-| -------------- | ----------------- | ----------------------------------- |
-| `targetAmount` | number            | required, ≥ 0                       |
-| `targetDate`   | ISO 8601 datetime | required                            |
-| `description`  | string            | required, non-empty                 |
-| `category`     | string            | required, one of 5 valid categories |
+| Field           | Type              | Constraints                                        |
+| --------------- | ----------------- | -------------------------------------------------- |
+| `target_amount` | number            | required, ≥ 0                                      |
+| `target_date`   | ISO 8601 datetime | required                                           |
+| `description`   | string            | optional in schema; use non-empty text in practice |
+| `progress`      | number            | optional; defaults to `0`                          |
+| `category`      | string            | optional; defaults to `other` if omitted           |
 
-**Response `201 Created`** — returns the created `Goal` object. `progress` defaults to `0`.
+**Response `201 Created`** — returns the created goal (`snake_case` keys including `category`).
 
 ---
 
@@ -333,7 +370,8 @@ Update an existing goal. All fields are optional (partial update). Use this to u
 
 ```json
 {
-  "progress": 1500.0
+  "progress": 1500.0,
+  "category": "emergency"
 }
 ```
 
@@ -367,15 +405,76 @@ Fetch ML-generated savings recommendations for the current user.
 [
   {
     "id": "rec001",
-    "category": "food",
+    "user_id": "user456",
+    "category": "Food",
     "title": "Reduce dining out",
     "description": "You spent 40% more on dining this month. Consider meal prepping to save ~$120/month.",
-    "potentialSavings": 120.0
+    "potential_savings": 120.0,
+    "created_at": "2026-04-01T00:00:00Z"
   }
 ]
 ```
 
-Recommendations are generated server-side based on the user's spending history and budget configuration. This endpoint is read-only; recommendations are not created or deleted by the client.
+Recommendations are generated server-side based on the user's spending history and budget configuration. This endpoint is read-only; recommendations are not created or deleted by the client. Use **`POST /api/v1/ml/recommendations/generate`** to refresh stored recommendations.
+
+---
+
+## Machine learning (`/api/v1/ml`)
+
+All ML routes require authentication.
+
+### `POST /api/v1/ml/categorize`
+
+Predict a spending category from free-text description (TF-IDF + Multinomial Naive Bayes).
+
+**Request body**
+
+```json
+{
+  "description": "Grocery Store"
+}
+```
+
+**Response `200 OK`**
+
+```json
+{
+  "category": "Food",
+  "confidence": 0.9821
+}
+```
+
+---
+
+### `POST /api/v1/ml/budgets/generate`
+
+Analyse the current user's transactions and replace all budgets with ML-generated monthly limits (with a built-in buffer over historical averages).
+
+**Request body:** none.
+
+**Response `200 OK`** — array of budget objects (`snake_case`), same shape as `GET /api/v1/budgets`.
+
+**Errors**
+
+| Status | Condition                                   |
+| ------ | ------------------------------------------- |
+| `400`  | No transactions, or not enough expense data |
+
+---
+
+### `POST /api/v1/ml/recommendations/generate`
+
+Analyse transactions and budgets, delete existing recommendations for the user, and insert freshly generated ones (rule-based engine).
+
+**Request body:** none.
+
+**Response `200 OK`** — array of recommendation objects (`snake_case`), same shape as `GET /api/v1/recommendations`.
+
+**Errors**
+
+| Status | Condition       |
+| ------ | --------------- |
+| `400`  | No transactions |
 
 ---
 

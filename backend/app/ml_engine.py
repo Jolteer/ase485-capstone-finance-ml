@@ -1,13 +1,16 @@
 """Machine-learning utilities for SmartSpend.
 
 Provides three capabilities:
-1. **Transaction categorization** – text classifier trained on known transaction
+1. **Transaction categorization** - text classifier trained on known transaction
    descriptions. Uses TF-IDF + Multinomial Naive Bayes (fast, high accuracy on
    short text).
-2. **Budget generation** – statistical analysis of spending history to suggest
+2. **Budget generation** - statistical analysis of spending history to suggest
    per-category monthly limits.
-3. **Recommendation generation** – rule-based engine that compares spending
+3. **Recommendation generation** - rule-based engine that compares spending
    patterns against budgets and historical averages to surface savings tips.
+
+The training corpus lives in :mod:`app.ml_data` so this module stays focused
+on logic.
 """
 
 from __future__ import annotations
@@ -16,191 +19,48 @@ import math
 import statistics
 from collections import defaultdict
 from datetime import datetime, timezone
+from typing import Callable
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
-CATEGORIES = [
-    "Food",
-    "Entertainment",
-    "Bills",
-    "Shopping",
-    "Transportation",
-    "Healthcare",
-    "Education",
-    "Other",
+from app.ml_data import CATEGORIES, TRAINING_DATA
+
+__all__ = [
+    "CATEGORIES",
+    "predict_category",
+    "predict_category_with_confidence",
+    "generate_budgets",
+    "generate_recommendations",
 ]
 
-# ---------------------------------------------------------------------------
-# Training corpus – representative descriptions per category.  The model is
-# re-trained on startup (in-memory) so we can extend this without managing a
-# separate model artefact file.
-# ---------------------------------------------------------------------------
-_TRAINING_DATA: list[tuple[str, str]] = [
-    # Food
-    ("Grocery Store", "Food"),
-    ("grocery shopping", "Food"),
-    ("Whole Foods Market", "Food"),
-    ("Walmart Grocery", "Food"),
-    ("Restaurant dinner", "Food"),
-    ("restaurant lunch", "Food"),
-    ("fast food drive through", "Food"),
-    ("McDonald's", "Food"),
-    ("Chipotle", "Food"),
-    ("Starbucks coffee", "Food"),
-    ("Coffee shop", "Food"),
-    ("Dunkin Donuts", "Food"),
-    ("Pizza delivery", "Food"),
-    ("DoorDash order", "Food"),
-    ("Uber Eats", "Food"),
-    ("Grubhub delivery", "Food"),
-    ("bakery pastries", "Food"),
-    ("deli sandwich", "Food"),
-    ("food truck lunch", "Food"),
-    ("sushi bar", "Food"),
-    ("Trader Joe's", "Food"),
-    ("Costco groceries", "Food"),
-    ("Aldi supermarket", "Food"),
-    ("meal prep ingredients", "Food"),
-    # Entertainment
-    ("Netflix", "Entertainment"),
-    ("Netflix subscription", "Entertainment"),
-    ("Spotify", "Entertainment"),
-    ("Spotify premium", "Entertainment"),
-    ("Hulu subscription", "Entertainment"),
-    ("Disney Plus", "Entertainment"),
-    ("HBO Max", "Entertainment"),
-    ("Apple TV+", "Entertainment"),
-    ("Movie tickets", "Entertainment"),
-    ("movie theater", "Entertainment"),
-    ("Concert tickets", "Entertainment"),
-    ("concert festival", "Entertainment"),
-    ("video games", "Entertainment"),
-    ("Steam purchase", "Entertainment"),
-    ("PlayStation Store", "Entertainment"),
-    ("Xbox Game Pass", "Entertainment"),
-    ("YouTube Premium", "Entertainment"),
-    ("bowling night", "Entertainment"),
-    ("amusement park", "Entertainment"),
-    ("museum tickets", "Entertainment"),
-    ("theater show", "Entertainment"),
-    ("comedy club", "Entertainment"),
-    # Bills
-    ("Electric Bill", "Bills"),
-    ("electricity payment", "Bills"),
-    ("Internet Bill", "Bills"),
-    ("internet service", "Bills"),
-    ("Water Bill", "Bills"),
-    ("water utility", "Bills"),
-    ("Gas Bill", "Bills"),
-    ("natural gas utility", "Bills"),
-    ("Phone Bill", "Bills"),
-    ("cell phone payment", "Bills"),
-    ("Car Insurance", "Bills"),
-    ("auto insurance premium", "Bills"),
-    ("Home Insurance", "Bills"),
-    ("renters insurance", "Bills"),
-    ("Rent payment", "Bills"),
-    ("mortgage payment", "Bills"),
-    ("cable TV", "Bills"),
-    ("trash collection", "Bills"),
-    ("sewer bill", "Bills"),
-    ("HOA dues", "Bills"),
-    # Shopping
-    ("Amazon Order", "Shopping"),
-    ("Amazon purchase", "Shopping"),
-    ("Target", "Shopping"),
-    ("Target shopping", "Shopping"),
-    ("Walmart", "Shopping"),
-    ("Best Buy", "Shopping"),
-    ("electronics store", "Shopping"),
-    ("clothing store", "Shopping"),
-    ("New shoes", "Shopping"),
-    ("new clothes", "Shopping"),
-    ("furniture purchase", "Shopping"),
-    ("IKEA", "Shopping"),
-    ("home decor", "Shopping"),
-    ("Holiday gifts", "Shopping"),
-    ("birthday gift", "Shopping"),
-    ("department store", "Shopping"),
-    ("online shopping", "Shopping"),
-    ("Etsy purchase", "Shopping"),
-    ("eBay order", "Shopping"),
-    ("thrift store", "Shopping"),
-    # Transportation
-    ("Gas Station", "Transportation"),
-    ("gas fill up", "Transportation"),
-    ("Uber ride", "Transportation"),
-    ("Lyft ride", "Transportation"),
-    ("taxi cab", "Transportation"),
-    ("bus pass", "Transportation"),
-    ("subway ticket", "Transportation"),
-    ("train ticket", "Transportation"),
-    ("parking fee", "Transportation"),
-    ("parking garage", "Transportation"),
-    ("toll road", "Transportation"),
-    ("car maintenance", "Transportation"),
-    ("oil change", "Transportation"),
-    ("tire replacement", "Transportation"),
-    ("car wash", "Transportation"),
-    ("flight ticket", "Transportation"),
-    ("airline booking", "Transportation"),
-    # Healthcare
-    ("Pharmacy", "Healthcare"),
-    ("pharmacy prescription", "Healthcare"),
-    ("Co-pay", "Healthcare"),
-    ("doctor copay", "Healthcare"),
-    ("doctor visit", "Healthcare"),
-    ("dentist appointment", "Healthcare"),
-    ("dental cleaning", "Healthcare"),
-    ("eye exam", "Healthcare"),
-    ("optometrist", "Healthcare"),
-    ("hospital bill", "Healthcare"),
-    ("urgent care", "Healthcare"),
-    ("physical therapy", "Healthcare"),
-    ("mental health counseling", "Healthcare"),
-    ("health insurance", "Healthcare"),
-    ("vitamins supplements", "Healthcare"),
-    ("medical lab test", "Healthcare"),
-    # Education
-    ("Online Course", "Education"),
-    ("online class", "Education"),
-    ("Udemy course", "Education"),
-    ("Coursera subscription", "Education"),
-    ("textbook purchase", "Education"),
-    ("school supplies", "Education"),
-    ("tuition payment", "Education"),
-    ("student loan", "Education"),
-    ("workshop fee", "Education"),
-    ("certification exam", "Education"),
-    ("library fine", "Education"),
-    ("tutoring session", "Education"),
-    ("college bookstore", "Education"),
-    ("Skillshare membership", "Education"),
-    # Other
-    ("Salary Deposit", "Other"),
-    ("salary payment", "Other"),
-    ("paycheck direct deposit", "Other"),
-    ("freelance payment", "Other"),
-    ("side hustle income", "Other"),
-    ("tax refund", "Other"),
-    ("ATM withdrawal", "Other"),
-    ("cash withdrawal", "Other"),
-    ("bank fee", "Other"),
-    ("wire transfer", "Other"),
-    ("venmo transfer", "Other"),
-    ("zelle payment", "Other"),
-    ("interest earned", "Other"),
-    ("dividend payment", "Other"),
-    ("reimbursement", "Other"),
-    ("miscellaneous", "Other"),
-]
 
+# ---------------------------------------------------------------------------
+# Shared helpers
+# ---------------------------------------------------------------------------
+
+def _parse_iso_date(value: object) -> datetime | None:
+    """Coerce a transaction's *date* field to :class:`datetime` or None.
+
+    Accepts datetime instances unchanged, parses ISO-8601 strings (including
+    the trailing-Z form psycopg2/json round-trips often produce), and returns
+    None for anything else so callers can skip undated rows.
+    """
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Model pipeline (lazy)
+# ---------------------------------------------------------------------------
 
 def _build_pipeline() -> Pipeline:
-    texts = [t for t, _ in _TRAINING_DATA]
-    labels = [l for _, l in _TRAINING_DATA]
+    texts = [t for t, _ in TRAINING_DATA]
+    labels = [label for _, label in TRAINING_DATA]
     pipe = Pipeline([
         ("tfidf", TfidfVectorizer(
             lowercase=True,
@@ -217,6 +77,7 @@ _pipeline: Pipeline | None = None
 
 
 def _get_pipeline() -> Pipeline:
+    # Train lazily so importing this module is cheap (matters for tests).
     global _pipeline
     if _pipeline is None:
         _pipeline = _build_pipeline()
@@ -224,7 +85,7 @@ def _get_pipeline() -> Pipeline:
 
 
 # ---------------------------------------------------------------------------
-# 1.  Categorization
+# 1. Categorization
 # ---------------------------------------------------------------------------
 
 def predict_category(description: str) -> str:
@@ -246,7 +107,7 @@ def predict_category_with_confidence(description: str) -> tuple[str, float]:
 
 
 # ---------------------------------------------------------------------------
-# 2.  Budget generation
+# 2. Budget generation
 # ---------------------------------------------------------------------------
 
 def generate_budgets(
@@ -258,13 +119,14 @@ def generate_budgets(
 
     Strategy: for each expense category, compute the average monthly spend over
     the available history, then add *buffer_pct* headroom so the user isn't
-    immediately over-budget.  Only categories with actual spending are included.
+    immediately over-budget. Only categories with actual spending are included.
 
     Returns a list of dicts with keys: category, limit_amount, period.
     """
     if not transactions:
         return []
 
+    # category -> "YYYY-MM" -> total expense for that month
     monthly_totals: dict[str, dict[str, float]] = defaultdict(
         lambda: defaultdict(float)
     )
@@ -272,22 +134,20 @@ def generate_budgets(
         amount = txn.get("amount", 0)
         if amount >= 0:
             continue
-        cat = txn.get("category", "Other")
-        dt = txn.get("date")
-        if isinstance(dt, str):
-            dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        dt = _parse_iso_date(txn.get("date"))
         if dt is None:
             continue
+        cat = txn.get("category", "Other")
         key = f"{dt.year}-{dt.month:02d}"
         monthly_totals[cat][key] += abs(amount)
 
-    budgets = []
+    budgets: list[dict] = []
     for cat in CATEGORIES:
         months = monthly_totals.get(cat, {})
         if not months:
             continue
-        values = list(months.values())
-        avg = statistics.mean(values)
+        avg = statistics.mean(months.values())
+        # Round up to the nearest $5 to give the user a tidy limit.
         suggested = math.ceil(avg * (1 + buffer_pct) / 5) * 5
         budgets.append({
             "category": cat,
@@ -299,47 +159,50 @@ def generate_budgets(
 
 
 # ---------------------------------------------------------------------------
-# 3.  Recommendation generation
+# 3. Recommendation generation
 # ---------------------------------------------------------------------------
 
-def generate_recommendations(
+class _SpendingContext:
+    """Aggregates needed by every recommendation rule.
+
+    Computed once from the transaction list so each rule can read pre-summed
+    totals instead of iterating the raw rows again.
+    """
+
+    __slots__ = ("budget_map", "cur_month", "prev_month", "income_total")
+
+    def __init__(
+        self,
+        *,
+        budget_map: dict[str, float],
+        cur_month: dict[str, float],
+        prev_month: dict[str, float],
+        income_total: float,
+    ) -> None:
+        self.budget_map = budget_map
+        self.cur_month = cur_month
+        self.prev_month = prev_month
+        self.income_total = income_total
+
+
+def _summarize(
     transactions: list[dict],
     budgets: list[dict],
-) -> list[dict]:
-    """Produce personalised savings recommendations.
-
-    Rules evaluated:
-    - Over-budget categories → "Reduce spending in X"
-    - Month-over-month increase > 20 % → "Spending spike in X"
-    - Subscription-like small recurring charges → "Review subscriptions"
-    - Categories without a budget → "Set a budget for X"
-    - General savings tip when total spending is high vs income
-    """
-    if not transactions:
-        return []
-
-    now = datetime.now(timezone.utc)
-    recs: list[dict] = []
-
-    budget_map = {b["category"]: b["limit_amount"] for b in budgets}
-
-    # Compute current-month and previous-month totals per category
+    *,
+    now: datetime,
+) -> _SpendingContext:
     cur_month: dict[str, float] = defaultdict(float)
     prev_month: dict[str, float] = defaultdict(float)
-    all_expenses: dict[str, float] = defaultdict(float)
     income_total = 0.0
 
     for txn in transactions:
         amount = txn.get("amount", 0)
-        dt = txn.get("date")
-        if isinstance(dt, str):
-            dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        dt = _parse_iso_date(txn.get("date"))
         if dt is None:
             continue
         cat = txn.get("category", "Other")
         if amount < 0:
             abs_amt = abs(amount)
-            all_expenses[cat] += abs_amt
             if dt.year == now.year and dt.month == now.month:
                 cur_month[cat] += abs_amt
             elif (
@@ -350,79 +213,146 @@ def generate_recommendations(
         else:
             income_total += amount
 
-    # Rule 1: Over-budget categories
-    for cat, limit in budget_map.items():
-        spent = cur_month.get(cat, 0)
+    return _SpendingContext(
+        budget_map={b["category"]: b["limit_amount"] for b in budgets},
+        cur_month=cur_month,
+        prev_month=prev_month,
+        income_total=income_total,
+    )
+
+
+# Each rule returns a list of recommendation dicts (possibly empty).
+_RuleFn = Callable[[_SpendingContext], list[dict]]
+
+
+def _rule_over_budget(ctx: _SpendingContext) -> list[dict]:
+    """Categories where current-month spend exceeds the user's budget."""
+    out: list[dict] = []
+    for cat, limit in ctx.budget_map.items():
+        spent = ctx.cur_month.get(cat, 0)
         if spent > limit:
             over = spent - limit
-            recs.append({
+            out.append({
                 "category": cat,
                 "title": f"Over budget in {cat}",
                 "description": (
                     f"You've spent ${spent:.0f} against a ${limit:.0f} budget "
-                    f"this month — ${over:.0f} over. Try cutting back on "
+                    f"this month - ${over:.0f} over. Try cutting back on "
                     f"non-essential {cat.lower()} purchases."
                 ),
                 "potential_savings": round(over, 2),
             })
+    return out
 
-    # Rule 2: Month-over-month spike
-    for cat, cur in cur_month.items():
-        prev = prev_month.get(cat, 0)
+
+def _rule_spending_spike(ctx: _SpendingContext) -> list[dict]:
+    """Categories where current month is >20% higher than previous month."""
+    out: list[dict] = []
+    for cat, cur in ctx.cur_month.items():
+        prev = ctx.prev_month.get(cat, 0)
         if prev > 0 and cur > prev * 1.2:
             increase = cur - prev
             pct = ((cur - prev) / prev) * 100
-            recs.append({
+            out.append({
                 "category": cat,
                 "title": f"Spending spike in {cat}",
                 "description": (
                     f"Your {cat.lower()} spending jumped {pct:.0f}% this month "
-                    f"(${prev:.0f} → ${cur:.0f}). Review recent purchases."
+                    f"(${prev:.0f} -> ${cur:.0f}). Review recent purchases."
                 ),
                 "potential_savings": round(increase * 0.5, 2),
             })
+    return out
 
-    # Rule 3: Categories with spending but no budget
-    for cat in cur_month:
-        if cat not in budget_map and cat != "Other":
-            spent = cur_month[cat]
-            recs.append({
-                "category": cat,
-                "title": f"Set a budget for {cat}",
-                "description": (
-                    f"You spent ${spent:.0f} on {cat.lower()} this month but "
-                    f"have no budget set. Adding one helps track and control spending."
-                ),
-                "potential_savings": round(spent * 0.15, 2),
-            })
 
-    # Rule 4: High spending relative to income
-    total_expense = sum(cur_month.values())
-    if income_total > 0 and total_expense > income_total * 0.8:
-        savings_gap = total_expense - income_total * 0.7
-        recs.append({
-            "category": "Other",
-            "title": "Spending exceeds 80% of income",
+def _rule_set_a_budget(ctx: _SpendingContext) -> list[dict]:
+    """Categories with current spending but no budget configured."""
+    out: list[dict] = []
+    for cat, spent in ctx.cur_month.items():
+        if cat in ctx.budget_map or cat == "Other":
+            continue
+        out.append({
+            "category": cat,
+            "title": f"Set a budget for {cat}",
             "description": (
-                f"You've spent ${total_expense:.0f} out of ${income_total:.0f} "
-                f"income this month. Aim to keep spending under 70% to build savings."
+                f"You spent ${spent:.0f} on {cat.lower()} this month but "
+                f"have no budget set. Adding one helps track and control spending."
             ),
-            "potential_savings": round(max(savings_gap, 0), 2),
+            "potential_savings": round(spent * 0.15, 2),
         })
+    return out
 
-    # Rule 5: Top spending category suggestion
-    if cur_month:
-        top_cat = max(cur_month, key=cur_month.get)  # type: ignore[arg-type]
-        top_amt = cur_month[top_cat]
-        if top_cat != "Other" and not any(r["category"] == top_cat for r in recs):
-            recs.append({
-                "category": top_cat,
-                "title": f"Reduce {top_cat.lower()} spending",
-                "description": (
-                    f"{top_cat} is your highest expense at ${top_amt:.0f} "
-                    f"this month. Small reductions here have the biggest impact."
-                ),
-                "potential_savings": round(top_amt * 0.10, 2),
-            })
 
+def _rule_high_expense_ratio(ctx: _SpendingContext) -> list[dict]:
+    """Total expenses exceed 80% of income (general savings nudge)."""
+    if ctx.income_total <= 0:
+        return []
+    total_expense = sum(ctx.cur_month.values())
+    if total_expense <= ctx.income_total * 0.8:
+        return []
+    savings_gap = total_expense - ctx.income_total * 0.7
+    return [{
+        "category": "Other",
+        "title": "Spending exceeds 80% of income",
+        "description": (
+            f"You've spent ${total_expense:.0f} out of ${ctx.income_total:.0f} "
+            f"income this month. Aim to keep spending under 70% to build savings."
+        ),
+        "potential_savings": round(max(savings_gap, 0), 2),
+    }]
+
+
+def _rule_top_category(ctx: _SpendingContext, prior: list[dict]) -> list[dict]:
+    """Suggest reductions in the single highest-spend category (if not already covered)."""
+    if not ctx.cur_month:
+        return []
+    top_cat = max(ctx.cur_month, key=lambda c: ctx.cur_month[c])
+    if top_cat == "Other":
+        return []
+    if any(r["category"] == top_cat for r in prior):
+        return []
+    top_amt = ctx.cur_month[top_cat]
+    return [{
+        "category": top_cat,
+        "title": f"Reduce {top_cat.lower()} spending",
+        "description": (
+            f"{top_cat} is your highest expense at ${top_amt:.0f} "
+            f"this month. Small reductions here have the biggest impact."
+        ),
+        "potential_savings": round(top_amt * 0.10, 2),
+    }]
+
+
+# Independent rules, applied in order. _rule_top_category needs the others'
+# output to dedupe, so it's applied as a final pass below.
+_INDEPENDENT_RULES: list[_RuleFn] = [
+    _rule_over_budget,
+    _rule_spending_spike,
+    _rule_set_a_budget,
+    _rule_high_expense_ratio,
+]
+
+
+def generate_recommendations(
+    transactions: list[dict],
+    budgets: list[dict],
+) -> list[dict]:
+    """Produce personalised savings recommendations.
+
+    Rules evaluated:
+    - Over-budget categories -> "Reduce spending in X"
+    - Month-over-month increase > 20% -> "Spending spike in X"
+    - Categories without a budget -> "Set a budget for X"
+    - General savings tip when total spending is high vs income
+    - Top spending category nudge (only if not already mentioned)
+    """
+    if not transactions:
+        return []
+
+    ctx = _summarize(transactions, budgets, now=datetime.now(timezone.utc))
+
+    recs: list[dict] = []
+    for rule in _INDEPENDENT_RULES:
+        recs.extend(rule(ctx))
+    recs.extend(_rule_top_category(ctx, recs))
     return recs

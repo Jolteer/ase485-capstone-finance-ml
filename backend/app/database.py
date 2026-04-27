@@ -59,12 +59,15 @@ def query(sql: str, params: tuple | None = None, *, fetch_one: bool = False):
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(sql, params)
-                # Statements without a result set (e.g. INSERT without RETURNING)
+                # No result set means the caller used a non-SELECT statement here.
+                # Commit so any side effects persist; use execute() for clarity.
                 if cur.description is None:
                     conn.commit()
                     return None
                 rows = cur.fetchall()
-                conn.commit()
+                # Read path: rollback ends the implicit transaction without
+                # writing a no-op commit on every SELECT.
+                conn.rollback()
                 if fetch_one:
                     return dict(rows[0]) if rows else None
                 return [dict(r) for r in rows]

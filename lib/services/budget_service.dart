@@ -3,8 +3,6 @@
 /// All methods throw on non-success; paths use `/budgets` and `/budgets/:id`.
 library;
 
-import 'dart:convert';
-
 import 'package:ase485_capstone_finance_ml/models/budget.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
@@ -17,54 +15,41 @@ class BudgetService {
   /// GET /budgets; returns list of [Budget].
   Future<List<Budget>> fetchBudgets() async {
     final res = await _api.get('/budgets');
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-
-    final list = jsonDecode(res.body) as List;
-    return list.map((j) => Budget.fromJson(j as Map<String, dynamic>)).toList();
+    return ApiClient.decodeJsonList(res, Budget.fromJson);
   }
 
   /// POST /budgets; returns created [Budget] with id.
   ///
-  /// Delegates serialization to [Budget.toJson] and strips server-managed
-  /// fields ([id], [userId], [createdAt]) that the API generates on creation.
+  /// Strips server-managed fields ([id], [userId], [createdAt]) since the API
+  /// generates them on creation.
   Future<Budget> createBudget(Budget budget) async {
-    final body = budget.toJson()
-      ..remove('id')
-      ..remove('user_id')
-      ..remove('created_at');
-
-    final res = await _api.post('/budgets', body: body);
-    if (res.statusCode != 201) throw Exception(ApiClient.extractError(res));
-    return Budget.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _api.post('/budgets', body: _stripServerFields(budget));
+    return ApiClient.decodeJsonObject(res, Budget.fromJson, expected: 201);
   }
 
   /// PUT /budgets/:id; returns updated [Budget].
-  ///
-  /// Delegates serialization to [Budget.toJson] and strips server-managed
-  /// fields ([id], [userId], [createdAt]).
   Future<Budget> updateBudget(Budget budget) async {
-    final body = budget.toJson()
-      ..remove('id')
-      ..remove('user_id')
-      ..remove('created_at');
-
-    final res = await _api.put('/budgets/${budget.id}', body: body);
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-    return Budget.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    final res = await _api.put(
+      '/budgets/${budget.id}',
+      body: _stripServerFields(budget),
+    );
+    return ApiClient.decodeJsonObject(res, Budget.fromJson);
   }
 
   /// DELETE /budgets/:id.
   Future<void> deleteBudget(String id) async {
     final res = await _api.delete('/budgets/$id');
-    if (res.statusCode != 204) throw Exception(ApiClient.extractError(res));
+    ApiClient.expectStatus(res, 204);
   }
 
   /// POST /ml/budgets/generate; replaces current budgets with ML-generated ones.
   Future<List<Budget>> generateBudgets() async {
     final res = await _api.post('/ml/budgets/generate');
-    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
-
-    final list = jsonDecode(res.body) as List;
-    return list.map((j) => Budget.fromJson(j as Map<String, dynamic>)).toList();
+    return ApiClient.decodeJsonList(res, Budget.fromJson);
   }
+
+  Map<String, dynamic> _stripServerFields(Budget budget) => budget.toJson()
+    ..remove('id')
+    ..remove('user_id')
+    ..remove('created_at');
 }

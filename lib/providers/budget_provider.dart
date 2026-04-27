@@ -5,18 +5,17 @@
 library;
 
 import 'package:flutter/foundation.dart';
+
 import 'package:ase485_capstone_finance_ml/models/budget.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 import 'package:ase485_capstone_finance_ml/services/budget_service.dart';
-import 'package:ase485_capstone_finance_ml/utils/error_helpers.dart';
+import 'package:ase485_capstone_finance_ml/utils/async_operation_mixin.dart';
 
 /// Manages the list of [Budget]s and delegates to [BudgetService] for API calls.
-class BudgetProvider extends ChangeNotifier {
+class BudgetProvider extends ChangeNotifier with AsyncOperationMixin {
   final BudgetService _service;
 
   List<Budget> _budgets = [];
-  bool _isLoading = false;
-  String? _error;
 
   /// Pass [service] in tests to inject a mock; production code omits it and
   /// requires [apiClient] to construct the default [BudgetService].
@@ -26,90 +25,32 @@ class BudgetProvider extends ChangeNotifier {
   /// Unmodifiable list of budgets; load with [fetchBudgets].
   List<Budget> get budgets => List.unmodifiable(_budgets);
 
-  /// True while [fetchBudgets] is running.
-  bool get isLoading => _isLoading;
-
-  /// Last error from a budget operation, or null. Clear with [clearError].
-  String? get error => _error;
-
-  /// Clears [error] and notifies listeners.
-  void clearError() {
-    _error = null;
-    notifyListeners();
-  }
-
   /// Fetches budgets from the API and updates [budgets].
-  Future<void> fetchBudgets() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _budgets = await _service.fetchBudgets();
-    } catch (e) {
-      _error = formatError(e);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  Future<void> fetchBudgets() => runLoad(() async {
+    _budgets = await _service.fetchBudgets();
+  });
 
   /// Creates a budget via API and inserts it at the start of [budgets].
-  Future<void> addBudget(Budget budget) async {
-    _error = null;
-    try {
-      final created = await _service.createBudget(budget);
-      _budgets.insert(0, created);
-      notifyListeners();
-    } catch (e) {
-      _error = formatError(e);
-      notifyListeners();
-      rethrow;
-    }
-  }
+  Future<void> addBudget(Budget budget) => runMutate(() async {
+    final created = await _service.createBudget(budget);
+    _budgets.insert(0, created);
+  });
 
   /// Updates a budget via API and replaces it in [budgets].
-  Future<void> updateBudget(Budget budget) async {
-    _error = null;
-    try {
-      final updated = await _service.updateBudget(budget);
-      final idx = _budgets.indexWhere((b) => b.id == budget.id);
-      if (idx != -1) _budgets[idx] = updated;
-      notifyListeners();
-    } catch (e) {
-      _error = formatError(e);
-      notifyListeners();
-      rethrow;
-    }
-  }
+  Future<void> updateBudget(Budget budget) => runMutate(() async {
+    final updated = await _service.updateBudget(budget);
+    final idx = _budgets.indexWhere((b) => b.id == budget.id);
+    if (idx != -1) _budgets[idx] = updated;
+  });
 
   /// Deletes the budget with [id] via API and removes it from [budgets].
-  Future<void> deleteBudget(String id) async {
-    _error = null;
-    try {
-      await _service.deleteBudget(id);
-      _budgets.removeWhere((b) => b.id == id);
-      notifyListeners();
-    } catch (e) {
-      _error = formatError(e);
-      notifyListeners();
-      rethrow;
-    }
-  }
+  Future<void> deleteBudget(String id) => runMutate(() async {
+    await _service.deleteBudget(id);
+    _budgets.removeWhere((b) => b.id == id);
+  });
 
   /// Replaces all budgets with ML-generated suggestions based on transaction history.
-  Future<void> generateBudgets() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _budgets = await _service.generateBudgets();
-    } catch (e) {
-      _error = formatError(e);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  Future<void> generateBudgets() => runLoad(() async {
+    _budgets = await _service.generateBudgets();
+  });
 }

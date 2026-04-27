@@ -61,11 +61,11 @@ INSERT INTO budgets (user_id, category, limit_amount, period) VALUES
     ('demo-user-0001', 'Education',      100,  'monthly');
 
 -- ── Goals ──────────────────────────────────────────────────────────────
-INSERT INTO goals (user_id, target_amount, target_date, description, progress) VALUES
-    ('demo-user-0001', 3000,  '2026-06-01T00:00:00Z', 'Vacation Fund',   1800),
-    ('demo-user-0001', 50000, '2027-12-01T00:00:00Z', 'Down Payment',   12000),
-    ('demo-user-0001', 5000,  '2026-01-01T00:00:00Z', 'Emergency Fund',  5000),
-    ('demo-user-0001', 15000, '2027-03-01T00:00:00Z', 'New Car',         3200);
+INSERT INTO goals (user_id, target_amount, target_date, description, progress, category) VALUES
+    ('demo-user-0001', 3000,  '2026-06-01T00:00:00Z', 'Vacation Fund',   1800, 'vacation'),
+    ('demo-user-0001', 50000, '2027-12-01T00:00:00Z', 'Down Payment',   12000, 'home'),
+    ('demo-user-0001', 5000,  '2026-01-01T00:00:00Z', 'Emergency Fund',  5000, 'emergency'),
+    ('demo-user-0001', 15000, '2027-03-01T00:00:00Z', 'New Car',         3200, 'car');
 
 -- ── Recommendations ────────────────────────────────────────────────────
 INSERT INTO recommendations (user_id, category, title, description, potential_savings) VALUES

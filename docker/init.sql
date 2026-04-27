@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS goals (
     target_amount   DOUBLE PRECISION NOT NULL,
     target_date     TIMESTAMPTZ NOT NULL,
     description     TEXT NOT NULL DEFAULT '',
-    progress        DOUBLE PRECISION NOT NULL DEFAULT 0
+    progress        DOUBLE PRECISION NOT NULL DEFAULT 0,
+    category        TEXT NOT NULL DEFAULT 'other'
 );
 
 CREATE INDEX IF NOT EXISTS idx_goals_user ON goals(user_id);
