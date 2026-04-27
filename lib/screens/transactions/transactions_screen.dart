@@ -11,6 +11,7 @@ import 'package:ase485_capstone_finance_ml/config/routes.dart';
 import 'package:ase485_capstone_finance_ml/config/spacing.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/providers/transaction_provider.dart';
+import 'package:ase485_capstone_finance_ml/utils/provider_error_mixin.dart';
 import 'package:ase485_capstone_finance_ml/widgets/loading_overlay.dart';
 import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
 
@@ -23,12 +24,10 @@ class TransactionsScreen extends StatefulWidget {
   State<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends State<TransactionsScreen> {
+class _TransactionsScreenState extends State<TransactionsScreen>
+    with ProviderErrorMixin {
   late DateTime _selectedMonth;
   TransactionCategory? _selectedCategory;
-
-  /// Cached provider reference so we can attach/detach the listener safely.
-  TransactionProvider? _provider;
 
   @override
   void initState() {
@@ -41,35 +40,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final provider = context.read<TransactionProvider>();
-    if (_provider != provider) {
-      _provider?.removeListener(_onProviderChanged);
-      _provider = provider..addListener(_onProviderChanged);
-      if (_provider!.transactions.isEmpty && !_provider!.isLoading) {
-        _provider!.fetchTransactions();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _provider?.removeListener(_onProviderChanged);
-    super.dispose();
-  }
-
-  /// Shows a SnackBar when [TransactionProvider.error] is set, then clears it.
-  void _onProviderChanged() {
-    final error = _provider?.error;
-    if (error != null && mounted) {
-      _provider!.clearError();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      });
+    listenForErrors<TransactionProvider>(
+      provider,
+      getError: (p) => p.error,
+      clearError: (p) => p.clearError(),
+    );
+    if (provider.transactions.isEmpty && !provider.isLoading) {
+      provider.fetchTransactions();
     }
   }
 

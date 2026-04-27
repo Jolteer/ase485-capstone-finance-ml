@@ -58,4 +58,13 @@ class BudgetService {
     final res = await _api.delete('/budgets/$id');
     if (res.statusCode != 204) throw Exception(ApiClient.extractError(res));
   }
+
+  /// POST /ml/budgets/generate; replaces current budgets with ML-generated ones.
+  Future<List<Budget>> generateBudgets() async {
+    final res = await _api.post('/ml/budgets/generate');
+    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
+
+    final list = jsonDecode(res.body) as List;
+    return list.map((j) => Budget.fromJson(j as Map<String, dynamic>)).toList();
+  }
 }

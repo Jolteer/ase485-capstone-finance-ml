@@ -59,17 +59,25 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 12. **Persisted Settings** — `SettingsProvider` backed by `SharedPreferences`: dark mode, notification preference, biometric-login toggle, and currency locale (propagated to `Formatters` in real time).
 13. **6-Provider Architecture** — `SettingsProvider`, `AuthProvider`, `TransactionProvider`, `BudgetProvider`, `GoalProvider`, and `RecommendationProvider` registered in `MultiProvider`; `ApiClient` singleton injected via `Provider`.
 
-> **Current State:** The backend API is fully operational. The Flutter frontend has all screens, providers, services, and models in place. Persistent auth and settings are complete. Live provider-to-screen wiring is in progress for Sprint 2.
+> **Current State:** The backend API is fully operational with 18 endpoints including 3 ML-powered endpoints. The Flutter frontend has all 11 screens connected to live API data with 6 providers. ML features (categorization, budget generation, recommendations), budget alerts, persistent auth, and persisted settings are all complete.
 
-### Planned / In Progress
+#### Sprint 2 Features (Delivered)
 
-- Live provider integration (connecting remaining screens to real API data).
-- ML-powered automatic transaction categorization.
-- Budget adaptation that learns from new spending data over time.
-- Push notifications when approaching or exceeding budget limits.
+14. **ML Transaction Categorization** — TF-IDF + Naive Bayes pipeline (scikit-learn) auto-categorizes transactions from description text. Standalone `/ml/categorize` endpoint and integrated into POST `/transactions` when category is omitted.
+15. **ML Budget Generation** — Analyses transaction history per category and suggests monthly budgets with 10% buffer. POST `/ml/budgets/generate` replaces existing budgets with ML suggestions.
+16. **ML Savings Recommendations** — Rule-based engine evaluating over-budget categories, spending spikes, missing budgets, and income ratio. POST `/ml/recommendations/generate` produces personalised tips.
+17. **Budget Alerts** — Client-side alert system detecting budget usage at 80% (warning) and 100% (danger). Alert banners on Home dashboard, notification bell with badge count, and bottom-sheet detail view.
+18. **Persistent Auth** — `AuthProvider.tryRestore` reads JWT and cached user from `flutter_secure_storage` on startup; bypasses login screen if session is valid.
+19. **Persisted Settings** — `SettingsProvider` backed by `SharedPreferences`: dark mode, notifications, biometric toggle, currency locale.
+
+### Planned / Future
+
 - Data import from external sources (CSV / bank feeds).
+- Firebase push notifications for real-time alerts.
+- Adaptive budgets that adjust month-to-month automatically.
+- Deep learning categorization (BERT embeddings).
 
-**Total: 13 features, 14 requirements**
+**Total: 19 features, 20 requirements**
 
 ### Non-Functional Requirements
 
@@ -131,7 +139,8 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   │   ├── transaction_tile.dart
 │   │   ├── goal_progress_card.dart
 │   │   ├── category_card.dart
-│   │   └── loading_overlay.dart
+│   │   ├── loading_overlay.dart
+│   │   └── budget_alert_banner.dart
 │   ├── utils/              # Formatters, validators, categories, helpers
 │   │   ├── formatters.dart      # currency, date, percent (via intl); updateLocale
 │   │   ├── validators.dart      # form field validators (email, password, amount)
@@ -148,7 +157,8 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │       ├── auth.py         # JWT creation & HTTPBearer verification dependency
 │       ├── database.py     # psycopg2 connection pool, query/execute helpers
 │       ├── schemas.py      # Pydantic v2 request/response models
-│       └── routers/        # auth, transactions, budgets, goals, recommendations
+│       ├── ml_engine.py    # ML: categorization, budget generation, recommendations
+│       └── routers/        # auth, transactions, budgets, goals, recommendations, ml
 ├── docker/
 │   ├── init.sql            # Schema DDL (5 tables, UUID PKs, FK cascade)
 │   └── seed.sql            # Demo user + 30 transactions + budgets/goals/recommendations
@@ -169,7 +179,8 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 ├── integration_test/       # Flutter integration test (full app smoke test)
 └── docs/                   # Project documentation & presentations
     └── presentation/
-        └── sprint1_presentation.md
+        ├── sprint1_presentation.md
+        └── sprint2_presentation.md
 ```
 
 ---
@@ -194,23 +205,27 @@ Schema definition: [docker/init.sql](docker/init.sql) · Seed data: [docker/seed
 
 All routes are mounted under `/api/v1`. Authenticated endpoints require an `Authorization: Bearer <JWT>` header.
 
-| Method   | Path                        | Auth | Description                                      |
-| -------- | --------------------------- | :--: | ------------------------------------------------ |
-| `GET`    | `/health`                   |  —   | Health check                                     |
-| `POST`   | `/api/v1/auth/register`     |  —   | Create account, receive JWT + user               |
-| `POST`   | `/api/v1/auth/login`        |  —   | Authenticate, receive JWT + user                 |
-| `GET`    | `/api/v1/transactions`      |  ✔   | List transactions (optional `?category=` filter) |
-| `POST`   | `/api/v1/transactions`      |  ✔   | Create a transaction                             |
-| `DELETE` | `/api/v1/transactions/{id}` |  ✔   | Delete a transaction                             |
-| `GET`    | `/api/v1/budgets`           |  ✔   | List budgets                                     |
-| `POST`   | `/api/v1/budgets`           |  ✔   | Create a budget                                  |
-| `PUT`    | `/api/v1/budgets/{id}`      |  ✔   | Partial-update a budget                          |
-| `DELETE` | `/api/v1/budgets/{id}`      |  ✔   | Delete a budget                                  |
-| `GET`    | `/api/v1/goals`             |  ✔   | List goals (ordered by target date)              |
-| `POST`   | `/api/v1/goals`             |  ✔   | Create a goal                                    |
-| `PUT`    | `/api/v1/goals/{id}`        |  ✔   | Partial-update a goal                            |
-| `DELETE` | `/api/v1/goals/{id}`        |  ✔   | Delete a goal                                    |
-| `GET`    | `/api/v1/recommendations`   |  ✔   | List recommendations                             |
+| Method   | Path                                  | Auth | Description                                             |
+| -------- | ------------------------------------- | :--: | ------------------------------------------------------- |
+| `GET`    | `/health`                             |  —   | Health check                                            |
+| `POST`   | `/api/v1/auth/register`               |  —   | Create account, receive JWT + user                      |
+| `POST`   | `/api/v1/auth/login`                  |  —   | Authenticate, receive JWT + user                        |
+| `GET`    | `/api/v1/transactions`                |  ✔   | List transactions (optional `?category=` filter)        |
+| `POST`   | `/api/v1/transactions`                |  ✔   | Create a transaction (auto-categorizes if no category)  |
+| `PUT`    | `/api/v1/transactions/{id}`           |  ✔   | Partial-update a transaction                            |
+| `DELETE` | `/api/v1/transactions/{id}`           |  ✔   | Delete a transaction                                    |
+| `GET`    | `/api/v1/budgets`                     |  ✔   | List budgets                                            |
+| `POST`   | `/api/v1/budgets`                     |  ✔   | Create a budget                                         |
+| `PUT`    | `/api/v1/budgets/{id}`                |  ✔   | Partial-update a budget                                 |
+| `DELETE` | `/api/v1/budgets/{id}`                |  ✔   | Delete a budget                                         |
+| `GET`    | `/api/v1/goals`                       |  ✔   | List goals (ordered by target date)                     |
+| `POST`   | `/api/v1/goals`                       |  ✔   | Create a goal                                           |
+| `PUT`    | `/api/v1/goals/{id}`                  |  ✔   | Partial-update a goal                                   |
+| `DELETE` | `/api/v1/goals/{id}`                  |  ✔   | Delete a goal                                           |
+| `GET`    | `/api/v1/recommendations`             |  ✔   | List recommendations                                    |
+| `POST`   | `/api/v1/ml/categorize`               |  ✔   | ML: predict category from description                   |
+| `POST`   | `/api/v1/ml/budgets/generate`         |  ✔   | ML: generate budgets from transaction history           |
+| `POST`   | `/api/v1/ml/recommendations/generate` |  ✔   | ML: generate savings recommendations from spending data |
 
 Interactive API docs available at `http://localhost:8000/api/v1/docs` when the backend is running.
 
@@ -305,18 +320,24 @@ flutter test integration_test/
 
 ## Tests
 
-### Unit & Widget Tests (`test/`)
+### Flutter Unit & Widget Tests (`test/`)
 
 - **App test** — `app_test.dart` verifies `SmartSpendApp` renders without crashing.
 - **Model tests** — `fromJson`/`toJson` round-trips and computed properties for `Transaction`, `Budget`, `Goal`, `Recommendation`, and `User`.
 - **Provider tests** — `AuthProvider`, `TransactionProvider`, `BudgetProvider`, and `GoalProvider` tested with `mocktail`-injected service mocks covering loading state, success, and error paths.
 - **Service tests** — `ApiClient`, `AuthService`, `TransactionService`, `BudgetService`, `GoalService`, and `RecommendationService` tested against mocked HTTP responses.
 - **Utility tests** — Form validators (email, password min-length, numeric amount) and `formatError` error-string helper.
-- **Widget tests** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, and `LoadingOverlay` render and behave correctly.
+- **Widget tests** — `SummaryCard`, `TransactionTile`, `GoalProgressCard`, `CategoryCard`, `LoadingOverlay`, and `BudgetAlertBanner` render and behave correctly.
 
-### Integration Tests (`integration_test/`)
+### Flutter Integration Tests (`integration_test/`)
 
-- Full app smoke test — launches `SmartSpendApp` and verifies the app title renders. Extended E2E flow tests planned for later in Sprint 2.
+- App launch tests — login screen renders, form fields present, navigation to register screen.
+- Login form validation — empty email submit shows error.
+
+### Backend Tests (`backend/tests/`)
+
+- **ML Engine tests** — categorization accuracy across all 8 categories, confidence scores, budget generation from transaction history, recommendation generation rules.
+- **API endpoint tests** — all CRUD endpoints (transactions, budgets, goals, recommendations) and ML endpoints (`/ml/categorize`, `/ml/budgets/generate`, `/ml/recommendations/generate`) tested with mocked database layer.
 
 ### Acceptance Criteria
 
@@ -337,14 +358,14 @@ flutter test integration_test/
 - Week 7: Dashboard & visualization (budget/goals/recommendations API, spending analytics screens)
 - Week 8: Testing, bug fixes, UI polish (account, settings, analytics), Sprint 1 Presentation
 
-### Sprint 2 (Weeks 9–15) — In Progress
+### Sprint 2 (Weeks 9–15) — Complete
 
 - Week 9: Persistent auth (secure token storage), `SettingsProvider` (SharedPreferences), `RecommendationProvider`; expanded test suite (providers, services, all widgets)
-- Week 10: Live provider integration — connect remaining Flutter screens to real API data; ML categorization model
-- Week 11: Budget adaptation system (ML-driven budget generation)
-- Week 12: Savings recommendations engine (ML inference pipeline)
-- Week 13: Alerts & push notifications when approaching budget limits
-- Week 14: Flutter app polish, full integration testing, deployment
+- Week 10: Live provider integration — all Flutter screens connected to real API data
+- Week 11: ML categorization engine (TF-IDF + Naive Bayes), auto-categorize on transaction create
+- Week 12: ML budget generation + ML savings recommendations engine
+- Week 13: Budget alerts (banners, notification bell with badge, bottom sheet details)
+- Week 14: Backend pytest suite, integration tests, UI polish, cleanup
 - Week 15: Final testing, deployment, Final Presentation (4/27, 4/29)
 
 ---
@@ -352,6 +373,7 @@ flutter test integration_test/
 ## Project Documentation
 
 - [Sprint 1 Presentation](docs/presentation/sprint1_presentation.md)
+- [Sprint 2 Final Presentation](docs/presentation/sprint2_presentation.md)
 - **Repositories:**
   - Capstone Project: https://github.com/Jolteer/ase485-capstone-finance-ml
   - Learning with AI: https://github.com/Jolteer/ase485-learning-with-ai

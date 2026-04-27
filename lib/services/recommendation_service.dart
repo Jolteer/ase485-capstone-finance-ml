@@ -24,4 +24,15 @@ class RecommendationService {
         .map((j) => Recommendation.fromJson(j as Map<String, dynamic>))
         .toList();
   }
+
+  /// POST /ml/recommendations/generate; regenerates recommendations via ML.
+  Future<List<Recommendation>> generateRecommendations() async {
+    final res = await _api.post('/ml/recommendations/generate');
+    if (res.statusCode != 200) throw Exception(ApiClient.extractError(res));
+
+    final list = jsonDecode(res.body) as List;
+    return list
+        .map((j) => Recommendation.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
 }

@@ -5,4 +5,6 @@
 - budgets:    GET/POST /budgets, PUT/DELETE /budgets/:id
 - goals:      GET/POST /goals, PUT/DELETE /goals/:id
 - recommendations: GET /recommendations (read-only)
+- ml:         POST /ml/categorize, POST /ml/budgets/generate,
+              POST /ml/recommendations/generate
 """

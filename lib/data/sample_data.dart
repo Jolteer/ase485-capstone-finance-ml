@@ -5,14 +5,14 @@
 /// Replace with real provider/service data in production.
 library;
 
-import 'package:ase485_capstone_finance_ml/viewmodels/budget_item.dart';
-import 'package:ase485_capstone_finance_ml/viewmodels/category_breakdown.dart';
+import 'package:ase485_capstone_finance_ml/models/budget_item.dart';
+import 'package:ase485_capstone_finance_ml/models/category_breakdown.dart';
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
 import 'package:ase485_capstone_finance_ml/models/recommendation.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 
-export 'package:ase485_capstone_finance_ml/viewmodels/budget_item.dart';
-export 'package:ase485_capstone_finance_ml/viewmodels/category_breakdown.dart';
+export 'package:ase485_capstone_finance_ml/models/budget_item.dart';
+export 'package:ase485_capstone_finance_ml/models/category_breakdown.dart';
 
 // ---------------------------------------------------------------------------
 // Transactions (sample list for demo/fallback when API is unavailable)

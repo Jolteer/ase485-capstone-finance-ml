@@ -96,4 +96,20 @@ class BudgetProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  /// Replaces all budgets with ML-generated suggestions based on transaction history.
+  Future<void> generateBudgets() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _budgets = await _service.generateBudgets();
+    } catch (e) {
+      _error = formatError(e);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

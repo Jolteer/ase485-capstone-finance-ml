@@ -35,7 +35,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
       _provider?.removeListener(_onProviderChanged);
       _provider = provider..addListener(_onProviderChanged);
       if (_provider!.recommendations.isEmpty && !_provider!.isLoading) {
-        _provider!.fetchRecommendations();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _provider!.fetchRecommendations();
+        });
       }
     }
   }
@@ -83,6 +85,12 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                   ),
                 ],
               ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () =>
+              context.read<RecommendationProvider>().generateRecommendations(),
+          icon: const Icon(Icons.auto_awesome),
+          label: const Text('Refresh Tips'),
+        ),
       ),
     );
   }

@@ -45,10 +45,13 @@ class TokenResponse(BaseModel):
 # ── Transactions ────────────────────────────────────────────────────────────
 
 class TransactionCreate(BaseModel):
-    """Request body for POST /transactions. amount: positive = income, negative = expense."""
+    """Request body for POST /transactions. amount: positive = income, negative = expense.
+
+    When *category* is omitted or empty the ML categorizer predicts it from *description*.
+    """
 
     amount: float
-    category: str
+    category: str = ""
     description: str = ""
     date: datetime | None = None  # Defaults to now on the server if omitted
 
@@ -145,3 +148,18 @@ class RecommendationResponse(BaseModel):
     description: str
     potential_savings: float
     created_at: datetime
+
+
+# ── ML ─────────────────────────────────────────────────────────────────────
+
+class CategorizeRequest(BaseModel):
+    """Request body for POST /ml/categorize."""
+
+    description: str
+
+
+class CategorizeResponse(BaseModel):
+    """ML prediction result: predicted category and model confidence."""
+
+    category: str
+    confidence: float

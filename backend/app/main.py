@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import close_pool
-from app.routers import auth, budgets, goals, recommendations, transactions
+from app.routers import auth, budgets, goals, ml, recommendations, transactions
 
 
 @asynccontextmanager
@@ -44,6 +44,7 @@ api.include_router(transactions.router)  # /api/v1/transactions
 api.include_router(budgets.router)       # /api/v1/budgets
 api.include_router(goals.router)        # /api/v1/goals
 api.include_router(recommendations.router)  # /api/v1/recommendations
+api.include_router(ml.router)              # /api/v1/ml
 
 app.mount("/api/v1", api)
 

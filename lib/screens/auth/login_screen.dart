@@ -56,7 +56,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       auth.clearError();
     } else if (auth.isAuthenticated) {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
     }
   }
 

@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.auth import get_current_user_id
 from app.database import execute, query
+from app.ml_engine import predict_category
 from app.schemas import TransactionCreate, TransactionResponse, TransactionUpdate
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -40,12 +41,19 @@ def create_transaction(
     body: TransactionCreate,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Create a transaction. date defaults to now if omitted."""
+    """Create a transaction. date defaults to now if omitted.
+
+    When category is empty the ML model auto-categorises from description.
+    """
+    category = body.category
+    if not category:
+        category = predict_category(body.description)
+
     row = execute(
         """INSERT INTO transactions (user_id, amount, category, description, date)
            VALUES (%s, %s, %s, %s, COALESCE(%s, now()))
            RETURNING *""",
-        (user_id, body.amount, body.category, body.description, body.date),
+        (user_id, body.amount, category, body.description, body.date),
     )
     return row
 

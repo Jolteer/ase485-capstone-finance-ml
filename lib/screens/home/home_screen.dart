@@ -9,17 +9,20 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ase485_capstone_finance_ml/config/constants.dart';
 import 'package:ase485_capstone_finance_ml/config/routes.dart';
+import 'package:ase485_capstone_finance_ml/config/spacing.dart';
 import 'package:ase485_capstone_finance_ml/providers/auth_provider.dart';
 import 'package:ase485_capstone_finance_ml/providers/transaction_provider.dart';
+import 'package:ase485_capstone_finance_ml/providers/budget_provider.dart';
 import 'package:ase485_capstone_finance_ml/screens/transactions/transactions_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/budget/budget_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/goals/goals_screen.dart';
 import 'package:ase485_capstone_finance_ml/screens/account/account_screen.dart';
-import 'package:ase485_capstone_finance_ml/config/spacing.dart';
 import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
+import 'package:ase485_capstone_finance_ml/utils/spending_helpers.dart';
+import 'package:ase485_capstone_finance_ml/widgets/budget_alert_banner.dart';
 import 'package:ase485_capstone_finance_ml/widgets/loading_overlay.dart';
+import 'package:ase485_capstone_finance_ml/widgets/notification_bell.dart';
 import 'package:ase485_capstone_finance_ml/widgets/summary_card.dart';
 import 'package:ase485_capstone_finance_ml/widgets/transaction_tile.dart';
 
@@ -48,23 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-load transactions so the home dashboard has real data immediately.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TransactionProvider>().fetchTransactions();
+      context.read<BudgetProvider>().fetchBudgets();
     });
   }
 
-  /// AppBar shown only for the home tab; other tabs render their own.
   PreferredSizeWidget? get _appBar {
     if (_currentIndex != 0) return null;
     return AppBar(
       title: const Text('SmartSpend'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () {}, // TODO: notifications
-        ),
-      ],
+      actions: const [NotificationBell()],
     );
   }
 
@@ -93,13 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// _HomeDashboard — no Scaffold; lives inside the HomeScreen Scaffold
+// _HomeDashboard
 // ---------------------------------------------------------------------------
 
-/// Dashboard body: greeting, summary cards, quick actions, recent transactions.
-///
-/// Intentionally not a [Scaffold]; the outer [HomeScreen] Scaffold provides the
-/// [AppBar] and [BottomNavigationBar] for this tab.
 class _HomeDashboard extends StatelessWidget {
   const _HomeDashboard();
 
@@ -113,6 +106,8 @@ class _HomeDashboard extends StatelessWidget {
         children: const [
           _Greeting(),
           SizedBox(height: AppSpacing.s20),
+          BudgetAlertBanner(),
+          SizedBox(height: AppSpacing.sm),
           _SummaryCards(),
           SizedBox(height: AppSpacing.lg),
           _QuickActionsBar(),
@@ -128,7 +123,6 @@ class _HomeDashboard extends StatelessWidget {
 // _Greeting
 // ---------------------------------------------------------------------------
 
-/// "Welcome back, `name`!" greeting that reads the real user name from [AuthProvider].
 class _Greeting extends StatelessWidget {
   const _Greeting();
 
@@ -163,30 +157,15 @@ class _Greeting extends StatelessWidget {
 // _SummaryCards
 // ---------------------------------------------------------------------------
 
-/// 2×2 grid of [SummaryCard]s computed from the current month's transactions.
-///
-/// - **Income**: sum of positive amounts in the current calendar month.
-/// - **Spent**: sum of absolute expense amounts in the current calendar month.
-/// - **Balance**: income − spent (can be negative if overspent).
-/// - **Savings**: balance clamped to zero (never shown as negative).
 class _SummaryCards extends StatelessWidget {
   const _SummaryCards();
 
   @override
   Widget build(BuildContext context) {
     final transactions = context.watch<TransactionProvider>().transactions;
-    final now = DateTime.now();
 
-    final monthly = transactions.where(
-      (t) => t.date.year == now.year && t.date.month == now.month,
-    );
-
-    final income = monthly
-        .where((t) => t.isIncome)
-        .fold(0.0, (s, t) => s + t.amount);
-    final spent = monthly
-        .where((t) => t.isExpense)
-        .fold(0.0, (s, t) => s + t.absAmount);
+    final income = monthlyIncome(transactions);
+    final spent = monthlyExpenses(transactions);
     final balance = income - spent;
     final savings = balance.clamp(0.0, double.maxFinite);
 
@@ -237,10 +216,9 @@ class _SummaryCards extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _QuickActionsBar  (unchanged logic; kept here for clarity)
+// _QuickActionsBar
 // ---------------------------------------------------------------------------
 
-/// Row of quick actions: Add, Analytics, Tips, Settings.
 class _QuickActionsBar extends StatelessWidget {
   const _QuickActionsBar();
 
@@ -289,7 +267,6 @@ class _QuickActionsBar extends StatelessWidget {
   }
 }
 
-/// Single quick-action button: icon inside a [CircleAvatar] with label below.
 class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -305,7 +282,7 @@ class _QuickAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      borderRadius: BorderRadius.circular(AppConstants.radiusLg),
+      borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.s12),
@@ -328,9 +305,6 @@ class _QuickAction extends StatelessWidget {
 // _RecentTransactionsSection
 // ---------------------------------------------------------------------------
 
-/// "Recent Transactions" section: header with "See all" link and up to 5
-/// [TransactionTile]s from [TransactionProvider]; each tile taps through to
-/// the edit screen.
 class _RecentTransactionsSection extends StatelessWidget {
   const _RecentTransactionsSection();
 

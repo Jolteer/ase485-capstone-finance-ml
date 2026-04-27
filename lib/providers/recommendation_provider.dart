@@ -57,4 +57,20 @@ class RecommendationProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Regenerates recommendations via ML analysis and updates [recommendations].
+  Future<void> generateRecommendations() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _recommendations = await _service.generateRecommendations();
+    } catch (e) {
+      _error = formatError(e);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
