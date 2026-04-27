@@ -48,7 +48,7 @@ SmartSpend is a mobile app that learns from your real spending and gives back pe
 ## What Went Wrong
 
 - Connecting the app to the backend took trial and error
-- Keeping users logged in across restarts had edge cases
+- Keeping users logged in across restarts
 - Building enough training examples for the ML model
 - Keeping the project lightweight after adding ML libraries
 
@@ -58,7 +58,6 @@ SmartSpend is a mobile app that learns from your real spending and gives back pe
 
 - Sprint 1 architecture made Sprint 2 ML integration smooth
 - Provider pattern stayed clean across all 11 screens
-- TF-IDF + Naive Bayes is fast and lightweight — no GPU needed
 - Test coverage held strong (25+ Flutter test files + pytest)
 
 ---
