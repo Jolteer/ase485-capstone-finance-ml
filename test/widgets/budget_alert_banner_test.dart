@@ -9,16 +9,17 @@ import 'package:ase485_capstone_finance_ml/utils/budget_helpers.dart';
 void main() {
   final now = DateTime.now();
 
-  Transaction _expense(TransactionCategory cat, double amount) => Transaction(
-    id: 'tx-${cat.name}',
-    userId: 'u1',
-    amount: -amount.abs(),
-    category: cat,
-    description: 'test',
-    date: DateTime(now.year, now.month, 15),
-  );
+  Transaction makeExpense(TransactionCategory cat, double amount) =>
+      Transaction(
+        id: 'tx-${cat.name}',
+        userId: 'u1',
+        amount: -amount.abs(),
+        category: cat,
+        description: 'test',
+        date: DateTime(now.year, now.month, 15),
+      );
 
-  Budget _budget(TransactionCategory cat, double limit) => Budget(
+  Budget makeBudget(TransactionCategory cat, double limit) => Budget(
     id: 'b-${cat.name}',
     userId: 'u1',
     category: cat,
@@ -30,23 +31,23 @@ void main() {
   group('computeBudgetAlerts', () {
     test('returns empty when no budgets', () {
       final alerts = computeBudgetAlerts([], [
-        _expense(TransactionCategory.food, 100),
+        makeExpense(TransactionCategory.food, 100),
       ]);
       expect(alerts, isEmpty);
     });
 
     test('returns empty when spending is below 80%', () {
       final alerts = computeBudgetAlerts(
-        [_budget(TransactionCategory.food, 500)],
-        [_expense(TransactionCategory.food, 300)],
+        [makeBudget(TransactionCategory.food, 500)],
+        [makeExpense(TransactionCategory.food, 300)],
       );
       expect(alerts, isEmpty);
     });
 
     test('returns warning at 80%', () {
       final alerts = computeBudgetAlerts(
-        [_budget(TransactionCategory.food, 500)],
-        [_expense(TransactionCategory.food, 420)],
+        [makeBudget(TransactionCategory.food, 500)],
+        [makeExpense(TransactionCategory.food, 420)],
       );
       expect(alerts, hasLength(1));
       expect(alerts.first.severity, AlertSeverity.warning);
@@ -54,8 +55,8 @@ void main() {
 
     test('returns danger at 100%', () {
       final alerts = computeBudgetAlerts(
-        [_budget(TransactionCategory.food, 500)],
-        [_expense(TransactionCategory.food, 550)],
+        [makeBudget(TransactionCategory.food, 500)],
+        [makeExpense(TransactionCategory.food, 550)],
       );
       expect(alerts, hasLength(1));
       expect(alerts.first.severity, AlertSeverity.danger);
@@ -65,12 +66,12 @@ void main() {
     test('sorts by ratio descending', () {
       final alerts = computeBudgetAlerts(
         [
-          _budget(TransactionCategory.food, 100),
-          _budget(TransactionCategory.entertainment, 100),
+          makeBudget(TransactionCategory.food, 100),
+          makeBudget(TransactionCategory.entertainment, 100),
         ],
         [
-          _expense(TransactionCategory.food, 85),
-          _expense(TransactionCategory.entertainment, 110),
+          makeExpense(TransactionCategory.food, 85),
+          makeExpense(TransactionCategory.entertainment, 110),
         ],
       );
       expect(alerts, hasLength(2));
@@ -79,7 +80,7 @@ void main() {
 
     test('ignores transactions from other months', () {
       final alerts = computeBudgetAlerts(
-        [_budget(TransactionCategory.food, 100)],
+        [makeBudget(TransactionCategory.food, 100)],
         [
           Transaction(
             id: 'old',

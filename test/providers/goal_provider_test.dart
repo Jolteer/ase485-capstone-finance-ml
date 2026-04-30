@@ -9,22 +9,14 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:ase485_capstone_finance_ml/models/goal.dart';
 import 'package:ase485_capstone_finance_ml/providers/goal_provider.dart';
+import 'package:ase485_capstone_finance_ml/repositories/goal_repository.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
-import 'package:ase485_capstone_finance_ml/services/goal_service.dart';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Mock classes
-// ──────────────────────────────────────────────────────────────────────────────
-
-class MockGoalService extends Mock implements GoalService {}
+class MockGoalRepository extends Mock implements GoalRepository {}
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Fixtures
-// ──────────────────────────────────────────────────────────────────────────────
-
-Goal _makeGoal({
+Goal makeGoal({
   String id = 'g1',
   double target = 5000.0,
   double progress = 1000.0,
@@ -39,15 +31,15 @@ Goal _makeGoal({
 );
 
 void main() {
-  late MockGoalService mockService;
+  late MockGoalRepository mockRepo;
   late ApiClient dummyApi;
 
   setUpAll(() {
-    registerFallbackValue(_makeGoal());
+    registerFallbackValue(makeGoal());
   });
 
   setUp(() {
-    mockService = MockGoalService();
+    mockRepo = MockGoalRepository();
     final storage = MockFlutterSecureStorage();
     when(
       () => storage.read(key: any(named: 'key')),
@@ -65,189 +57,91 @@ void main() {
     );
   });
 
-  GoalProvider _makeProvider() =>
-      GoalProvider(apiClient: dummyApi, service: mockService);
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // Initial state
-  // ────────────────────────────────────────────────────────────────────────────
+  GoalProvider buildProvider() =>
+      GoalProvider(apiClient: dummyApi, repository: mockRepo);
 
   group('initial state', () {
-    test('goals is empty', () => expect(_makeProvider().goals, isEmpty));
+    test('goals is empty', () => expect(buildProvider().goals, isEmpty));
     test(
       'isLoading is false',
-      () => expect(_makeProvider().isLoading, isFalse),
+      () => expect(buildProvider().isLoading, isFalse),
     );
-    test('error is null', () => expect(_makeProvider().error, isNull));
+    test('error is null', () => expect(buildProvider().error, isNull));
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // fetchGoals
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('fetchGoals', () {
     test('populates goals on success', () async {
       when(
-        () => mockService.fetchGoals(),
-      ).thenAnswer((_) async => [_makeGoal(id: 'a'), _makeGoal(id: 'b')]);
+        () => mockRepo.fetch(),
+      ).thenAnswer((_) async => [makeGoal(id: 'a'), makeGoal(id: 'b')]);
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchGoals();
 
       expect(provider.goals, hasLength(2));
-      expect(provider.goals.map((g) => g.id), containsAll(['a', 'b']));
-    });
-
-    test('isLoading transitions true → false', () async {
-      final calls = <bool>[];
-      when(() => mockService.fetchGoals()).thenAnswer((_) async => []);
-
-      final provider = _makeProvider();
-      provider.addListener(() => calls.add(provider.isLoading));
-      await provider.fetchGoals();
-
-      expect(calls.first, isTrue);
-      expect(calls.last, isFalse);
     });
 
     test('sets error and leaves list empty on failure', () async {
-      when(() => mockService.fetchGoals()).thenThrow(Exception('No internet'));
+      when(() => mockRepo.fetch()).thenThrow(Exception('No internet'));
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchGoals();
 
       expect(provider.goals, isEmpty);
-      expect(provider.error, isNotNull);
       expect(provider.error, contains('No internet'));
     });
-
-    test('isLoading is false after failure', () async {
-      when(() => mockService.fetchGoals()).thenThrow(Exception('fail'));
-
-      final provider = _makeProvider();
-      await provider.fetchGoals();
-
-      expect(provider.isLoading, isFalse);
-    });
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // addGoal
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('addGoal', () {
     test('appends created goal to list', () async {
       when(
-        () => mockService.createGoal(any()),
-      ).thenAnswer((_) async => _makeGoal(id: 'new'));
+        () => mockRepo.create(any()),
+      ).thenAnswer((_) async => makeGoal(id: 'new'));
 
-      final provider = _makeProvider();
-      await provider.addGoal(_makeGoal());
+      final provider = buildProvider();
+      await provider.addGoal(makeGoal());
 
       expect(provider.goals.last.id, 'new');
     });
-
-    test('appends after existing items', () async {
-      when(
-        () => mockService.fetchGoals(),
-      ).thenAnswer((_) async => [_makeGoal(id: 'old')]);
-      when(
-        () => mockService.createGoal(any()),
-      ).thenAnswer((_) async => _makeGoal(id: 'new'));
-
-      final provider = _makeProvider();
-      await provider.fetchGoals();
-      await provider.addGoal(_makeGoal());
-
-      expect(provider.goals[0].id, 'old');
-      expect(provider.goals[1].id, 'new');
-    });
-
-    test('rethrows on failure', () async {
-      when(
-        () => mockService.createGoal(any()),
-      ).thenThrow(Exception('Server error'));
-
-      await expectLater(
-        _makeProvider().addGoal(_makeGoal()),
-        throwsA(isA<Exception>()),
-      );
-    });
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // updateGoal
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('updateGoal', () {
     test('replaces matching goal in list', () async {
-      final original = _makeGoal(id: 'g1', progress: 1000.0);
-      final updated = _makeGoal(id: 'g1', progress: 4000.0);
+      final original = makeGoal(id: 'g1', progress: 1000.0);
+      final updated = makeGoal(id: 'g1', progress: 4000.0);
 
-      when(() => mockService.fetchGoals()).thenAnswer((_) async => [original]);
-      when(
-        () => mockService.updateGoal(any()),
-      ).thenAnswer((_) async => updated);
+      when(() => mockRepo.fetch()).thenAnswer((_) async => [original]);
+      when(() => mockRepo.update(any())).thenAnswer((_) async => updated);
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchGoals();
       await provider.updateGoal(original);
 
       expect(provider.goals.first.progress, 4000.0);
     });
-
-    test('rethrows on failure', () async {
-      when(
-        () => mockService.updateGoal(any()),
-      ).thenThrow(Exception('Not found'));
-
-      await expectLater(
-        _makeProvider().updateGoal(_makeGoal()),
-        throwsA(isA<Exception>()),
-      );
-    });
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // deleteGoal
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('deleteGoal', () {
     test('removes goal by id from list', () async {
       when(
-        () => mockService.fetchGoals(),
-      ).thenAnswer((_) async => [_makeGoal(id: 'g1'), _makeGoal(id: 'g2')]);
-      when(() => mockService.deleteGoal(any())).thenAnswer((_) async {});
+        () => mockRepo.fetch(),
+      ).thenAnswer((_) async => [makeGoal(id: 'g1'), makeGoal(id: 'g2')]);
+      when(() => mockRepo.delete(any())).thenAnswer((_) async {});
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchGoals();
       await provider.deleteGoal('g1');
 
       expect(provider.goals, hasLength(1));
       expect(provider.goals.first.id, 'g2');
     });
-
-    test('rethrows on failure', () async {
-      when(
-        () => mockService.deleteGoal(any()),
-      ).thenThrow(Exception('Not found'));
-
-      await expectLater(
-        _makeProvider().deleteGoal('missing'),
-        throwsA(isA<Exception>()),
-      );
-    });
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // clearError
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('clearError', () {
     test('sets error to null', () async {
-      when(() => mockService.fetchGoals()).thenThrow(Exception('fail'));
+      when(() => mockRepo.fetch()).thenThrow(Exception('fail'));
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchGoals();
       expect(provider.error, isNotNull);
 

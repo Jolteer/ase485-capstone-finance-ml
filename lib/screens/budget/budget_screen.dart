@@ -2,26 +2,26 @@
 ///
 /// Reads [BudgetProvider] for limits and [TransactionProvider] to compute
 /// current-month spending per category. FAB opens an add-budget dialog;
-/// tapping a [CategoryCard] opens an edit/delete dialog.
+/// tapping a [CategoryCard] opens an edit/delete dialog. The small "magic
+/// wand" FAB regenerates budgets from history via the ML service.
 library;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:ase485_capstone_finance_ml/config/constants.dart';
+
 import 'package:ase485_capstone_finance_ml/config/spacing.dart';
 import 'package:ase485_capstone_finance_ml/models/budget.dart';
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/providers/budget_provider.dart';
 import 'package:ase485_capstone_finance_ml/providers/transaction_provider.dart';
 import 'package:ase485_capstone_finance_ml/screens/budget/budget_form_dialog.dart';
-import 'package:ase485_capstone_finance_ml/utils/formatters.dart';
+import 'package:ase485_capstone_finance_ml/screens/budget/widgets/generate_budgets_fab.dart';
+import 'package:ase485_capstone_finance_ml/screens/budget/widgets/monthly_overview_card.dart';
 import 'package:ase485_capstone_finance_ml/utils/provider_error_mixin.dart';
 import 'package:ase485_capstone_finance_ml/utils/spending_helpers.dart';
 import 'package:ase485_capstone_finance_ml/widgets/category_card.dart';
 import 'package:ase485_capstone_finance_ml/widgets/loading_overlay.dart';
 
-/// Budget tab: monthly overview card, category budget cards, and add/edit dialogs.
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
 
@@ -29,7 +29,9 @@ class BudgetScreen extends StatefulWidget {
   State<BudgetScreen> createState() => _BudgetScreenState();
 }
 
-class _BudgetScreenState extends State<BudgetScreen> with ProviderErrorMixin {
+class _BudgetScreenState extends State<BudgetScreen>
+    with ProviderErrorMixin<BudgetScreen> {
+  /// One-shot guard for the "fetch on first arrival" pattern.
   bool _didTriggerInitialFetch = false;
 
   @override
@@ -41,11 +43,10 @@ class _BudgetScreenState extends State<BudgetScreen> with ProviderErrorMixin {
       getError: (p) => p.error,
       clearError: (p) => p.clearError(),
     );
-    // Gate the auto-fetch on a one-shot flag instead of `budgets.isEmpty`.
-    // build() calls context.watch, so every provider notify re-fires
-    // didChangeDependencies; if the user has no budgets (or the request
-    // fails), the empty-list check would re-schedule fetchBudgets() forever
-    // and strobe the screen.
+    // build() calls context.watch, so every provider notification re-fires
+    // didChangeDependencies. If we keyed the auto-fetch on `budgets.isEmpty`
+    // a user with no budgets (or a failed request) would re-schedule
+    // fetchBudgets() forever and strobe the screen.
     if (!_didTriggerInitialFetch) {
       _didTriggerInitialFetch = true;
       if (provider.budgets.isEmpty && !provider.isLoading) {
@@ -101,7 +102,7 @@ class _BudgetScreenState extends State<BudgetScreen> with ProviderErrorMixin {
             : ListView(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 children: [
-                  _MonthlyOverviewCard(
+                  MonthlyOverviewCard(
                     month: DateTime.now(),
                     spent: totalSpent,
                     budget: totalBudget,
@@ -130,100 +131,13 @@ class _BudgetScreenState extends State<BudgetScreen> with ProviderErrorMixin {
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FloatingActionButton.small(
-              heroTag: 'budget_generate_fab',
-              onPressed: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Generate Budgets'),
-                    content: const Text(
-                      'This will analyse your spending history and replace '
-                      'your current budgets with ML-generated suggestions.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Generate'),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirmed == true && context.mounted) {
-                  await context.read<BudgetProvider>().generateBudgets();
-                }
-              },
-              child: const Icon(Icons.auto_awesome),
-            ),
+            const GenerateBudgetsFab(),
             const SizedBox(height: AppSpacing.sm),
             FloatingActionButton(
               heroTag: 'budget_fab',
               onPressed: () =>
                   _showAddDialog(budgets.map((b) => b.category).toSet()),
               child: const Icon(Icons.add),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// _MonthlyOverviewCard
-// ---------------------------------------------------------------------------
-
-class _MonthlyOverviewCard extends StatelessWidget {
-  final DateTime month;
-  final double spent;
-  final double budget;
-
-  const _MonthlyOverviewCard({
-    required this.month,
-    required this.spent,
-    required this.budget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final ratio = budget > 0 ? (spent / budget).clamp(0.0, 1.0) : 0.0;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            Text(
-              DateFormat.yMMMM().format(month),
-              style: theme.textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              '${Formatters.currency(spent)} / ${Formatters.currency(budget)}',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: AppSpacing.s10,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              '${(ratio * 100).toStringAsFixed(0)}% of monthly budget used',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
             ),
           ],
         ),

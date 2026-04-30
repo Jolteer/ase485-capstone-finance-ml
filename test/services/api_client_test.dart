@@ -1,4 +1,4 @@
-/// Tests for ApiClient: headers, HTTP methods, token management, and error extraction.
+/// Tests for ApiClient: headers, HTTP methods, token management, and ApiException parsing.
 library;
 
 import 'dart:convert';
@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:ase485_capstone_finance_ml/core/api/api_exception.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
@@ -27,7 +28,7 @@ void main() {
     when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
   });
 
-  ApiClient _makeApi(http.Response Function(http.Request) handler) {
+  ApiClient buildApi(http.Response Function(http.Request) handler) {
     return ApiClient(
       client: MockClient((req) async => handler(req)),
       storage: storage,
@@ -41,7 +42,7 @@ void main() {
   group('request headers', () {
     test('always sends Content-Type: application/json', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -52,7 +53,7 @@ void main() {
 
     test('includes Authorization header after setToken is called', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -64,7 +65,7 @@ void main() {
 
     test('omits Authorization header when no token has been set', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -81,7 +82,7 @@ void main() {
   group('HTTP methods', () {
     test('get sends GET to correct path', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -91,9 +92,9 @@ void main() {
       expect(captured.url.path, endsWith('/transactions'));
     });
 
-    test('get appends query parameters to the URL', () async {
+    test('get appends query parameters', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -102,9 +103,9 @@ void main() {
       expect(captured.url.queryParameters['category'], 'food');
     });
 
-    test('post sends POST with JSON-encoded body', () async {
+    test('post sends POST with JSON body', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('{}', 201);
       });
@@ -116,9 +117,9 @@ void main() {
       expect(decoded['amount'], 5.0);
     });
 
-    test('put sends PUT with JSON-encoded body', () async {
+    test('put sends PUT with JSON body', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('{}', 200);
       });
@@ -128,9 +129,9 @@ void main() {
       expect(jsonDecode(captured.body)['amount'], 10.0);
     });
 
-    test('delete sends DELETE to correct path', () async {
+    test('delete sends DELETE', () async {
       late http.Request captured;
-      final api = _makeApi((req) {
+      final api = buildApi((req) {
         captured = req;
         return http.Response('', 204);
       });
@@ -147,7 +148,7 @@ void main() {
 
   group('setToken', () {
     test('writes token to secure storage', () async {
-      final api = _makeApi((_) => http.Response('', 200));
+      final api = buildApi((_) => http.Response('', 200));
       api.setToken('my-token');
       verify(
         () => storage.write(key: 'auth_token', value: 'my-token'),
@@ -155,7 +156,7 @@ void main() {
     });
 
     test('deletes token from secure storage when null', () async {
-      final api = _makeApi((_) => http.Response('', 200));
+      final api = buildApi((_) => http.Response('', 200));
       api.setToken(null);
       verify(() => storage.delete(key: 'auth_token')).called(1);
     });
@@ -166,18 +167,16 @@ void main() {
       when(
         () => storage.read(key: 'auth_token'),
       ).thenAnswer((_) async => 'stored-token');
-      final api = _makeApi((_) => http.Response('', 200));
+      final api = buildApi((_) => http.Response('', 200));
 
-      final result = await api.tryRestoreToken();
-      expect(result, isTrue);
+      expect(await api.tryRestoreToken(), isTrue);
     });
 
     test('returns false when no token is stored', () async {
       when(() => storage.read(key: 'auth_token')).thenAnswer((_) async => null);
-      final api = _makeApi((_) => http.Response('', 200));
+      final api = buildApi((_) => http.Response('', 200));
 
-      final result = await api.tryRestoreToken();
-      expect(result, isFalse);
+      expect(await api.tryRestoreToken(), isFalse);
     });
 
     test('subsequent GET includes the restored token', () async {
@@ -200,10 +199,10 @@ void main() {
   });
 
   // ────────────────────────────────────────────────────────────────────────────
-  // extractError
+  // ApiException parsing
   // ────────────────────────────────────────────────────────────────────────────
 
-  group('extractError', () {
+  group('ApiException.fromResponse', () {
     test('joins FastAPI validation list msg fields', () {
       final res = http.Response(
         jsonEncode({
@@ -215,50 +214,55 @@ void main() {
         422,
       );
       expect(
-        ApiClient.extractError(res),
+        ApiException.fromResponse(res).message,
         'field required; value is not a valid email',
       );
     });
 
     test('returns the detail string', () {
       final res = http.Response(jsonEncode({'detail': 'Not found'}), 404);
-      expect(ApiClient.extractError(res), 'Not found');
+      expect(ApiException.fromResponse(res).message, 'Not found');
     });
 
     test('returns the message string', () {
       final res = http.Response(jsonEncode({'message': 'Unauthorized'}), 401);
-      expect(ApiClient.extractError(res), 'Unauthorized');
+      expect(ApiException.fromResponse(res).message, 'Unauthorized');
     });
 
     test('returns the error string', () {
       final res = http.Response(jsonEncode({'error': 'Server error'}), 500);
-      expect(ApiClient.extractError(res), 'Server error');
+      expect(ApiException.fromResponse(res).message, 'Server error');
     });
 
     test('falls back to generic message with status code on invalid JSON', () {
       final res = http.Response('not valid json', 503);
-      expect(ApiClient.extractError(res), 'Request failed (503)');
+      expect(ApiException.fromResponse(res).message, 'Request failed (503)');
     });
 
-    test(
-      'falls back to validation message when detail list has no msg fields',
-      () {
-        final res = http.Response(
-          jsonEncode({
-            'detail': [{}],
-          }),
-          422,
-        );
-        expect(ApiClient.extractError(res), 'Validation error (422)');
-      },
-    );
+    test('falls back to validation message when detail list has no msg', () {
+      final res = http.Response(
+        jsonEncode({
+          'detail': [{}],
+        }),
+        422,
+      );
+      expect(ApiException.fromResponse(res).message, 'Validation error (422)');
+    });
 
     test('prefers detail over message when both are present', () {
       final res = http.Response(
         jsonEncode({'detail': 'Conflict', 'message': 'ignored'}),
         409,
       );
-      expect(ApiClient.extractError(res), 'Conflict');
+      expect(ApiException.fromResponse(res).message, 'Conflict');
+    });
+
+    test('exposes status code helpers', () {
+      final res = http.Response(jsonEncode({'detail': 'nope'}), 401);
+      final exc = ApiException.fromResponse(res);
+      expect(exc.statusCode, 401);
+      expect(exc.isUnauthorized, isTrue);
+      expect(exc.isNotFound, isFalse);
     });
   });
 }

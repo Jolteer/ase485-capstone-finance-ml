@@ -18,31 +18,33 @@ import 'package:ase485_capstone_finance_ml/services/api_client.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
+ApiClient _buildOfflineApi(MockFlutterSecureStorage storage) {
+  when(
+    () => storage.read(key: any(named: 'key')),
+  ).thenAnswer((_) async => null);
+  when(
+    () => storage.write(
+      key: any(named: 'key'),
+      value: any(named: 'value'),
+    ),
+  ).thenAnswer((_) async {});
+  when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
+  return ApiClient(
+    client: MockClient((_) async => http.Response('', 200)),
+    storage: storage,
+  );
+}
+
 void main() {
   testWidgets('LoginScreen renders SmartSpend title and sign-in form', (
     tester,
   ) async {
     final storage = MockFlutterSecureStorage();
-    when(
-      () => storage.read(key: any(named: 'key')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => storage.write(
-        key: any(named: 'key'),
-        value: any(named: 'value'),
-      ),
-    ).thenAnswer((_) async {});
-    when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
-
-    final api = ApiClient(
-      // Never actually called — the test only renders, does not submit.
-      client: MockClient((_) async => http.Response('', 200)),
-      storage: storage,
-    );
+    final api = _buildOfflineApi(storage);
 
     await tester.pumpWidget(
       ChangeNotifierProvider(
-        create: (_) => AuthProvider(apiClient: api, userStorage: storage),
+        create: (_) => AuthProvider(apiClient: api),
         child: const MaterialApp(home: LoginScreen()),
       ),
     );
@@ -54,25 +56,11 @@ void main() {
 
   testWidgets('LoginScreen shows Email and Password fields', (tester) async {
     final storage = MockFlutterSecureStorage();
-    when(
-      () => storage.read(key: any(named: 'key')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => storage.write(
-        key: any(named: 'key'),
-        value: any(named: 'value'),
-      ),
-    ).thenAnswer((_) async {});
-    when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
-
-    final api = ApiClient(
-      client: MockClient((_) async => http.Response('', 200)),
-      storage: storage,
-    );
+    final api = _buildOfflineApi(storage);
 
     await tester.pumpWidget(
       ChangeNotifierProvider(
-        create: (_) => AuthProvider(apiClient: api, userStorage: storage),
+        create: (_) => AuthProvider(apiClient: api),
         child: const MaterialApp(home: LoginScreen()),
       ),
     );
@@ -83,25 +71,11 @@ void main() {
 
   testWidgets('LoginScreen has a Sign Up navigation link', (tester) async {
     final storage = MockFlutterSecureStorage();
-    when(
-      () => storage.read(key: any(named: 'key')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => storage.write(
-        key: any(named: 'key'),
-        value: any(named: 'value'),
-      ),
-    ).thenAnswer((_) async {});
-    when(() => storage.delete(key: any(named: 'key'))).thenAnswer((_) async {});
-
-    final api = ApiClient(
-      client: MockClient((_) async => http.Response('', 200)),
-      storage: storage,
-    );
+    final api = _buildOfflineApi(storage);
 
     await tester.pumpWidget(
       ChangeNotifierProvider(
-        create: (_) => AuthProvider(apiClient: api, userStorage: storage),
+        create: (_) => AuthProvider(apiClient: api),
         child: const MaterialApp(home: LoginScreen()),
       ),
     );

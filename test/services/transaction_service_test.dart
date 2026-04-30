@@ -50,9 +50,7 @@ void main() {
     ).thenAnswer((_) async => null);
   });
 
-  TransactionService _makeService(
-    http.Response Function(http.Request) handler,
-  ) {
+  TransactionService makeService(http.Response Function(http.Request) handler) {
     final api = ApiClient(
       client: MockClient((req) async => handler(req)),
       storage: storage,
@@ -66,7 +64,7 @@ void main() {
 
   group('TransactionService.fetchTransactions', () {
     test('returns parsed list on 200', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode([_kTxJson]), 200),
       );
 
@@ -78,14 +76,14 @@ void main() {
     });
 
     test('returns empty list when response array is empty', () async {
-      final svc = _makeService((_) => http.Response('[]', 200));
+      final svc = makeService((_) => http.Response('[]', 200));
       final result = await svc.fetchTransactions();
       expect(result, isEmpty);
     });
 
     test('sends category query param when filter provided', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode([_kTxJson]), 200);
       });
@@ -96,7 +94,7 @@ void main() {
 
     test('omits category query param when no filter', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -106,7 +104,7 @@ void main() {
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Unauthorized'}), 401),
       );
       expect(() => svc.fetchTransactions(), throwsA(isA<Exception>()));
@@ -122,7 +120,7 @@ void main() {
       'returns created transaction with server-assigned id on 201',
       () async {
         final createdJson = {..._kTxJson, 'id': 'server-id'};
-        final svc = _makeService(
+        final svc = makeService(
           (_) => http.Response(jsonEncode(createdJson), 201),
         );
 
@@ -133,7 +131,7 @@ void main() {
 
     test('strips id and user_id from request body', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode(_kTxJson), 201);
       });
@@ -145,7 +143,7 @@ void main() {
     });
 
     test('throws on non-201 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Bad request'}), 400),
       );
       expect(() => svc.createTransaction(_fakeTx()), throwsA(isA<Exception>()));
@@ -159,7 +157,7 @@ void main() {
   group('TransactionService.updateTransaction', () {
     test('returns updated transaction on 200', () async {
       final updatedJson = {..._kTxJson, 'amount': -75.0};
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode(updatedJson), 200),
       );
 
@@ -169,7 +167,7 @@ void main() {
 
     test('sends PUT to /transactions/:id', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode(_kTxJson), 200);
       });
@@ -180,7 +178,7 @@ void main() {
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Not found'}), 404),
       );
       expect(() => svc.updateTransaction(_fakeTx()), throwsA(isA<Exception>()));
@@ -193,13 +191,13 @@ void main() {
 
   group('TransactionService.deleteTransaction', () {
     test('completes without error on 204', () async {
-      final svc = _makeService((_) => http.Response('', 204));
+      final svc = makeService((_) => http.Response('', 204));
       await expectLater(svc.deleteTransaction('t1'), completes);
     });
 
     test('sends DELETE to /transactions/:id', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response('', 204);
       });
@@ -210,7 +208,7 @@ void main() {
     });
 
     test('throws on non-204 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Not found'}), 404),
       );
       expect(() => svc.deleteTransaction('missing'), throwsA(isA<Exception>()));

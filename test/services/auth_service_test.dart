@@ -38,7 +38,7 @@ void main() {
     ).thenAnswer((_) async => null);
   });
 
-  AuthService _makeService(http.Response Function(http.Request) handler) {
+  AuthService makeService(http.Response Function(http.Request) handler) {
     final api = ApiClient(
       client: MockClient((req) async => handler(req)),
       storage: storage,
@@ -52,7 +52,7 @@ void main() {
 
   group('AuthService.register', () {
     test('returns (token, user) record on 201', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(
           jsonEncode({'token': 'tok-123', 'user': _kUserJson}),
           201,
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('throws Exception on 400', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(
           jsonEncode({'detail': 'Email already registered'}),
           400,
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('error message includes detail from response body', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(
           jsonEncode({'detail': 'Email already registered'}),
           409,
@@ -104,7 +104,7 @@ void main() {
 
     test('sends name, email, and password in POST body', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(
           jsonEncode({'token': 'tok', 'user': _kUserJson}),
@@ -126,7 +126,7 @@ void main() {
 
   group('AuthService.login', () {
     test('returns (token, user) record on 200', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(
           jsonEncode({'token': 'tok-456', 'user': _kUserJson}),
           200,
@@ -139,7 +139,7 @@ void main() {
     });
 
     test('throws Exception on 401', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) =>
             http.Response(jsonEncode({'detail': 'Invalid credentials'}), 401),
       );
@@ -151,7 +151,7 @@ void main() {
     });
 
     test('error message includes detail from response body', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) =>
             http.Response(jsonEncode({'detail': 'Invalid credentials'}), 401),
       );
@@ -168,7 +168,7 @@ void main() {
 
     test('sends email and password in POST body', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(
           jsonEncode({'token': 'tok', 'user': _kUserJson}),
@@ -189,7 +189,7 @@ void main() {
 
   group('AuthService.logout', () {
     test('completes without throwing', () {
-      final svc = _makeService((_) => http.Response('', 200));
+      final svc = makeService((_) => http.Response('', 200));
       expect(() => svc.logout(), returnsNormally);
     });
 
@@ -197,18 +197,6 @@ void main() {
       'clears token so subsequent requests omit Authorization header',
       () async {
         late http.Request captured;
-        bool firstRequest = true;
-        final svc = _makeService((req) {
-          if (firstRequest) {
-            firstRequest = false;
-            return http.Response(
-              jsonEncode({'token': 'tok', 'user': _kUserJson}),
-              200,
-            );
-          }
-          captured = req;
-          return http.Response('[]', 200);
-        });
 
         // Log in to set the token.
         final api = ApiClient(

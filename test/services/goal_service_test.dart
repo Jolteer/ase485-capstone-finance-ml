@@ -52,7 +52,7 @@ void main() {
     ).thenAnswer((_) async => null);
   });
 
-  GoalService _makeService(http.Response Function(http.Request) handler) {
+  GoalService makeService(http.Response Function(http.Request) handler) {
     final api = ApiClient(
       client: MockClient((req) async => handler(req)),
       storage: storage,
@@ -66,7 +66,7 @@ void main() {
 
   group('GoalService.fetchGoals', () {
     test('returns parsed list on 200', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode([_kGoalJson]), 200),
       );
 
@@ -78,12 +78,12 @@ void main() {
     });
 
     test('returns empty list when response array is empty', () async {
-      final svc = _makeService((_) => http.Response('[]', 200));
+      final svc = makeService((_) => http.Response('[]', 200));
       expect(await svc.fetchGoals(), isEmpty);
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Unauthorized'}), 401),
       );
       expect(() => svc.fetchGoals(), throwsA(isA<Exception>()));
@@ -97,7 +97,7 @@ void main() {
   group('GoalService.createGoal', () {
     test('returns created goal with server id on 201', () async {
       final createdJson = {..._kGoalJson, 'id': 'server-g'};
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode(createdJson), 201),
       );
 
@@ -107,7 +107,7 @@ void main() {
 
     test('strips id and user_id from request body', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode(_kGoalJson), 201);
       });
@@ -119,7 +119,7 @@ void main() {
     });
 
     test('throws on non-201 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Bad request'}), 400),
       );
       expect(() => svc.createGoal(_fakeGoal()), throwsA(isA<Exception>()));
@@ -133,7 +133,7 @@ void main() {
   group('GoalService.updateGoal', () {
     test('returns updated goal on 200', () async {
       final updatedJson = {..._kGoalJson, 'progress': 2500.0};
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode(updatedJson), 200),
       );
 
@@ -143,7 +143,7 @@ void main() {
 
     test('sends PUT to /goals/:id', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode(_kGoalJson), 200);
       });
@@ -154,7 +154,7 @@ void main() {
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Not found'}), 404),
       );
       expect(() => svc.updateGoal(_fakeGoal()), throwsA(isA<Exception>()));
@@ -167,13 +167,13 @@ void main() {
 
   group('GoalService.deleteGoal', () {
     test('completes without error on 204', () async {
-      final svc = _makeService((_) => http.Response('', 204));
+      final svc = makeService((_) => http.Response('', 204));
       await expectLater(svc.deleteGoal('g1'), completes);
     });
 
     test('sends DELETE to /goals/:id', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response('', 204);
       });
@@ -184,7 +184,7 @@ void main() {
     });
 
     test('throws on non-204 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Not found'}), 404),
       );
       expect(() => svc.deleteGoal('missing'), throwsA(isA<Exception>()));

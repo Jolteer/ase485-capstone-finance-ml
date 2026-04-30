@@ -51,7 +51,7 @@ void main() {
     ).thenAnswer((_) async => null);
   });
 
-  BudgetService _makeService(http.Response Function(http.Request) handler) {
+  BudgetService makeService(http.Response Function(http.Request) handler) {
     final api = ApiClient(
       client: MockClient((req) async => handler(req)),
       storage: storage,
@@ -65,7 +65,7 @@ void main() {
 
   group('BudgetService.fetchBudgets', () {
     test('returns parsed list on 200', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode([_kBudgetJson]), 200),
       );
 
@@ -77,12 +77,12 @@ void main() {
     });
 
     test('returns empty list when response array is empty', () async {
-      final svc = _makeService((_) => http.Response('[]', 200));
+      final svc = makeService((_) => http.Response('[]', 200));
       expect(await svc.fetchBudgets(), isEmpty);
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Unauthorized'}), 401),
       );
       expect(() => svc.fetchBudgets(), throwsA(isA<Exception>()));
@@ -96,7 +96,7 @@ void main() {
   group('BudgetService.createBudget', () {
     test('returns created budget with server id on 201', () async {
       final createdJson = {..._kBudgetJson, 'id': 'server-b'};
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode(createdJson), 201),
       );
 
@@ -106,7 +106,7 @@ void main() {
 
     test('strips id, user_id, and created_at from request body', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode(_kBudgetJson), 201);
       });
@@ -119,7 +119,7 @@ void main() {
     });
 
     test('throws on non-201 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Bad request'}), 400),
       );
       expect(() => svc.createBudget(_fakeBudget()), throwsA(isA<Exception>()));
@@ -133,7 +133,7 @@ void main() {
   group('BudgetService.updateBudget', () {
     test('returns updated budget on 200', () async {
       final updatedJson = {..._kBudgetJson, 'limit_amount': 750.0};
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode(updatedJson), 200),
       );
 
@@ -143,7 +143,7 @@ void main() {
 
     test('sends PUT to /budgets/:id', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response(jsonEncode(_kBudgetJson), 200);
       });
@@ -154,7 +154,7 @@ void main() {
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Not found'}), 404),
       );
       expect(() => svc.updateBudget(_fakeBudget()), throwsA(isA<Exception>()));
@@ -167,13 +167,13 @@ void main() {
 
   group('BudgetService.deleteBudget', () {
     test('completes without error on 204', () async {
-      final svc = _makeService((_) => http.Response('', 204));
+      final svc = makeService((_) => http.Response('', 204));
       await expectLater(svc.deleteBudget('b1'), completes);
     });
 
     test('sends DELETE to /budgets/:id', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response('', 204);
       });
@@ -184,7 +184,7 @@ void main() {
     });
 
     test('throws on non-204 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Not found'}), 404),
       );
       expect(() => svc.deleteBudget('missing'), throwsA(isA<Exception>()));

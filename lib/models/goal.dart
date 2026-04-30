@@ -22,10 +22,16 @@ enum GoalCategory {
   /// Human-readable label for this category.
   final String label;
 
-  /// Parses a [GoalCategory] from its [name] string; falls back to [other].
+  /// Parses a [GoalCategory] from a string; falls back to [other].
+  ///
+  /// Matches against the enum [name] (e.g. ``"vacation"``) or [label]
+  /// (e.g. ``"Vacation"``) case-insensitively. Mirrors
+  /// [TransactionCategory.fromName] so the API and UI layers can stay loose
+  /// about casing.
   static GoalCategory fromName(String name) {
+    final lower = name.toLowerCase();
     return GoalCategory.values.firstWhere(
-      (c) => c.name == name,
+      (c) => c.name == lower || c.label.toLowerCase() == lower,
       orElse: () => GoalCategory.other,
     );
   }

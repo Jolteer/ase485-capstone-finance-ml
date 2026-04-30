@@ -101,65 +101,47 @@ SmartSpend solves this by using machine learning to learn from a user's spending
 │   │   ├── spacing.dart    # AppSpacing — named pixel constants (xxs → xl)
 │   │   ├── routes.dart     # AppRoutes — 11 named routes
 │   │   └── theme.dart      # AppTheme — Material 3 light & dark ThemeData
+│   ├── core/               # Cross-cutting infrastructure
+│   │   ├── api/api_exception.dart  # Typed HTTP error + NetworkException
+│   │   └── json/json_helpers.dart  # Shared JSON parse helpers (require*, optional*)
 │   ├── models/             # Immutable Dart data classes (fromJson, toJson, copyWith)
-│   │   ├── user.dart
-│   │   ├── transaction.dart
-│   │   ├── budget.dart
-│   │   ├── budget_item.dart        # ratio, isOverBudget, remainingAmount (budget + spend)
-│   │   ├── category_breakdown.dart # analytics chart data
-│   │   ├── goal.dart               # progressPercent, isCompleted, GoalCategory enum
-│   │   └── recommendation.dart
-│   ├── providers/          # ChangeNotifier state management (6 providers)
-│   │   ├── settings_provider.dart  # SharedPreferences: dark mode, notifications, locale
-│   │   ├── auth_provider.dart      # login, register, logout, tryRestore (secure storage)
-│   │   ├── transaction_provider.dart
-│   │   ├── budget_provider.dart
-│   │   ├── goal_provider.dart
-│   │   └── recommendation_provider.dart
-│   ├── services/           # HTTP API client & per-resource service classes
-│   │   ├── api_client.dart      # JWT-injecting HTTP wrapper, tryRestoreToken
-│   │   ├── auth_service.dart
-│   │   ├── transaction_service.dart
-│   │   ├── budget_service.dart
-│   │   ├── goal_service.dart
-│   │   └── recommendation_service.dart
-│   ├── screens/            # 11 UI screens
-│   │   ├── auth/           # login, register
-│   │   ├── home/           # dashboard + bottom nav host
-│   │   ├── transactions/   # list view + add transaction form
-│   │   ├── budget/         # per-category budget overview
-│   │   ├── goals/          # savings goals with progress
-│   │   ├── analytics/      # category breakdowns, period selector
-│   │   ├── recommendations/  # AI-powered savings suggestions
-│   │   ├── settings/       # app preferences & toggles
-│   │   └── account/        # profile & navigation hub
-│   ├── widgets/            # Reusable UI components
-│   │   ├── summary_card.dart
-│   │   ├── transaction_tile.dart
-│   │   ├── goal_progress_card.dart
-│   │   ├── category_card.dart
-│   │   ├── loading_overlay.dart
-│   │   ├── budget_alert_banner.dart
-│   │   └── notification_bell.dart
-│   ├── utils/              # Formatters, validators, categories, helpers
-│   │   ├── formatters.dart          # currency, date, percent (via intl); updateLocale
-│   │   ├── validators.dart          # form field validators (email, password, amount)
-│   │   ├── categories.dart          # 8 category constants, icon/color maps
-│   │   ├── goal_helpers.dart        # GoalCategoryUi extension (icon per category)
-│   │   ├── error_helpers.dart       # formatError strips "Exception: " prefix
-│   │   ├── budget_helpers.dart      # budget alert / usage helpers
-│   │   ├── spending_helpers.dart    # analytics / period spending helpers
-│   │   └── provider_error_mixin.dart # shared provider error handling
-├── backend/                # FastAPI backend
+│   │   ├── user.dart, transaction.dart, budget.dart, budget_item.dart,
+│   │   │   category_breakdown.dart, goal.dart, recommendation.dart
+│   ├── providers/          # ChangeNotifier UI state (6 providers)
+│   │   └── auth, transaction, budget, goal, recommendation, settings
+│   ├── repositories/       # Data-access abstraction between providers and services
+│   │   └── auth, transaction, budget, goal, recommendation
+│   ├── services/           # HTTP service layer (per-resource API methods)
+│   │   ├── api_client.dart      # JWT-injecting HTTP wrapper + ApiException-aware decoders
+│   │   └── auth, transaction, budget, goal, recommendation
+│   ├── screens/            # UI screens (split into per-feature widgets/ subfolders)
+│   │   ├── auth/           # login, register, widgets/auth_form_shell.dart
+│   │   ├── home/           # dashboard + bottom nav host + widgets/
+│   │   ├── transactions/, budget/, goals/, analytics/widgets/,
+│   │   │   recommendations/, settings/widgets/, account/
+│   ├── widgets/            # Cross-feature reusable UI components
+│   │   ├── summary_card, transaction_tile, goal_progress_card, category_card,
+│   │   │   loading_overlay, budget_alert_banner, notification_bell
+│   ├── utils/              # Formatters, validators, helpers, mixins
+│   │   ├── formatters, validators, categories, goal_helpers, error_helpers,
+│   │   │   budget_helpers, spending_helpers,
+│   │   │   async_operation_mixin (loading/error skeleton),
+│   │   │   provider_error_mixin (auto SnackBars from provider error fields)
+├── backend/                # FastAPI backend (layered architecture)
 │   ├── Dockerfile          # python:3.12-slim, Uvicorn on port 8000
 │   ├── requirements.txt
 │   └── app/
-│       ├── main.py         # FastAPI app, CORS middleware, router mounts, /health
-│       ├── auth.py         # JWT creation & HTTPBearer verification dependency
-│       ├── database.py     # psycopg2 connection pool, query/execute helpers
-│       ├── schemas.py      # Pydantic v2 request/response models
-│       ├── ml_engine.py    # ML: categorization, budget generation, recommendations
-│       └── routers/        # auth, transactions, budgets, goals, recommendations, ml
+│       ├── main.py         # FastAPI app factory, CORS, lifespan, exception handlers
+│       ├── core/           # config, db (pool + transaction()), security, exceptions, logging
+│       ├── schemas/        # Pydantic v2 request/response models, split per domain
+│       │   └── auth, transactions, budgets, goals, recommendations, ml, common (enums)
+│       ├── repositories/   # SQL layer (raises NotFoundError; no HTTPException)
+│       │   └── users, transactions, budgets, goals, recommendations, _partial_update
+│       ├── services/       # Use-case layer (orchestration, no HTTP types)
+│       │   └── auth, transaction, budget, goal, recommendation, ml_orchestration
+│       ├── ml/             # Categorizer, budgets, recommendations, constants, training_data
+│       └── api/v1/         # HTTP routers mounted at /api/v1
+│           └── auth, transactions, budgets, goals, recommendations, ml
 ├── docker/
 │   ├── init.sql            # Schema DDL (5 tables, UUID PKs, FK cascade)
 │   └── seed.sql            # Demo user + 30 transactions + budgets/goals/recommendations

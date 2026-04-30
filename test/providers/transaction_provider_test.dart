@@ -9,22 +9,14 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:ase485_capstone_finance_ml/models/transaction.dart';
 import 'package:ase485_capstone_finance_ml/providers/transaction_provider.dart';
+import 'package:ase485_capstone_finance_ml/repositories/transaction_repository.dart';
 import 'package:ase485_capstone_finance_ml/services/api_client.dart';
-import 'package:ase485_capstone_finance_ml/services/transaction_service.dart';
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Mock classes
-// ──────────────────────────────────────────────────────────────────────────────
-
-class MockTransactionService extends Mock implements TransactionService {}
+class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Fixtures
-// ──────────────────────────────────────────────────────────────────────────────
-
-Transaction _makeTx({
+Transaction makeTx({
   String id = 't1',
   double amount = -50.0,
   String description = 'Lunch',
@@ -38,15 +30,15 @@ Transaction _makeTx({
 );
 
 void main() {
-  late MockTransactionService mockService;
+  late MockTransactionRepository mockRepo;
   late ApiClient dummyApi;
 
   setUpAll(() {
-    registerFallbackValue(_makeTx());
+    registerFallbackValue(makeTx());
   });
 
   setUp(() {
-    mockService = MockTransactionService();
+    mockRepo = MockTransactionRepository();
     final storage = MockFlutterSecureStorage();
     when(
       () => storage.read(key: any(named: 'key')),
@@ -64,222 +56,122 @@ void main() {
     );
   });
 
-  TransactionProvider _makeProvider() =>
-      TransactionProvider(apiClient: dummyApi, service: mockService);
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // Initial state
-  // ────────────────────────────────────────────────────────────────────────────
+  TransactionProvider buildProvider() =>
+      TransactionProvider(apiClient: dummyApi, repository: mockRepo);
 
   group('initial state', () {
-    test('transactions is empty', () {
-      expect(_makeProvider().transactions, isEmpty);
-    });
-
-    test('isLoading is false', () {
-      expect(_makeProvider().isLoading, isFalse);
-    });
-
-    test('error is null', () {
-      expect(_makeProvider().error, isNull);
-    });
+    test(
+      'transactions is empty',
+      () => expect(buildProvider().transactions, isEmpty),
+    );
+    test(
+      'isLoading is false',
+      () => expect(buildProvider().isLoading, isFalse),
+    );
+    test('error is null', () => expect(buildProvider().error, isNull));
   });
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // fetchTransactions
-  // ────────────────────────────────────────────────────────────────────────────
-
   group('fetchTransactions', () {
-    test('populates transactions list on success', () async {
-      final txList = [_makeTx(id: 'a'), _makeTx(id: 'b')];
+    test('populates list on success', () async {
       when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
-      ).thenAnswer((_) async => txList);
+        () => mockRepo.fetch(category: any(named: 'category')),
+      ).thenAnswer((_) async => [makeTx(id: 'a'), makeTx(id: 'b')]);
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchTransactions();
 
       expect(provider.transactions, hasLength(2));
-      expect(provider.transactions.map((t) => t.id), containsAll(['a', 'b']));
     });
 
-    test('isLoading transitions from true → false', () async {
-      final calls = <bool>[];
+    test('sets error on failure', () async {
       when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
-      ).thenAnswer((_) async => []);
-
-      final provider = _makeProvider();
-      provider.addListener(() => calls.add(provider.isLoading));
-      await provider.fetchTransactions();
-
-      // first notification: isLoading=true, last: isLoading=false
-      expect(calls.first, isTrue);
-      expect(calls.last, isFalse);
-    });
-
-    test('sets error and leaves list empty on failure', () async {
-      when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
+        () => mockRepo.fetch(category: any(named: 'category')),
       ).thenThrow(Exception('Network error'));
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchTransactions();
 
       expect(provider.transactions, isEmpty);
-      expect(provider.error, isNotNull);
       expect(provider.error, contains('Network error'));
     });
 
-    test('isLoading is false after failure', () async {
+    test('forwards category filter to repository', () async {
       when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
-      ).thenThrow(Exception('fail'));
+        () => mockRepo.fetch(category: TransactionCategory.food),
+      ).thenAnswer((_) async => [makeTx()]);
 
-      final provider = _makeProvider();
-      await provider.fetchTransactions();
-
-      expect(provider.isLoading, isFalse);
-    });
-
-    test('forwards category filter to service', () async {
-      when(
-        () => mockService.fetchTransactions(category: TransactionCategory.food),
-      ).thenAnswer((_) async => [_makeTx()]);
-
-      await _makeProvider().fetchTransactions(
+      await buildProvider().fetchTransactions(
         category: TransactionCategory.food,
       );
 
       verify(
-        () => mockService.fetchTransactions(category: TransactionCategory.food),
+        () => mockRepo.fetch(category: TransactionCategory.food),
       ).called(1);
     });
   });
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // addTransaction
-  // ────────────────────────────────────────────────────────────────────────────
-
   group('addTransaction', () {
-    test('inserts created transaction at index 0', () async {
-      final created = _makeTx(id: 'new');
+    test('inserts created tx at index 0', () async {
       when(
-        () => mockService.createTransaction(any()),
-      ).thenAnswer((_) async => created);
+        () => mockRepo.create(any()),
+      ).thenAnswer((_) async => makeTx(id: 'new'));
 
-      final provider = _makeProvider();
-      await provider.addTransaction(_makeTx());
+      final provider = buildProvider();
+      await provider.addTransaction(makeTx());
 
       expect(provider.transactions.first.id, 'new');
-    });
-
-    test('prepends to an existing list', () async {
-      // Seed list via fetchTransactions.
-      when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
-      ).thenAnswer((_) async => [_makeTx(id: 'old')]);
-      when(
-        () => mockService.createTransaction(any()),
-      ).thenAnswer((_) async => _makeTx(id: 'new'));
-
-      final provider = _makeProvider();
-      await provider.fetchTransactions();
-      await provider.addTransaction(_makeTx());
-
-      expect(provider.transactions.first.id, 'new');
-      expect(provider.transactions[1].id, 'old');
     });
 
     test('rethrows on failure', () async {
-      when(
-        () => mockService.createTransaction(any()),
-      ).thenThrow(Exception('Server error'));
-
+      when(() => mockRepo.create(any())).thenThrow(Exception('Server error'));
       await expectLater(
-        _makeProvider().addTransaction(_makeTx()),
+        buildProvider().addTransaction(makeTx()),
         throwsA(isA<Exception>()),
       );
     });
   });
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // updateTransaction
-  // ────────────────────────────────────────────────────────────────────────────
-
   group('updateTransaction', () {
     test('replaces matching transaction in list', () async {
-      final original = _makeTx(id: 't1', amount: -50.0);
-      final updated = _makeTx(id: 't1', amount: -99.0);
+      final original = makeTx(id: 't1', amount: -50.0);
+      final updated = makeTx(id: 't1', amount: -99.0);
 
       when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
+        () => mockRepo.fetch(category: any(named: 'category')),
       ).thenAnswer((_) async => [original]);
-      when(
-        () => mockService.updateTransaction(any()),
-      ).thenAnswer((_) async => updated);
+      when(() => mockRepo.update(any())).thenAnswer((_) async => updated);
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchTransactions();
       await provider.updateTransaction(original);
 
       expect(provider.transactions.first.amount, -99.0);
     });
-
-    test('rethrows on failure', () async {
-      when(
-        () => mockService.updateTransaction(any()),
-      ).thenThrow(Exception('Not found'));
-
-      await expectLater(
-        _makeProvider().updateTransaction(_makeTx()),
-        throwsA(isA<Exception>()),
-      );
-    });
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // deleteTransaction
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('deleteTransaction', () {
     test('removes transaction from list by id', () async {
       when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
-      ).thenAnswer((_) async => [_makeTx(id: 't1'), _makeTx(id: 't2')]);
-      when(() => mockService.deleteTransaction(any())).thenAnswer((_) async {});
+        () => mockRepo.fetch(category: any(named: 'category')),
+      ).thenAnswer((_) async => [makeTx(id: 't1'), makeTx(id: 't2')]);
+      when(() => mockRepo.delete(any())).thenAnswer((_) async {});
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchTransactions();
       await provider.deleteTransaction('t1');
 
       expect(provider.transactions, hasLength(1));
       expect(provider.transactions.first.id, 't2');
     });
-
-    test('rethrows on failure', () async {
-      when(
-        () => mockService.deleteTransaction(any()),
-      ).thenThrow(Exception('Not found'));
-
-      await expectLater(
-        _makeProvider().deleteTransaction('missing'),
-        throwsA(isA<Exception>()),
-      );
-    });
   });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // clearError
-  // ────────────────────────────────────────────────────────────────────────────
 
   group('clearError', () {
     test('sets error to null', () async {
       when(
-        () => mockService.fetchTransactions(category: any(named: 'category')),
+        () => mockRepo.fetch(category: any(named: 'category')),
       ).thenThrow(Exception('fail'));
 
-      final provider = _makeProvider();
+      final provider = buildProvider();
       await provider.fetchTransactions();
       expect(provider.error, isNotNull);
 

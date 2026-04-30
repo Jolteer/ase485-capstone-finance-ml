@@ -1,8 +1,16 @@
-/// Shared HTTP client for backend API: base URL, auth token, GET/POST/PUT/DELETE, error extraction.
+/// Shared HTTP client for the SmartSpend backend.
 ///
-/// All services use this client; configure [AppConstants.apiBaseUrl] at build time.
-/// The JWT token is persisted across restarts via [FlutterSecureStorage]; call
-/// [tryRestoreToken] on app startup to re-hydrate the token before any API call.
+/// Wraps [http.Client] with the conventions every service needs:
+/// - prepends [AppConstants.apiBaseUrl] to every path,
+/// - injects ``Authorization: Bearer <token>`` when set,
+/// - applies a default request timeout,
+/// - converts [SocketException] into [NetworkException] for the UI,
+/// - converts non-success HTTP responses into [ApiException] via [expectStatus]
+///   / [decodeJsonList] / [decodeJsonObject] so callers can branch on
+///   [ApiException.statusCode] instead of parsing string messages.
+///
+/// The JWT is persisted in [FlutterSecureStorage] via [setToken] /
+/// [tryRestoreToken] so the user stays signed in across cold starts.
 library;
 
 import 'dart:async';
@@ -11,14 +19,11 @@ import 'dart:io';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:ase485_capstone_finance_ml/config/constants.dart';
+import 'package:ase485_capstone_finance_ml/core/api/api_exception.dart';
 
 /// Central HTTP client for all API communication.
-///
-/// Wraps [http.Client] and prepends [AppConstants.apiBaseUrl] to every request.
-/// Handles auth token injection, request timeouts, offline detection, and
-/// response error mapping. The JWT is persisted in [FlutterSecureStorage] so
-/// the user stays logged in across cold starts.
 class ApiClient {
   final http.Client _client;
   final FlutterSecureStorage _storage;
@@ -26,18 +31,20 @@ class ApiClient {
 
   static const String _kTokenKey = 'auth_token';
 
-  /// Maximum time to wait for any single HTTP request before throwing [TimeoutException].
+  /// Maximum time to wait for any single HTTP request before throwing.
   static const Duration _defaultTimeout = Duration(seconds: 15);
 
   ApiClient({http.Client? client, FlutterSecureStorage? storage})
     : _client = client ?? http.Client(),
       _storage = storage ?? const FlutterSecureStorage();
 
-  /// Sets or clears the JWT token for authenticated requests.
+  // ── Token management ─────────────────────────────────────────────────────
+
+  /// Sets or clears the JWT token used to authenticate requests.
   ///
-  /// Persists [token] to secure storage (or deletes the stored value when
-  /// [token] is null). The in-memory value is updated synchronously; storage
-  /// write happens asynchronously as a fire-and-forget side effect.
+  /// In-memory state is updated synchronously so subsequent calls already
+  /// carry the new token; the secure-storage write is fire-and-forget so the
+  /// caller doesn't have to await disk I/O.
   void setToken(String? token) {
     _token = token;
     if (token != null) {
@@ -47,42 +54,47 @@ class ApiClient {
     }
   }
 
-  /// Reads the previously persisted token from secure storage and restores it.
+  /// Reads the persisted token from secure storage and applies it.
   ///
-  /// Returns `true` when a token was found and applied; `false` otherwise.
-  /// Call this once during app startup (before any authenticated API call).
+  /// Returns `true` when a token was found, `false` otherwise. Call once at
+  /// app startup before any authenticated API call.
   Future<bool> tryRestoreToken() async {
     final token = await _storage.read(key: _kTokenKey);
-    if (token != null) {
-      _token = token;
-      return true;
-    }
-    return false;
+    if (token == null) return false;
+    _token = token;
+    return true;
   }
 
-  /// Headers for every request: Content-Type JSON, plus Authorization when [_token] is set.
+  // ── Request helpers ──────────────────────────────────────────────────────
+
+  /// Headers for every request: JSON content-type + bearer auth when set.
   Map<String, String> get _headers {
     final h = <String, String>{'Content-Type': 'application/json'};
     if (_token != null) h['Authorization'] = 'Bearer $_token';
     return h;
   }
 
-  /// Builds a [Uri] for [path] relative to [AppConstants.apiBaseUrl],
-  /// optionally appending [queryParams].
+  /// Builds the absolute URL for [path] (relative to [AppConstants.apiBaseUrl]).
   Uri _uri(String path, {Map<String, String>? queryParams}) => Uri.parse(
     '${AppConstants.apiBaseUrl}$path',
   ).replace(queryParameters: queryParams);
 
-  /// Executes [request] and translates [SocketException] into a friendly offline error.
+  /// Executes [request], translating [SocketException] / [TimeoutException]
+  /// into [NetworkException] so the UI gets a friendly "no connection"
+  /// message instead of a stack trace.
   Future<http.Response> _send(Future<http.Response> Function() request) async {
     try {
       return await request();
     } on SocketException {
-      throw Exception('No internet connection. Please check your network.');
+      throw const NetworkException(
+        'No internet connection. Please check your network.',
+      );
+    } on TimeoutException {
+      throw const NetworkException('Request timed out. Please try again.');
     }
   }
 
-  /// GET request to [path] (relative to baseUrl).
+  /// GET request to [path] (relative to [AppConstants.apiBaseUrl]).
   Future<http.Response> get(String path, {Map<String, String>? queryParams}) =>
       _send(
         () => _client
@@ -112,23 +124,24 @@ class ApiClient {
         .timeout(_defaultTimeout),
   );
 
-  /// DELETE request to [path].
+  /// DELETE request.
   Future<http.Response> delete(String path) => _send(
     () =>
         _client.delete(_uri(path), headers: _headers).timeout(_defaultTimeout),
   );
 
-  /// Throws an [Exception] with [extractError] if [res.statusCode] != [expected].
+  // ── Status / decoding helpers ────────────────────────────────────────────
+
+  /// Throws [ApiException] when [res.statusCode] doesn't match [expected].
   static void expectStatus(http.Response res, int expected) {
     if (res.statusCode != expected) {
-      throw Exception(extractError(res));
+      throw ApiException.fromResponse(res);
     }
   }
 
-  /// Verifies status, decodes the body as a JSON list, and parses each entry.
+  /// Verifies status, decodes a JSON list, parses each entry through [parse].
   ///
-  /// On non-[expected] status, throws using [extractError]. The default
-  /// [expected] is 200, matching every list-fetching endpoint we use today.
+  /// On non-[expected] status throws [ApiException]. Default expected is 200.
   static List<T> decodeJsonList<T>(
     http.Response res,
     T Function(Map<String, dynamic>) parse, {
@@ -139,10 +152,9 @@ class ApiClient {
     return list.map((j) => parse(j as Map<String, dynamic>)).toList();
   }
 
-  /// Verifies status, decodes the body as a JSON object, and parses it.
+  /// Verifies status, decodes a JSON object, parses it through [parse].
   ///
-  /// On non-[expected] status, throws using [extractError]. Use [expected]: 201
-  /// for create endpoints.
+  /// Use [expected]: 201 for create endpoints. Throws [ApiException] otherwise.
   static T decodeJsonObject<T>(
     http.Response res,
     T Function(Map<String, dynamic>) parse, {
@@ -152,37 +164,6 @@ class ApiClient {
     return parse(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
-  /// Extracts a human-readable error message from an API [response].
-  ///
-  /// Handles three FastAPI/standard shapes in priority order:
-  /// 1. `detail` as a List (FastAPI validation errors) — joins the `msg` fields.
-  /// 2. `detail`, `message`, or `error` as a plain String.
-  /// 3. Falls back to a generic message with the HTTP status code.
-  static String extractError(http.Response response) {
-    try {
-      final body = jsonDecode(response.body);
-      if (body is Map) {
-        // FastAPI validation errors: {"detail": [{"loc": [...], "msg": "...", "type": "..."}]}
-        if (body['detail'] is List) {
-          final errors = body['detail'] as List;
-          final messages = errors
-              .whereType<Map>()
-              .map((e) => e['msg'])
-              .whereType<String>()
-              .toList();
-          if (messages.isNotEmpty) return messages.join('; ');
-          return 'Validation error (${response.statusCode})';
-        }
-        for (final key in ['detail', 'message', 'error']) {
-          if (body[key] is String) return body[key] as String;
-        }
-      }
-    } catch (_) {
-      // fall through to generic message
-    }
-    return 'Request failed (${response.statusCode})';
-  }
-
-  /// Releases the underlying HTTP client resources.
+  /// Releases the underlying HTTP client.
   void dispose() => _client.close();
 }

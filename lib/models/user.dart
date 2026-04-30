@@ -1,8 +1,17 @@
 ﻿/// Logged-in user profile (identity and display info).
 ///
-/// Supports JSON via [fromJson] / [toJson] and [copyWith]. Used for auth
-/// context, account screen, and any user-scoped data.
+/// Supports JSON via [User.fromJson] / [toJson] and immutability via
+/// [copyWith]. Used for the auth context, account screen, and any user-scoped
+/// data.
 library;
+
+import 'package:ase485_capstone_finance_ml/core/json/json_helpers.dart';
+
+/// Public user object embedded in auth responses.
+///
+/// JSON parsing goes through the shared helpers in
+/// `core/json/json_helpers.dart` so a malformed server payload throws the
+/// same structured [ArgumentError] you get from [Budget] or [Goal].
 class User {
   /// Unique identifier for the user (e.g. from auth backend).
   final String id;
@@ -23,13 +32,14 @@ class User {
     required this.createdAt,
   });
 
-  /// Creates a [User] from a JSON map (e.g. API or auth response).
+  /// Creates a [User] from a JSON map (e.g. API response). Throws
+  /// [ArgumentError] for missing or malformed fields.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      name: json['name'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: requireString(json, 'id'),
+      email: requireString(json, 'email'),
+      name: requireString(json, 'name'),
+      createdAt: requireDateTime(json, 'created_at'),
     );
   }
 

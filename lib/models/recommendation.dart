@@ -1,8 +1,12 @@
 ﻿/// A savings or spending recommendation with estimated impact.
 ///
-/// Supports JSON via [fromJson] / [toJson] and [copyWith]. Used by the
-/// recommendations screen to show actionable tips and [potentialSavings].
+/// Supports JSON via [Recommendation.fromJson] / [toJson] and [copyWith].
+/// Used by the recommendations screen to show actionable tips and
+/// [potentialSavings].
 library;
+
+import 'package:ase485_capstone_finance_ml/core/json/json_helpers.dart';
+
 class Recommendation {
   /// Unique identifier for this recommendation.
   final String id;
@@ -13,7 +17,7 @@ class Recommendation {
   /// Short title or summary for the recommendation.
   final String title;
 
-  /// Detailed description or steps.
+  /// Detailed description or steps to act on the tip.
   final String description;
 
   /// Estimated amount the user could save by following the recommendation.
@@ -27,14 +31,15 @@ class Recommendation {
     required this.potentialSavings,
   });
 
-  /// Creates a [Recommendation] from a JSON map (e.g. API response).
+  /// Creates a [Recommendation] from a JSON map (e.g. API response). Throws
+  /// [ArgumentError] for missing or malformed fields.
   factory Recommendation.fromJson(Map<String, dynamic> json) {
     return Recommendation(
-      id: json['id'] as String,
-      category: json['category'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      potentialSavings: (json['potential_savings'] as num).toDouble(),
+      id: requireString(json, 'id'),
+      category: requireString(json, 'category'),
+      title: requireString(json, 'title'),
+      description: requireString(json, 'description'),
+      potentialSavings: requireDouble(json, 'potential_savings'),
     );
   }
 

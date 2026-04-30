@@ -39,7 +39,7 @@ void main() {
     ).thenAnswer((_) async => null);
   });
 
-  RecommendationService _makeService(
+  RecommendationService makeService(
     http.Response Function(http.Request) handler,
   ) {
     final api = ApiClient(
@@ -51,7 +51,7 @@ void main() {
 
   group('RecommendationService.fetchRecommendations', () {
     test('returns parsed list on 200', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode([_kRecJson]), 200),
       );
 
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('returns empty list when response array is empty', () async {
-      final svc = _makeService((_) => http.Response('[]', 200));
+      final svc = makeService((_) => http.Response('[]', 200));
       expect(await svc.fetchRecommendations(), isEmpty);
     });
 
@@ -74,7 +74,7 @@ void main() {
         'id': 'r2',
         'title': 'Cancel subscriptions',
       };
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode([_kRecJson, second]), 200),
       );
 
@@ -85,7 +85,7 @@ void main() {
 
     test('sends GET to /recommendations', () async {
       late http.Request captured;
-      final svc = _makeService((req) {
+      final svc = makeService((req) {
         captured = req;
         return http.Response('[]', 200);
       });
@@ -96,7 +96,7 @@ void main() {
     });
 
     test('throws on non-200 status', () async {
-      final svc = _makeService(
+      final svc = makeService(
         (_) => http.Response(jsonEncode({'detail': 'Unauthorized'}), 401),
       );
       expect(() => svc.fetchRecommendations(), throwsA(isA<Exception>()));
