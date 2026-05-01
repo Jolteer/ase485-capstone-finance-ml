@@ -1,0 +1,18 @@
+[build]
+publish = "build/web"
+command = """
+  if [ ! -d "_flutter" ]; then
+    git clone https://github.com/flutter/flutter.git -b stable --depth 1 _flutter
+  fi
+  export PATH="$PATH:$(pwd)/_flutter/bin"
+  flutter --version
+  flutter config --enable-web
+  flutter pub get
+  flutter build web --release --dart-define=API_BASE_URL=$API_BASE_URL
+"""
+
+# Flutter web is a single-page app: every route must serve index.html
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
