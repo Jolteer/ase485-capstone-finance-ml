@@ -1,0 +1,15 @@
+# Copy this file to android/key.properties and fill in the four values below.
+# The real key.properties is gitignored — never commit it.
+#
+# storeFile is resolved relative to the android/ folder, OR you can use an
+# absolute path (e.g. C:/Users/you/smartspend-release.jks). Forward slashes
+# work on Windows; backslashes need to be escaped (\\).
+#
+# Generate the keystore once with:
+#   keytool -genkey -v -keystore smartspend-release.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias smartspend
+
+storeFile=../smartspend-release.jks
+storePassword=CHANGE_ME
+keyAlias=smartspend
+keyPassword=CHANGE_ME

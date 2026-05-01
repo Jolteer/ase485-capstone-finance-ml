@@ -64,6 +64,17 @@ class Settings:
     environment: str = "development"
 
 
+def _resolve_db_env(name: str, alias: str, default: str) -> str:
+    """Resolve a database env var, accepting either ``POSTGRES_*`` or ``PG*``.
+
+    Managed Postgres providers (Railway, Heroku, Render) inject the libpq-style
+    ``PGHOST``/``PGUSER``/``PGPASSWORD``/``PGDATABASE``/``PGPORT`` variables. Local
+    docker-compose uses ``POSTGRES_*``. Accepting both lets the same image deploy
+    cleanly to Railway with no manual env mapping while keeping local dev unchanged.
+    """
+    return os.getenv(name) or os.getenv(alias) or default
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Return the resolved ``Settings`` for this process (cached).
@@ -75,11 +86,15 @@ def get_settings() -> Settings:
     cors = _split_csv(os.getenv("CORS_ALLOWED_ORIGINS"))
     defaults = Settings()
     return Settings(
-        postgres_host=os.getenv("POSTGRES_HOST", defaults.postgres_host),
-        postgres_port=int(os.getenv("POSTGRES_PORT", str(defaults.postgres_port))),
-        postgres_db=os.getenv("POSTGRES_DB", defaults.postgres_db),
-        postgres_user=os.getenv("POSTGRES_USER", defaults.postgres_user),
-        postgres_password=os.getenv("POSTGRES_PASSWORD", defaults.postgres_password),
+        postgres_host=_resolve_db_env("POSTGRES_HOST", "PGHOST", defaults.postgres_host),
+        postgres_port=int(
+            _resolve_db_env("POSTGRES_PORT", "PGPORT", str(defaults.postgres_port))
+        ),
+        postgres_db=_resolve_db_env("POSTGRES_DB", "PGDATABASE", defaults.postgres_db),
+        postgres_user=_resolve_db_env("POSTGRES_USER", "PGUSER", defaults.postgres_user),
+        postgres_password=_resolve_db_env(
+            "POSTGRES_PASSWORD", "PGPASSWORD", defaults.postgres_password
+        ),
         db_pool_min=int(os.getenv("DB_POOL_MIN", str(defaults.db_pool_min))),
         db_pool_max=int(os.getenv("DB_POOL_MAX", str(defaults.db_pool_max))),
         jwt_secret=os.getenv("JWT_SECRET", defaults.jwt_secret),

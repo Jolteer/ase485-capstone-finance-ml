@@ -77,3 +77,8 @@ credentials.md
 *.pfx
 secrets.yaml
 secrets.yml
+
+# Android release signing (keystore + properties file MUST stay local)
+android/key.properties
+*.jks
+*.keystore
